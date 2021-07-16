@@ -1,0 +1,89 @@
+
+library(HandyPack)
+library(stringr)
+library(networkD3)
+library(plotly)
+library(pheatmap)
+
+rm(list=ls())
+
+source('CradleWare.R')
+
+assays = c('integrated','RNA')
+background = c(integrated=2000,
+               RNA=11134)
+
+whichComparison = c('cells','genes')
+
+for(assay in assays[2])
+{
+    objectPair = getObjectPair(assay)
+    f = objectPair$f
+    fPrime = objectPair$fPrime
+
+    for(which in whichComparison)
+    {
+        if(which == 'cells')
+        {
+            obj = f
+            DEdir = paste0(assay,'_resolution_2/DE/fPrime')
+        } else {
+            obj = fPrime
+            DEdir = paste0(assay,'_resolution_2/DE/f')
+        }
+        clusters = unique(obj$seurat_clusters)
+        clusters = clusters[order(clusters)]
+        clusters = as.character(clusters)
+        obj@meta.data$seurat_clusters = as.character(obj@meta.data$seurat_clusters)
+
+        DEfiles = Sys.glob(paste0(DEdir,'/*txt'))
+        DEitems = str_replace(DEfiles,'.*group_','')
+        DEitems = str_replace(DEitems,'\\.txt','')
+
+        M = matrix(0,nrow=length(clusters),ncol=length(DEitems))
+        rownames(M) = as.character(clusters)
+        colnames(M) = as.character(DEitems)
+
+        for(i in 1:length(clusters))
+        {
+            a = colnames(obj)[obj@meta.data$seurat_clusters == clusters[i]]
+            for(j in 1:length(DEitems))
+            {
+                DEDF = Read.Table(DEfiles[j])
+                b = DEDF$id
+                A = length(a)
+                B = length(b)
+                C = length(intersect(a,b))
+                M[i,j] = -log10(geneListPValue(A,B,C,background[assay]))
+            }
+
+        }
+
+        ## This is a hack:
+        Max = 300
+        M[M>Max] = Max
+        
+        clusterTag = paste0(which,'Cluster_')
+        DETag = paste0('DE_',which,'_')
+        p = sankeyFromMatrix(M,disambiguation=c(clusterTag,DETag))
+        print(p)
+        
+        fileName = paste0(assay,'_resolution_2/',
+                          assay,'_',which,
+                          'Cluster_vs_DE',which,
+                          '.html')
+        htmlwidgets::saveWidget(as_widget(p),fileName)
+
+        fileName = str_replace(fileName,'\\.html','Heatmap.jpg')
+        jpeg(fileName,
+             height=8,width=8,units='in',res=100)
+        pheatmap(M,
+                 treeheight_row=0,
+                 treeheight_col=0)
+        dev.off()
+
+        
+    }  ## whichComparison                     
+} ## assay
+
+                            
