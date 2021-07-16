@@ -1,0 +1,77 @@
+
+- makeCellDictionary.R For pissy little reasons, the cell identifiers
+  in the original Seurat object do not work well as row names.  To
+  rectify this we simply give the cells serial numbers starting with
+  C.  
+
+- makeAndPickleObjects.R produces our working copies of the original
+  Seurat object, f, and its transpose fPrime, one each for each of the
+  assays, RNA and integrated. These are saved in SeuratObject/ and
+  accessed using getObjectPair()
+
+- aSmallCradle.R  This performs clustering of the transposed object
+  fPrime and saves the UMAP plot in {assay}_resolution_2/ along with a
+  data frame giving the clustering of the genes.
+
+- clusterSizes.R This makes a bar plot of the cluster sizes for the
+  two assays and saves this in figures/
+
+I've been using two measures to try to get a handle on the
+relationships between sets of genes, e.g., overlapping gene clusters
+from the two clusterings or overlap between clusters and gene sets
+such as hallmark.  One of these is the p-value for their overlap, the
+other is the size of their overlap divided by the product of their
+sizes.
+
+- fractionOfSmallInLarge.R This is an attempt to tease out the
+  relationship between the two clusterings by looking at heatmaps of
+  the two measures above.  Results are in
+  figures/fractionOfIntegratedInRNAClusters.jpg and
+  figures/minusLogPForOverlapOfIntegratedAndRNAClusters.jpg
+
+- hallmarkHeatmap.R This makes heatmaps for the two measures above for
+  overlap of the clusters with the Hallmark gene lists and stores them
+  in {assay}_resolution_2/hallmarkHeatMap_{whichFunction}.jpg  We
+  don't do this for C2 because this makes a crazy big figure.
+
+- orderGeneListsPerCluster.R This looks at the p-values for the
+  overlaps of the gene sets with the clusters and for each cluster
+  orders the gene sets in decreasing significance.  The resulting
+  table is saved as
+  {assay}_resolution_2/{gene set}_{assay}.txt
+
+- plotExpression.R This makes a map of the total expression values in
+  each gene cluster / cell cluster pair.  Totals are normalized to the
+  product of the sizes of the two clusters.  Figures are in
+  {assay}_resolution_2/expressionTotals_{assay}.jpg
+
+- plotAbsExpression.R makes similar figures using total absolute value
+  of expression.  This does not save the figures.
+
+- Sankey01.R This makes a Sankey graph of the normalized sum of
+  absolute values of expression for the bipartite graph of cell
+  clusters and gene clusters and saves it as an html widget in
+  {assay}_resolution_2/sankeyGraphAbsoluteValue.html
+
+- Sankey02.R Does something similar using total normalized expression
+  rather than total normalized absolute value of expression.  However,
+  as Sankey graphs want positive weights on edges, it subdivides these
+  into those edges with positive values and those with negative
+  values.  The resulting widgets are saved in
+  {assay}_resolution_2/sankeyGraphExpression{Up,Down}.html
+
+- DE_genes_cells.R This computes the DE genes for each of the cell
+  clusters and the DE cells for each of the gene clusters.  The
+  results are in the assay folders in a subfolder DE which contains
+  subfolders for the DE genes for f and the DE cells for fPrime.
+
+- clusters_vs_DE.R This compares each of the gene clusters to the DE
+  genes of each of the cell clusters and compares each of the cell
+  clusters to the DE cells of each of the gene clusters.  It makes a
+  matrix of the -log pvalues and displays this both as a heat map and
+  as a Sankey diagram.  The Sankey diagram is made using code in
+  CradleWare.R  Results are in
+
+  
+
+	
