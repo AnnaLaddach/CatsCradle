@@ -31,8 +31,9 @@ matrixToDF = function(M)
 
 ## ###################################################
 ## ###################################################
-smallDF = Read.Table('integrated_resolution_2/geneClusters.txt')
-largeDF = Read.Table('RNA_resolution_2/geneClusters.txt')
+res = 1
+smallDF = Read.Table(paste0('integrated_resolution_',res,'/geneClusters.txt'))
+largeDF = Read.Table(paste0('RNA_resolution_',res,'/geneClusters.txt'))
 
 clustersSmall = unique(smallDF$geneCluster)
 clustersLarge = unique(largeDF$geneCluster)
@@ -76,7 +77,7 @@ for(i in 1:NLarge)
 fractionDF = matrixToDF(MFraction)
 pValueDF = matrixToDF(MPValue)
 
-jpeg('figures/fractionOfIntegratedInRNAClusters.jpg',
+jpeg(paste0('figures/fractionOfIntegratedInRNAClusters_res_',res,'.jpg'),
      height=8,width=8,units='in',res=100)
 pheatmap(MFraction,
          treeheight_row=0,
@@ -84,7 +85,7 @@ pheatmap(MFraction,
 dev.off()
 
 
-jpeg('figures/minusLogPForOverlapOfIntegratedAndRNAClusters.jpg',
+jpeg(paste0('figures/minusLogPForOverlapOfIntegratedAndRNAClusters_res_',res,'.jpg'),
      height=8,width=8,units='in',res=100)
 pheatmap(MPValue,
          treeheight_row=0,

@@ -20,18 +20,19 @@ prepend = function(df)
 
 ## ###################################################
 assays = c('integrated','RNA')
+res = 1
 
 for(assay in assays)
 {
-    dirs = c(DEdir=paste0(assay,'_resolution_2/DE'),
-             f=paste0(assay,'_resolution_2/DE/f'),
-             fPrime=paste0(assay,'_resolution_2/DE/fPrime'))
+    dirs = c(DEdir=paste0(assay,'_resolution_',res,'/DE'),
+             f=paste0(assay,'_resolution_',res,'/DE/f'),
+             fPrime=paste0(assay,'_resolution_',res,'/DE/fPrime'))
     
     for(d in dirs)
         if(! dir.exists(d))
             dir.create(d)
     
-    objectPair = getObjectPair(assay)
+    objectPair = getObjectPair(assay,res)
     f = objectPair$f
     fPrime = objectPair$fPrime
     

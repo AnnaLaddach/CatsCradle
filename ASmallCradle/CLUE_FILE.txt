@@ -10,7 +10,7 @@
   accessed using getObjectPair()
 
 - aSmallCradle.R  This performs clustering of the transposed object
-  fPrime and saves the UMAP plot in {assay}_resolution_2/ along with a
+  fPrime and saves the UMAP plot in {assay}_resolution_{res}/ along with a
   data frame giving the clustering of the genes.
 
 - clusterSizes.R This makes a bar plot of the cluster sizes for the
@@ -38,12 +38,12 @@ sizes.
   overlaps of the gene sets with the clusters and for each cluster
   orders the gene sets in decreasing significance.  The resulting
   table is saved as
-  {assay}_resolution_2/{gene set}_{assay}.txt
+  {assay}_resolution_{res}/{gene set}_{assay}.txt
 
 - plotExpression.R This makes a map of the total expression values in
   each gene cluster / cell cluster pair.  Totals are normalized to the
   product of the sizes of the two clusters.  Figures are in
-  {assay}_resolution_2/expressionTotals_{assay}.jpg
+  {assay}_resolution_{res}/expressionTotals_{assay}.jpg
 
 - plotAbsExpression.R makes similar figures using total absolute value
   of expression.  This does not save the figures.
@@ -52,13 +52,21 @@ sizes.
   absolute values of expression for the bipartite graph of cell
   clusters and gene clusters and saves it as an html widget in
   {assay}_resolution_2/sankeyGraphAbsoluteValue.html
+  (Did not redo this for res 1)
 
 - Sankey02.R Does something similar using total normalized expression
   rather than total normalized absolute value of expression.  However,
   as Sankey graphs want positive weights on edges, it subdivides these
   into those edges with positive values and those with negative
   values.  The resulting widgets are saved in
-  {assay}_resolution_2/sankeyGraphExpression{Up,Down}.html
+  {assay}_resolution_{res}/sankeyGraphExpression{Up,Down}.html
+
+- clusterExpressionHeatmap.R This displays the same information as
+  Sankey02.R except instead of displaying it as a Sankey graph, it
+  displays it as a heat map.  Since heat maps are welcoming to
+  negative values, we only need one heatmap where we need two Sankey
+  graphs.  Results are in
+  {assay}_resolution_{res}/clusterExpressionHeatmap.jpg')
 
 - DE_genes_cells.R This computes the DE genes for each of the cell
   clusters and the DE cells for each of the gene clusters.  The
@@ -71,6 +79,9 @@ sizes.
   matrix of the -log pvalues and displays this both as a heat map and
   as a Sankey diagram.  The Sankey diagram is made using code in
   CradleWare.R  Results are in
+  {assay}_resolution_{res}/{assay}_{cells,genes}Cluster_vs_DE{cells,genes}.html
+  {assay}_resolution_{res}/{assay}_{cells,genes}Cluster_vs_DE{cells,genes}Heatmap.jpg
+  
 
   
 

@@ -33,18 +33,21 @@ for(assay in assays)
     f = reviseF(f)
 
     ## Transpose:
-    fPrime = makeFPrime(f,assay)
+    res = 1
+    fPrime = makeFPrime(f,assay,res=res)
 
     ## Save the objects:
     fOut = paste0(objectDir,
                  '/f_',
                  assay,
                  '.rds')
-    saveRDS(f,fOut)
+    ## saveRDS(f,fOut)
 
     fPrimeOut = paste0(objectDir,
                       '/fPrime_',
                       assay,
+                      '_',
+                      res,
                       '.rds')
     saveRDS(fPrime,fPrimeOut)
 }

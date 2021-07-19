@@ -5,6 +5,9 @@ library(networkD3)
 library(plotly)
 library(pheatmap)
 
+library(htmlwidgets)
+library(htmltools)
+
 rm(list=ls())
 
 source('CradleWare.R')
@@ -45,9 +48,10 @@ background = c(integrated=2000,
 
 whichComparison = c('cells','genes')
 
-for(assay in assays[2])
+res = 1
+for(assay in assays)
 {
-    objectPair = getObjectPair(assay)
+    objectPair = getObjectPair(assay,res)
     f = objectPair$f
     fPrime = objectPair$fPrime
 
@@ -56,11 +60,11 @@ for(assay in assays[2])
         if(which == 'cells')
         {
             obj = f
-            DEdir = paste0(assay,'_resolution_2/DE/fPrime')
+            DEdir = paste0(assay,'_resolution_',res,'/DE/fPrime')
             toRename = 'rows'
         } else {
             obj = fPrime
-            DEdir = paste0(assay,'_resolution_2/DE/f')
+            DEdir = paste0(assay,'_resolution_',res,'/DE/f')
             toRename = 'cols'
         }
         clusters = unique(obj$seurat_clusters)
@@ -102,9 +106,12 @@ for(assay in assays[2])
         M = rename(M,toRename,clusterTag,DETag)
         
         p = sankeyFromMatrix(M,disambiguation=c(clusterTag,DETag))
-        print(p)
 
-        fileName = paste0(assay,'_resolution_2/',
+##        p =htmlwidgets::prependContent(p,htmltools::tags$h3("Title")) 
+        
+        print(p)
+  
+        fileName = paste0(assay,'_resolution_',res,'/',
                           assay,'_',which,
                           'Cluster_vs_DE',which,
                           '.html')

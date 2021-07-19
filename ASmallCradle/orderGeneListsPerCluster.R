@@ -18,9 +18,11 @@ geneSets = c(hallmark='~/geneSets/mouse/h.all.v7.2.symbols.gmt',
 
 background = 21281
 
+res = 1
+
 for(assay in assays)
 {
-    clusterDF = Read.Table(paste0(assay,'_resolution_2/geneClusters.txt'))
+    clusterDF = Read.Table(paste0(assay,'_resolution_',res,'/geneClusters.txt'))
     for(n in names(geneSets))
     {
         geneSet = geneSets[n]
@@ -33,7 +35,7 @@ for(assay in assays)
                                         background)
 
         df = orderByEachColumn(M,extended=TRUE)
-        dirOut = paste0(assay,'_resolution_2/')
+        dirOut = paste0(assay,'_resolution_',res,'/')
         fileOut = paste0(dirOut,
                          n,
                          '_',
