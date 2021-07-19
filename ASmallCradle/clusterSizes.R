@@ -9,12 +9,13 @@ graphics.off()
 ## ###################################################
 ## ###################################################
 
+res = 1
 assays = c('integrated','RNA')
 figs = list()
 
 for(assay in assays)
 {
-    fileName = paste0(assay,'_resolution_2/geneClusters.txt')
+    fileName = paste0(assay,'_resolution_',res,'/geneClusters.txt')
     clusterDF = Read.Table(fileName)
 
     clusters = unique(clusterDF$geneCluster)
@@ -29,11 +30,11 @@ for(assay in assays)
     figs[[assay]] = ggplot(countDF,aes(x=clusters,y=count)) +
         geom_col() +
         scale_x_continuous(breaks=clusters) +
-        ggtitle(paste('Cluster sizes',assay))
+        ggtitle(paste('Cluster sizes',assay,'resolution',res))
 }
 
 g = plot_grid(figs[[1]],figs[[2]])
 print(g)
 
 ggsave(plot=g,
-       filename='figures/clusterSizes.jpg')
+       filename=paste0('figures/clusterSizes_resolution_',res,'.jpg'))

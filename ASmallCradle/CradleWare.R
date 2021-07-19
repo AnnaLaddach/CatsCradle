@@ -51,20 +51,6 @@ getTranslation = function()
 }
 
 ## ###################################################
-## ###################################################
-runTest = function(f)
-{
-    df = FindMarkers(f,
-                     assay=f@active.assay,
-                     only.pos=TRUE,
-                     group.by=f@meta.data$seurat_clusters,
-                     ident.1=5,
-                     test='MAST')
-
-    return(df)
-}
-
-## ###################################################
 reviseF = function(f)
 {
     new.names = paste0('C',1:ncol(f))
@@ -82,19 +68,6 @@ makeFPrime = function(f,active.assay,npcs=30,dims=1:20,res=2)
 
     return(fPrime)
 }
-    
-## ###################################################
-runTest = function(f)
-{
-    df = FindMarkers(f,
-                     assay=f@active.assay,
-                     only.pos=TRUE,
-                     group.by=f@meta.data$seurat_clusters,
-                     ident.1=5,
-                     test='MAST')
-    return(df)
-}
-
 
 ## ###################################################
 transposeSeuratObject = function(f,active.assay)
@@ -217,6 +190,25 @@ getExpressionTotals = function(f,fPrime,absolute=FALSE)
 }
 
 ## ###################################################
+getExpressionTotalsMatrix = function(f,fPrime,absolute=FALSE)
+{
+    df = getExpressionTotals(f,fPrime,absolute=FALSE)
+
+    cellCluster = as.character(unique(df$shortName))
+    geneCluster = as.character(unique(df$geneCluster))
+
+    M = matrix(0,nrow=length(cellCluster),ncol=length(geneCluster))
+    rownames(M) = cellCluster
+    colnames(M) = geneCluster
+
+    for(i in 1:nrow(df))
+        M[df$shortName[i],df$geneCluster[i]] = df$expression[i]
+
+    return(M)
+}
+    
+
+## ###################################################
 getGeneSetsVsClustersMatrix = function(geneSets,
                                        clusterDF,
                                        whichFunction,
@@ -288,7 +280,7 @@ orderByEachColumn = function(M,extended=FALSE)
 }
 
 ## ###################################################
-getObjectPair = function(assay)
+getObjectPair = function(assay,res=2)
 {
     objectPair = list()
 
@@ -302,6 +294,8 @@ getObjectPair = function(assay)
     fPrimeName = paste0(objectDir,
                       '/fPrime_',
                       assay,
+                      '_',
+                      res,
                       '.rds')
     objectPair[['fPrime']] = readRDS(fPrimeName)
 

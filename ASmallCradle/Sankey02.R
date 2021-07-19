@@ -6,10 +6,11 @@ library(plotly)
 
 source('CradleWare.R')
 
+res = 1
 assays = c('integrated','RNA')
 for(assay in assays)
 {
-    objectPair = getObjectPair(assay)
+    objectPair = getObjectPair(assay,res)
     
     f = objectPair$f
     fPrime = objectPair$fPrime
@@ -52,7 +53,7 @@ for(assay in assays)
                       fontSize=10)
     
     print(pUp)
-    fileName = paste0(assay,'_resolution_2/sankeyGraphExpressionUp.html')
+    fileName = paste0(assay,'_resolution_',res,'/sankeyGraphExpressionUp.html')
     htmlwidgets::saveWidget(as_widget(pUp), fileName)
 
     ## Now down:
@@ -71,6 +72,6 @@ for(assay in assays)
                       fontSize=10)
     
     print(pDown)
-    fileName = paste0(assay,'_resolution_2/sankeyGraphExpressionDown.html')
+    fileName = paste0(assay,'_resolution_',res,'/sankeyGraphExpressionDown.html')
     htmlwidgets::saveWidget(as_widget(pDown), fileName)    
 }

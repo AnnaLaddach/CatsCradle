@@ -12,10 +12,11 @@ source('CradleWare.R')
 ## ###################################################
 
 assays = c('integrated','RNA')
+res = 1
 
 for(assay in assays)
 {
-    objectPair = getObjectPair(assay)
+    objectPair = getObjectPair(assay,res)
     f = objectPair$f
     fPrime = objectPair$fPrime
 
@@ -24,12 +25,12 @@ for(assay in assays)
     g = ggplot(df,aes(x=geneCluster,y=shortName,fill=expression)) +
         geom_tile() +
         scale_fill_viridis_c() +
-        ggtitle(paste('Expression totals',assay))
+        ggtitle(paste('Expression totals',assay,'resolution',res))
 
     dev.new()
     print(g)
     fileName = paste0(assay,
-                      '_resolution_2/expressionTotals_',
+                      '_resolution_',res,'/expressionTotals_',
                       assay,
                       '.jpg')
     ggsave(plot=g,
