@@ -1,0 +1,25 @@
+
+library(networkD3)
+library(plotly)
+library(HandyPack)
+library(BioHandy)
+library(pheatmap)
+library(stringr)
+
+rm(list=ls())
+
+source('CradleWare.R')
+source('~/FranzeSingleCell07/SeuratWare02.R')
+
+## ###################################################
+## ###################################################
+
+for(res in 1)
+{
+    for(assay in c('integrated','RNA'))
+    {
+        ## Get the DE genes:
+        DEdir = paste0(assay,'_resolution_',res,'/DE/f')
+        files = Sys.glob(DEdir)
+    }
+}

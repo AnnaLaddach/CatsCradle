@@ -32,7 +32,9 @@ sizes.
 - hallmarkHeatmap.R This makes heatmaps for the two measures above for
   overlap of the clusters with the Hallmark gene lists and stores them
   in {assay}_resolution_2/hallmarkHeatMap_{whichFunction}.jpg  We
-  don't do this for C2 because this makes a crazy big figure.
+  don't do this for C2 because this makes a crazy big figure.  This
+  has been revised to take log(M+1) in the case of the -log10
+  p-values. 
 
 - orderGeneListsPerCluster.R This looks at the p-values for the
   overlaps of the gene sets with the clusters and for each cluster
