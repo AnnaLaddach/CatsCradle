@@ -83,7 +83,13 @@ sizes.
   CradleWare.R  Results are in
   {assay}_resolution_{res}/{assay}_{cells,genes}Cluster_vs_DE{cells,genes}.html
   {assay}_resolution_{res}/{assay}_{cells,genes}Cluster_vs_DE{cells,genes}Heatmap.jpg
-  
+
+- compareDEGenes.R This looks at the -log10 p-value for the overlap
+  between the DE gene sets for the different cell types.  It removes
+  the diagonal for the Sankey graph and takes the log + 1 for the
+  heatmap.  The results are in
+  DEGeneOverlap/{assay}_DEGeneOverlap.html
+  DEGeneOverlap/{assay}_DEGeneOverlap.jpg  
 
   
 
