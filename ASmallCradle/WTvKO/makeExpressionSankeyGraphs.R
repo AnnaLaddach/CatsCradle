@@ -9,7 +9,7 @@ source('../CradleWare.R')
 res = 1
 assays = c('integrated','RNA')
 
-for(assay in assays[1])
+for(assay in assays)
 {
     outDir = paste0(assay,'_resolution_',res)
     if(! dir.exists(outDir))
@@ -26,5 +26,11 @@ for(assay in assays[1])
 
     pairWT = sankeyPairFromMatrix(MWT)
     pairKO = sankeyPairFromMatrix(MKO)
+
+    print(pairWT[[1]])
+    print(pairKO[[1]])
+
+    print(pairWT[[2]])
+    print(pairKO[[2]])    
 }
     

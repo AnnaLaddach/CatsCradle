@@ -284,7 +284,7 @@ getObjectPair = function(assay,res=2)
 {
     objectPair = list()
 
-    objectDir = 'SeuratObject'
+    objectDir = '~/CatsCradle/ASmallCradle/SeuratObject'
     fName = paste0(objectDir,
                  '/f_',
                  assay,

@@ -1,0 +1,30 @@
+
+library(Seurat)
+library(HandyPack)
+library(BioHandy)
+
+rm(list=list())
+graphics.off()
+
+source('../CradleWare.R')
+source('QuadWare.R')
+
+## ###################################################
+## ###################################################
+
+res = 1
+assays = c('integrated','RNA')
+
+for(assay in assays)
+{
+    objectQuad = getObjectQuad(assay,res)
+    fWT = objectQuad$fWT
+    fKO = objectQuad$fKO
+    fPrimeWT = objectQuad$fPrimeWT
+    fPrimeKO = objectQuad$fPrimeKO
+
+
+    
+
+
+}
