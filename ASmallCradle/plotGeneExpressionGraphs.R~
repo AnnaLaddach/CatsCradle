@@ -1,0 +1,16 @@
+
+library(Seurat)
+library(ggplot2)
+
+rm(list=ls())
+graphics.off()
+
+res = 1
+assay = 'integrated'
+objectPair = getObjectPair(assay,res)
+f = objectPair$f
+fPrime = objectPair$fPrime
+
+M = getM(f)
+
+
