@@ -2,6 +2,7 @@
 library(BioHandy)
 library(dplyr)
 library(networkD3)
+library(plotly)
 
 
 source('~/FranzeSingleCell07/SeuratWare02.R')
@@ -72,6 +73,7 @@ makeFPrime = function(f,active.assay,npcs=30,dims=1:20,res=2)
 ## ###################################################
 transposeSeuratObject = function(f,active.assay)
 {
+    f@active.assay = active.assay
     M = f@assays[[active.assay]]@data
     M = as.matrix(M)
     MPrime = t(M)
@@ -150,8 +152,7 @@ getExpressionTotals = function(f,fPrime,absolute=FALSE)
 
     df = data.frame(cellCluster=numeric(N),
                     geneCluster=numeric(N),
-                    expression=numeric(N),
-                    shortName=character(N))
+                    expression=numeric(N))
 
     finger = 1
     for(i in cellClusters)
@@ -172,8 +173,9 @@ getExpressionTotals = function(f,fPrime,absolute=FALSE)
 
             if(is.na(df$expression[finger]))
                 stop('NA NA')
-            
-            df$shortName[finger] = getShortName(i)
+
+            ## Too specific to previous case:
+            ## df$shortName[finger] = getShortName(i)
                 
 
             finger = finger + 1
@@ -183,7 +185,7 @@ getExpressionTotals = function(f,fPrime,absolute=FALSE)
     
     df$cellCluster = factor(df$cellCluster,levels=cellClusters)
     df$geneCluster = factor(df$geneCluster,levels=geneClusters)
-    df$shortName = factor(df$shortName,levels=getShortNames())
+    ## df$shortName = factor(df$shortName,levels=getShortNames())
     
     
     return(df)
@@ -194,7 +196,7 @@ getExpressionTotalsMatrix = function(f,fPrime,absolute=FALSE)
 {
     df = getExpressionTotals(f,fPrime,absolute=FALSE)
 
-    cellCluster = as.character(unique(df$shortName))
+    cellCluster = as.character(unique(df$cellCluster))
     geneCluster = as.character(unique(df$geneCluster))
 
     M = matrix(0,nrow=length(cellCluster),ncol=length(geneCluster))
@@ -202,7 +204,7 @@ getExpressionTotalsMatrix = function(f,fPrime,absolute=FALSE)
     colnames(M) = geneCluster
 
     for(i in 1:nrow(df))
-        M[df$shortName[i],df$geneCluster[i]] = df$expression[i]
+        M[df$cellCluster[i],df$geneCluster[i]] = df$expression[i]
 
     return(M)
 }
@@ -358,6 +360,9 @@ sankeyPairFromMatrix = function(M,disambiguation=c('R_','C_'),fontSize=20)
     return(sankeyPair)
 }
 
-    
-
+## ####################################################
+saveSankeyGraph = function(p,fileName)
+{
+     htmlwidgets::saveWidget(as_widget(p), fileName)
+}
     
