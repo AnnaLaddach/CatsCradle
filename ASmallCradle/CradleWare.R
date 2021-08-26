@@ -366,3 +366,9 @@ saveSankeyGraph = function(p,fileName)
      htmlwidgets::saveWidget(as_widget(p), fileName)
 }
     
+## ####################################################
+saveBrowseable = function(p,fileName)
+{
+     htmlwidgets::saveWidget(as_widget(p), fileName)
+}
+    
