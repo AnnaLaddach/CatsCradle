@@ -1,5 +1,6 @@
 
 library(HandyPack)
+library(tictoc)
 library(ggplot2)
 library(pheatmap)
 library(stringr)
@@ -7,7 +8,8 @@ library(stringr)
 rm(list=ls())
 graphics.off()
 
-source('CradleWare.R')
+source('../CradleWare.R')
+source('AccessObjects.R')
 
 
 assays = c('integrated','RNA')
@@ -16,19 +18,28 @@ geneSets = str_split(geneSets,'\t')
 which = c('log','density')
 
 for(res in 1:2)
+{
     for(assay in assays)
     {
+        pair = getObjectPair(assay=assay,res=res)
+        f = pair$f
+        
         for(whichFunction in which)
         {
+            Tic(paste('hallmark',assay,res))
+                
             clusterDF = Read.Table(paste0(assay,'_resolution_',res,'/geneClusters.txt'))
-            background = 21281
+            names(clusterDF)[2] = 'geneCluster'
+            names(clusterDF)[1] = 'gene'
+            
             M = getGeneSetsVsClustersMatrix(geneSets,
                                             clusterDF,
                                             whichFunction,
-                                            background)
+                                            backgroundGenes=rownames(f))
+            
             if(whichFunction == 'log')
                 M = log10(M+1)
-            
+
             figName = paste0(assay,'_resolution_',res,'/hallmarkHeatMap_',
                              whichFunction,'.jpg')
             jpeg(figName,
@@ -37,7 +48,8 @@ for(res in 1:2)
                      treeheight_row=0,
                      treeheight_col=0)
             dev.off()
+            toc()
         }
     }
-
+}
     

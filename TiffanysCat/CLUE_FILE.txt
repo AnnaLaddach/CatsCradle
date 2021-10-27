@@ -1,0 +1,36 @@
+
+- makeTheObjects.R For each of the cases {larval, adult, combined}
+  this makes and saves the object pair f and fPrime and saves these as
+  SeuratObject/{f_,fPrime_}{larval,adult,combined}.rdf
+  
+- AccessObjects.R This provides getObjectPair and getSeuratObject
+  which take the case as an argument.  getObjectPair returns a list
+  with elements f and fPrime.  getSeuratObject gets the original
+  Seurat object.
+
+- assortedAnalyses.R  This iterates over the cases
+  {larval,adult,combined} and makes UMAPs of the gene clusters
+  (including browseable clusters), and cat's cradles of mean gene
+  expression, i.e., Sankey graphs of mean expression in gene clusters
+  vs cell clusters.  UMAPs are in
+  figures/umapOfGenes_{case}.{jpg,html}
+  Cat's cradles are in
+  figures/CellsGenesExpressionUpSankeyGraph_{case}.html
+  This also makes lists of the genes in each gene cluster and these
+  are in
+  tables/geneClusters_{case}.txt
+
+- hallmarkVsGeneClusters.R
+  stop('This is kind of a hack regarding mouse v fish')
+
+- orderGeneListsPerCluster.R This finds -log10(p-value) for the
+  overlap between the gene clusters and gene lists such as hallmark,
+  etc. For each gene cluster we then have a list of p-values for its
+  overlap with the given gene list on the given background.  We make a
+  table where for each gene cluster we have the specific gene lists
+  (e.g., KRAS SIGNALING) and its -log10(pvalue) and these are ordered
+  in descening order by the latter.  These are saved in
+  tables/{hallmark,etc}_{larval,adult,combined}.txt
+
+
+
