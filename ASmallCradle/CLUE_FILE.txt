@@ -29,7 +29,8 @@ sizes.
   figures/fractionOfIntegratedInRNAClusters.jpg and
   figures/minusLogPForOverlapOfIntegratedAndRNAClusters.jpg
 
-- hallmarkHeatmap.R This makes heatmaps for the two measures above for
+- hallmarkHeatmap.R CURRENTLY UNDER REPAIR
+This makes heatmaps for the two measures above for
   overlap of the clusters with the Hallmark gene lists and stores them
   in {assay}_resolution_2/hallmarkHeatMap_{whichFunction}.jpg  We
   don't do this for C2 because this makes a crazy big figure.  This

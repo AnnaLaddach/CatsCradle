@@ -57,7 +57,8 @@ labelRows = function(M,f,nameCol,cutoff=.3)
         df = df[order(-df$Freq),]
         df$frac = df$Freq / length(theNames)
         df = df[df$frac >= cutoff,]
-        rownames(M)[i] = paste(df$theNames,collapse='_')
+        a = paste(df$theNames,collapse='_')
+        rownames(M)[i] = paste0('SC_',rownames(M)[i],': ',a)
     }
     return(M)
 }
