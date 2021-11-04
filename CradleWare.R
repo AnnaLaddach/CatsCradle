@@ -4,6 +4,7 @@ library(dplyr)
 library(networkD3)
 library(plotly)
 library(HandyPack)
+library(stringr)
 
 
 ## ###################################################
@@ -415,6 +416,92 @@ makeUMAPPlot = function(f,title='',which,size=1)
     return(answer)
 }
 
+## ####################################################
+widenGeneClusterLists = function(fileIn,fileOut)
+{
+    df = Read.Table(fileIn)
+    headings = names(df)
 
+    df[,2] = as.numeric(df[,2])
+    clusters = unique(df[,2])
+    clusters = clusters[order(clusters)]
+
+    geneLists = list()
+    for(i in 1:length(clusters))
+    {
+        idx = df[,2] == clusters[i]
+        tag = paste0('geneCluster_',clusters[i])
+        geneLists[[tag]] = df[idx,1]
+    }
+    longest = max(unlist(lapply(geneLists,length)))
+
+    pad = function(genes,N)
+    {
+        n = max(0,N - length(genes))
+        return(c(genes,rep('',n)))
+    }
+    for(tag in names(geneLists))
+        geneLists[[tag]] = pad(geneLists[[tag]],longest)
+
+    for(i in 1:length(geneLists))
+    {
+        tag = names(geneLists)[i]
+        a = data.frame(genes=geneLists[[tag]])
+        names(a) = tag
+        if(i == 1)
+            wide = a
+        else
+            wide = cbind(wide,a)
+    }
+    Write.Table(wide,
+                fileOut)
+}
+
+## ####################################################
+trimGeneListTable = function(fileIn,fileOut,cutoff=0.05)
+{
+    df = Read.Table(fileIn)
+    names(df) = str_replace_all(names(df),'X','')
+
+    ## Blank out the useless stuff:
+    numCol = ncol(df)
+    for(I in seq(from=1,to=numCol,by=2))
+    {
+        J = I + 1
+
+        for(i in 1:nrow(df))
+        {
+            logPValue = df[i,J]
+            if(logPValue < -log10(cutoff))
+            {
+                df[i,I] = ''
+                df[i,J] = -1
+            }
+        }
+    }
+
+    ## Find the longest:
+    longest = c()
+    for(I in seq(from=1,to=numCol,by=2))
+    {
+        idx = df[,I] != ''
+        longest = c(longest,sum(idx))
+    }
+    longest = max(longest)
+
+    ## Trim:
+    df = df[1:longest,]
+
+    ## Get rid of the -1s:
+    for(I in seq(from=1,to=numCol,by=2))
+    {
+        J = I + 1
+        idx = df[,J] == -1
+        df[,J] = as.character(df[,J])
+        df[idx,J] = ''
+    }
+    Write.Table(df,
+                fileOut)
+}
 
     

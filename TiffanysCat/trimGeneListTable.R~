@@ -1,0 +1,14 @@
+
+library(HandyPack)
+
+rm(list=ls())
+
+source('../CradleWare.R')
+## ####################################################
+## ####################################################
+
+fileIn = '/tables/hallmark_combined.txt'
+fileOut = ''
+
+df = trimGeneListTable(fileIn,fileOut)
+
