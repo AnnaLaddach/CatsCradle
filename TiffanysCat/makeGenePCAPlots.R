@@ -9,31 +9,29 @@ graphics.off()
 
 source('AccessObjects.R')
 source('../CradleWare.R')
+source('../PCAWare.R')
 ## ####################################################
 ## ####################################################
 
 cases = c('adult','combined')
-
-dims = paste0('PC_',1:4)
 
 for(case in cases)
 {
     pair = getObjectPair(case)
     fPrime = pair$fPrime
 
-    outDir = c('figures',paste0('PCA_',case))
+    outDir = c('figures',paste0('PCA_genes_',case))
     outDir = nameAndMakeDir(outDir)
 
-    df = FetchData(fPrime,dims)
-    df$gene = colnames(fPrime)
-    df$cluster = fPrime$seurat_clusters
+    df = makeGenePCDF(fPrime,4)
+    dims = paste0('PC_',1:4)
 
     g = plotPCs(df,
                 dataCols=dims,
-                coloring='cluster',
-                labeling=c('gene','cluster'),
+                coloring='seurat_clusters',
+                labeling=c('gene','seurat_clusters'),
                 outDir=outDir)
-
+    
     dev.new()
     print(g)
 }
