@@ -7,6 +7,7 @@ library(ggplot2)
 library(plotly)
 library(cowplot)
 library(HandyPack)
+library(tictoc)
 library(stringr)
 
 
@@ -505,6 +506,59 @@ trimGeneListTable = function(fileIn,fileOut,cutoff=0.05)
     }
     Write.Table(df,
                 fileOut)
+}
+
+## ####################################################
+findDECells = function(f,fPrime,cellClusterName,cutoff=0.05)
+{
+    DECells = list()
+    clusters = unique(fPrime$seurat_clusters)
+    clusters = clusters[order(as.numeric(clusters))]
+
+    for(cluster in clusters)
+    {
+        tag = paste0('seurat_cluster_',cluster)
+        Tic(tag)
+
+        ## Find the DE cells:
+        markerDF = FindMarkers(fPrime,
+                               assay=fPrime@active.assay,
+                               only.pos=TRUE,
+                               group.by=fPrime$seurat_clusters,
+                               ident.1=cluster)
+        if(nrow(markerDF) == 0)
+        {
+            DECells[[tag]] = NULL
+            next
+        }
+
+        ## Attach gene cluster and cell name:
+        markerDF$geneCluster = cluster
+        markerDF$cell = rownames(markerDF)
+
+        ## Subset to significant cells:
+        idx = markerDF$p_val_adj <= cutoff
+        markerDF = markerDF[idx,]
+
+        if(nrow(markerDF) == 0)
+        {
+            DECells[[tag]] = NULL
+            next
+        }
+
+
+        ## Determine cell type:
+        markerDF$cellType = ''
+        for(i in 1:nrow(markerDF))
+        {
+            idx = colnames(f) == markerDF$cell[i]
+            markerDF$cellType[i] = f@meta.data[idx,cellClusterName]
+        }
+
+        DECells[[tag]] = markerDF
+        toc()
+    }
+    return(DECells)
 }
 
     
