@@ -106,6 +106,7 @@ makeGenePCDF = function(f,dim)
 {
     df = makePCDF(f,dim)
     df$gene = colnames(f)
+    df = df[order(as.numeric(df$seurat_clusters)),]
 
     return(df)
 }
@@ -137,6 +138,106 @@ makeCentroidDF = function(df)
         else
             centroidDF = rbind(centroidDF,b)
     }
+    centroidDF = centroidDF[order(as.numeric(centroidDF$seurat_clusters)),]
     return(centroidDF)
 }
 
+## ####################################################
+makePCSeparationDFEachVsEach = function(f,dim)
+{
+    pcDF = makePCDF(f,dim)
+    centroidDF = makeCentroidDF(pcDF)
+    
+    clusters = unique(centroidDF$seurat_clusters)
+    clusters = as.character(clusters)
+    clusters = as.numeric(clusters)
+    clusters = clusters[order(clusters)]
+
+    I = c()
+    J = c()
+    PC = c()
+    separation = c()
+    finger = 1
+    for(i in 1:(length(clusters)-1))
+    {
+        for(j in (i+1):length(clusters))
+        {
+            for(pc in 1:dim)
+            {
+                I[finger] = clusters[i]
+                J[finger] = clusters[j]
+                PC[finger] = pc
+                separation[finger] = abs(centroidDF[i,pc] - centroidDF[j,pc])
+                finger = finger + 1
+            }
+        }
+    }
+
+    separationDF = data.frame(cluster1=I,cluster2=J,
+                              PC,separation)
+
+    separationDF$comparison = paste(separationDF$cluster1,
+                                    'vs',
+                                    separationDF$cluster2)
+    comparisonLevels = c()
+    for(i in clusters)
+        comparisonLevels = c(comparisonLevels,
+                             paste(i,'vs',clusters))
+    idx = comparisonLevels %in% separationDF$comparison
+    comparisonLevels = comparisonLevels[idx]
+    separationDF$comparison = factor(separationDF$comparison,
+                                     levels=comparisonLevels)
+    
+    return(separationDF)
+}
+
+## ####################################################
+makePCSeparationPlotEachVsEach = function(f,dim)
+{
+    df = makePCSeparationDFEachVsEach(f,dim)
+
+
+    idx = df$cluster1 == 5 |
+        df$cluster2 == 5
+    
+
+    g = ggplot(df[idx,],aes(x=PC,y=separation)) +
+        geom_line() +
+        geom_point() +
+        facet_wrap(~comparison,ncol=2)
+
+    return(g)
+}
+    
+## ####################################################
+makePCSeparationPlotEachVsEach = function(f,dim,outDir=NULL)
+{
+    df = makePCSeparationDFEachVsEach(f,dim)
+
+    clusters = unique(c(df$cluster1,df$cluster2))
+    plotList = list()
+
+    for(cluster in clusters)
+    {
+        idx = (df$cluster1 == cluster |
+               df$cluster2 == cluster)
+    
+    xTicks = seq(from=min(clusters),to=max(clusters),b=2)
+    g = ggplot(df[idx,],aes(x=PC,y=separation)) +
+        geom_line() +
+        geom_point() +
+        facet_wrap(~comparison,ncol=2) +
+        scale_x_continuous(breaks=xTicks)
+
+        plotList[[paste0('cluster_',cluster)]] = g
+
+        if(! is.null(outDir))
+        {
+            fileName = paste0(outDir,'/cluster_',cluster,'.jpg')
+            ggsave(plot=g,
+                   filename=fileName)
+        }
+    }
+    return(plotList)
+}
+    
