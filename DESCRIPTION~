@@ -1,0 +1,24 @@
+Package: CatsCradle
+Title: This package discovers gene clusters in Seurat data
+Version: 0.0.0.9000
+Authors@R:
+    person(given = "Anna",
+        family = "Laddach",
+        role = c("aut", "cre"),
+        email = "anna.laddach@crick.ac.uk",
+        comment = c(ORCID = "0000-0001-5552-6534"))
+    person(given = "Michael",
+        family = "Shapiro",
+        role = c("aut", "cre"),
+        email = "michael.shapiro@crick.ac.uk",
+        comment = c(ORCID = "0000-0002-2769-9320"))
+Description: The basic insight driving this package is the idea that by transposing the expression matrix of a Seurat object, we can use the usual Seurat technology to cluster genes and to visualise their relationships in two dimensions, e.g., as UMAP plots.  In addition we are then able to use the nearest neighbor graph to gain additional insight into specific genes by querying their neighborhood in this graph. 
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
+Imports: Seurat
+	 ggplot2
+	 plotly
+Depends: 
+    R (>= 4.0)	 
