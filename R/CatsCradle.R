@@ -1,20 +1,24 @@
 
 
 
+
 ## ###################################################
 #' Create the transpose of a Seurat object
 #'
 #' This takes a Seurat object f and creates a new Seurat object whose
-#' expression matrix is the transpose of that of f. Should preferably
-#' be called through makeFPrime()
+#' expression matrix is the transpose of that of f.
 #'
 #' @param f - a Seurat object
 #' @param active.assay - the assay to use.  Defaults to the
 #'     active.assay
+#' @param npcs - number of principal components, defaults to 30
+#' @param dims - dimensions to use for umap and nearest neighbors,
+#'     defaults to 1:20
 #' @return A Seurat object
 #' @export
 #' @import Seurat
-transposeSeuratObject = function(f,active.assay=f@active.assay)
+transposeSeuratObject = function(f,active.assay=f@active.assay,
+                                 npcs=30,dims=1:20)
 {
     f@active.assay = active.assay
     M = f@assays[[active.assay]]@data
@@ -24,55 +28,15 @@ transposeSeuratObject = function(f,active.assay=f@active.assay)
     colnames(MPrime) = rownames(f)
 
     fPrime = CreateSeuratObject(MPrime,assay=active.assay)
+
+    fPrime = FindVariableFeatures(fPrime)
+    fPrime = ScaleData(fPrime)
+    fPrime = RunPCA(fPrime,npcs=npcs)
+    fPrime = RunUMAP(fPrime,reduction='pca',dims=dims)
+    fPrime = FindNeighbors(fPrime)
+    
     return(fPrime)
 }
-
-## ###################################################
-#' Create the transpose object of a given Seurat object
-#'
-#' This transposes the given Seurat object and performs basic
-#' analysis including finding variable features, scaling data, running
-#' PCA and UMAP, finding neighbors and clustering.
-#'
-#' @param f - a Seurat object
-#' @param active.assay - active assay, defaults to the current active
-#'     assay
-#' @param npcs - number of pcs to find, defaults to 30
-#' @param dims - dimensions to be used for UMAP
-#' @param res - the resolution to be used for Louvain clustering
-#' @return The transposed Seurat object
-#' @export
-makeFPrime = function(f,active.assay,npcs=30,dims=1:20,res=2)
-{
-    fPrime = transposeSeuratObject(f,active.assay)
-    fPrime = initialAnalysis(fPrime,npcs,dim)
-    fPrime = FindClusters(fPrime,res=res)
-
-    return(fPrime)
-}
-
-
-## ###################################################
-#' Perform basic analysis on the transposed object
-#'
-#' This is typically called by findFPrime
-#'
-#' @param f - A Seurat object
-#' @param npcs - Number of pcs to compute, defaults to 30
-#' @param dims - The dimensions to be used for UMAP and NN graph
-#' @return A Seurat object
-#' @export
-initialAnalysis = function(f,npcs=30,dims=1:20)
-{
-    f = FindVariableFeatures(f)
-    f = ScaleData(f)
-    f = RunPCA(f,npcs=npcs)
-    f = RunUMAP(f,reduction='pca',dims=dims)
-    f = FindNeighbors(f,reduction='pca',dims=dims)
-
-    return(f)
-}
-
 
 ## ###################################################
 ## This retrieves the expression matrix:
@@ -86,7 +50,6 @@ getExpression = function(f)
     
     return(M)
 }
-
 
 ## ###################################################
 ## This computes z-scores:
