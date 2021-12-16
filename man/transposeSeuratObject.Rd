@@ -4,7 +4,7 @@
 \alias{transposeSeuratObject}
 \title{Create the transpose of a Seurat object}
 \usage{
-transposeSeuratObject(f, active.assay = f@active.assay)
+transposeSeuratObject(f, active.assay = f@active.assay, npcs = 30, dims = 1:20)
 }
 \arguments{
 \item{f}{\itemize{
@@ -15,12 +15,20 @@ transposeSeuratObject(f, active.assay = f@active.assay)
 \item the assay to use.  Defaults to the
 active.assay
 }}
+
+\item{npcs}{\itemize{
+\item number of principal components, defaults to 30
+}}
+
+\item{dims}{\itemize{
+\item dimensions to use for umap and nearest neighbors,
+defaults to 1:20
+}}
 }
 \value{
 A Seurat object
 }
 \description{
 This takes a Seurat object f and creates a new Seurat object whose
-expression matrix is the transpose of that of f. Should preferably
-be called through makeFPrime()
+expression matrix is the transpose of that of f.
 }

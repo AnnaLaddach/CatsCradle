@@ -2,8 +2,6 @@
 
 export(getAverageExpressionDF)
 export(getAverageExpressionMatrix)
-export(initialAnalysis)
-export(makeFPrime)
 export(stripGeneSet)
 export(tagRowAndColNames)
 export(transposeSeuratObject)
