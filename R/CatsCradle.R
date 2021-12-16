@@ -356,3 +356,69 @@ sankeyFromMatrix = function(M,disambiguation=c('R_','C_'),
 
     return(p)
 }
+
+
+## ####################################################
+#' This function extracts a nearest neighbor network
+#' from a Seurat object
+#'
+#' @param f - a Seurat object
+#' @return - This returns dataframe of neighbors:
+#' nodeA - node names for node A 
+#' nodeB - node names for node B
+#' weight - edge weight
+getNearestNeighborListsSeurat = function(f){
+    
+    #convert to dgTMatrix and extract relevant information
+    graph = as(f@graphs$RNA_snn, "dgTMatrix") 
+    neighborListDf = data.frame("nodeA" = graph@Dimnames[[1]][graph@i+1],
+                                "nodeB" =  graph@Dimnames[[2]][graph@j+1], 
+                                "weight" = graph@x)
+    
+    #remove self-loops
+    neighborListDf = 
+        neighborListDf[neighborListDf$nodeA != neighborListDf$nodeB,]
+    return(neighborListDf)
+}
+
+
+## ####################################################
+#' This function generates random indices for node B
+#'
+#' @param neighborListDf - a dataframe containing the neighborlist
+#' @param n - the number of times to randomise indices
+#' @param useWeights - whether to preserve edgeweights.
+#' @return - a matrix with randomised indices for node B
+randomiseNodeIndices = function(neighborListDf, n = 100, useWeights = F){
+    
+    #determine number of edges and create empty matrix for randomised indices
+    nEdges = nrow(neighborListDf)
+    indices = 1:nEdges
+    randomIndices = matrix(, nrow = nEdges, ncol = n)
+    
+    #check if weights are to be used
+    if (useWeights){
+        
+        #determine unique weights
+        weights = unique(neighborListDf$weight)
+        for (i in 1:n){
+            
+            #randomise indices within each weight category
+            for (weight in weights){
+                selected = neighborListDf$weight == weight
+                randomIndices[selected,i] =
+                    sample(indices[selected])
+            }
+        }
+    }
+    
+    #otherwise ignore weights and randomise indices
+    else {
+        for (i in 1:n){
+            randomIndices[,i] = sample(indices)
+        }
+    }
+    return(randomIndices)
+}
+
+
