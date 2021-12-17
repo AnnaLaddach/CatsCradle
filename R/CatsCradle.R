@@ -385,3 +385,108 @@ randomiseNodeIndices = function(neighborListDf, n = 100, useWeights = F){
 }
 
 
+## ####################################################
+#' This function reads in gene sets in .gmt format
+#'
+#' @param gmtFile - a .gmt file containing gene sets 
+#' @return - A named list of gene sets 
+readGmt = function(gmtFile){
+ lines = readLines(gmtFile)
+ geneSets = list()
+ for (line in lines){
+     info = strsplit(line, "\t")[[1]]
+     geneSets[paste(info[1],info[2])] = list(info[3:length(info)])
+ } 
+ return(geneSets)
+}
+
+
+## ####################################################
+#' This function annotates genes with terms
+#'
+#' @param gmtFile - a .gmt file containing gene sets to annotate genes with
+#' @return - A list where names are genes and values are lists of terms
+annotateGenes = function(geneSets){
+  #this is a bit slow for large collections of gene sets (a few minutes)
+  #think about whether it's necessary to speed up
+  genesAnno = list()
+  for (geneSet in names(geneSets)){
+    for (gene in geneSets[[geneSet]]){
+        if (gene %in% names(genesAnno)){
+            genesAnno[[gene]] = c(genesAnno[[gene]], geneSet)
+        }
+       else {
+           genesAnno[[gene]] = c(geneSet)
+       }
+      }
+    }
+    return(genesAnno)
+}
+
+
+## ####################################################
+#' This function predicts the functions of genes based on the functions of their
+#' neighbours.
+#'
+#' @param fPrime - a transposed Seurat object (generated with 
+#' transposeSeuratObject())
+#' @param genesAnno - genes annotated with gene sets
+#' @return - A list where names are genes and values are lists of terms.
+#' The values of the lists of terms are calculated according to the weights
+#' of the edges connecting the neighbors. 
+neighborTerms = function(fPrime,genesAnno, normalise = T){
+    
+    #determine genes
+    genes = rownames(fPrime@graphs$RNA_snn)
+    genesPredictedTerms = list()
+    i = 1
+    
+    #iterate through genes
+    for (gene in genes){
+        if (i %% 100 == 0){
+            print(paste(i, "genes processed"))
+        }
+        i = i + 1
+        genesPredictedTerms[[gene]] = list()
+        
+        #determine neighbors
+        neighbors = genes[fPrime@graphs$RNA_snn[gene,] > 0]
+        neighbors = neighbors[neighbors != gene]
+        
+        #calculate total weight of edges to neighbors
+        total = sum(fPrime@graphs$RNA_snn[gene,])
+        
+        #iterate through neighbors
+        for (neighbor in neighbors){
+            
+            #determine weight of connecting edge and normalise if T
+            weight = fPrime@graphs$RNA_snn[gene,neighbor]
+            if (normalise){
+                weight = weight/total
+            }
+            if (!(neighbor %in% names(genesAnno))){
+                next
+            }
+            
+            #extract terms for neighbor
+            terms = genesAnno[[neighbor]]
+            
+            #add these to predicted terms with appropriate weights
+            for (term in terms){
+                if (term %in% names(genesPredictedTerms[[gene]])){
+                    genesPredictedTerms[[gene]][[term]] = 
+                        genesPredictedTerms[[gene]][[term]] + weight
+                } else {
+                    genesPredictedTerms[[gene]][[term]] = weight 
+                }
+            }
+        }
+        termNames = names(genesPredictedTerms[[gene]])
+        genesPredictedTerms[[gene]] = as.numeric(genesPredictedTerms[[gene]])
+        names(genesPredictedTerms[[gene]]) = termNames
+        genesPredictedTerms[[gene]] =  
+            genesPredictedTerms[[gene]][order(-genesPredictedTerms[[gene]])]
+    }
+    return(genesPredictedTerms)
+}
+
