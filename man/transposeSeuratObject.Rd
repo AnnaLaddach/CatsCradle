@@ -4,7 +4,13 @@
 \alias{transposeSeuratObject}
 \title{Create the transpose of a Seurat object}
 \usage{
-transposeSeuratObject(f, active.assay = f@active.assay, npcs = 30, dims = 1:20)
+transposeSeuratObject(
+  f,
+  active.assay = f@active.assay,
+  npcs = 30,
+  dims = 1:20,
+  res = 1
+)
 }
 \arguments{
 \item{f}{\itemize{
@@ -23,6 +29,10 @@ active.assay
 \item{dims}{\itemize{
 \item dimensions to use for umap and nearest neighbors,
 defaults to 1:20
+}}
+
+\item{res}{\itemize{
+\item the clustering resolution, defaults to 1
 }}
 }
 \value{

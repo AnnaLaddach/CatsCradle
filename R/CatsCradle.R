@@ -14,11 +14,12 @@
 #' @param npcs - number of principal components, defaults to 30
 #' @param dims - dimensions to use for umap and nearest neighbors,
 #'     defaults to 1:20
+#' @param res - the clustering resolution, defaults to 1
 #' @return A Seurat object
 #' @export
 #' @import Seurat
 transposeSeuratObject = function(f,active.assay=f@active.assay,
-                                 npcs=30,dims=1:20)
+                                 npcs=30,dims=1:20,res=1)
 {
     f@active.assay = active.assay
     M = f@assays[[active.assay]]@data
@@ -34,6 +35,7 @@ transposeSeuratObject = function(f,active.assay=f@active.assay,
     fPrime = RunPCA(fPrime,npcs=npcs)
     fPrime = RunUMAP(fPrime,reduction='pca',dims=dims)
     fPrime = FindNeighbors(fPrime)
+    fPrime = FindClusters(fPrime,resolution=res)
     
     return(fPrime)
 }
@@ -77,12 +79,14 @@ zScores = function(M)
 #' @export
 getAverageExpressionMatrix = function(f,fPrime)
 {
-    cellCluster = as.numeric(unique(f$seurat_clusters))
-    cellCluster = cellCluster[order(cellCluster)]
+    f$seurat_clusters = as.character(f$seurat_clusters)
+    cellCluster = unique(f$seurat_clusters)
+    cellCluster = cellCluster[order(as.numeric(cellCluster))]
 
-    geneCluster = as.numeric(unique(fPrime$seurat_clusters))
-    geneCluster = geneCluster[order(geneCluster)]
-
+    fPrime$seurat_clusters = as.character(fPrime$seurat_clusters)
+    geneCluster = unique(fPrime$seurat_clusters)
+    geneCluster = geneCluster[order(as.numeric(geneCluster))]
+    
     ## Get z-scored expression:
     X = getExpression(f)
     X = zScores(X)
@@ -98,7 +102,7 @@ getAverageExpressionMatrix = function(f,fPrime)
             idxI = f$seurat_clusters == i
             idxJ = fPrime$seurat_clusters == j
 
-            M[i,j] = sum(X[idxI,idxJ]) / (sum(idxI) * sum(idxJ))
+            M[i,j] = sum(X[idxJ,idxI]) / (sum(idxI) * sum(idxJ))
         }
     }
     return(M)
