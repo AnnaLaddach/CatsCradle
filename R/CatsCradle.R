@@ -1,7 +1,6 @@
 
 
 
-
 ## ###################################################
 #' Create the transpose of a Seurat object
 #'
@@ -270,6 +269,19 @@ orderGeneSetPValues = function(M,ascending=TRUE,cutoff=NULL)
 }
 
 ## ####################################################
+#' This makes a sankey graph from a matrix of average
+#' express.  Our "Cat's Cradle".
+#'
+#' @param M - a matrix of gene expression
+#' @param disambiguation - used to distinguish between
+#' the row names and the column names if these overlap
+#' @param fontSize - defaults to 20
+#' @param minus - color to use for links with negative
+#' values
+#' @param plus - color for positive values
+#' @return A sankey graph
+#' @export
+#' @import networkD3
 sankeyFromMatrix = function(M,disambiguation=c('R_','C_'),
                             fontSize=20,minus='red',plus='blue')
 {
@@ -298,7 +310,7 @@ sankeyFromMatrix = function(M,disambiguation=c('R_','C_'),
                        stringsAsFactors=FALSE)
 
     ## Color the links DF:
-    idx = links$value > 0
+    idx = links$value >= 0
     links$group = ''
     links$group[idx] = 'plus'
     links$group[!idx] = 'minus'
@@ -315,11 +327,14 @@ sankeyFromMatrix = function(M,disambiguation=c('R_','C_'),
 
     linkColor = 'd3.scaleOrdinal() .domain(["minus","plus"]) .range(["X", "Y"])'
     linkColor = str_replace(linkColor,'X',minus)
-    linkColor = str_replace(linkColor,'Y',plus)    
+    linkColor = str_replace(linkColor,'Y',plus)  
+    
 
     p = sankeyNetwork(Links = links, Nodes = nodes, Source = "IDsource", Target = "IDtarget", 
                       Value = "value", NodeID = "name", 
-                      colourScale=linkColor, LinkGroup="group")
+                      ##colourScale=linkColor,
+                      LinkGroup="group",
+                      fontSize=fontSize)
 
     return(p)
 }
@@ -331,6 +346,7 @@ sankeyFromMatrix = function(M,disambiguation=c('R_','C_'),
 #'
 #' @param f - a Seurat object
 #' @return - This returns dataframe of neighbors:
+#' @export
 #' nodeA - node names for node A 
 #' nodeB - node names for node B
 #' weight - edge weight
@@ -356,6 +372,7 @@ getNearestNeighborListsSeurat = function(f){
 #' @param n - the number of times to randomise indices
 #' @param useWeights - whether to preserve edgeweights.
 #' @return - a matrix with randomised indices for node B
+#' @export
 randomiseNodeIndices = function(neighborListDf, n = 100, useWeights = F){
     
     #determine number of edges and create empty matrix for randomised indices
@@ -393,7 +410,8 @@ randomiseNodeIndices = function(neighborListDf, n = 100, useWeights = F){
 #' This function reads in gene sets in .gmt format
 #'
 #' @param gmtFile - a .gmt file containing gene sets 
-#' @return - A named list of gene sets 
+#' @return - A named list of gene sets
+#' @export
 readGmt = function(gmtFile){
  lines = readLines(gmtFile)
  geneSets = list()
@@ -410,6 +428,7 @@ readGmt = function(gmtFile){
 #'
 #' @param gmtFile - a .gmt file containing gene sets to annotate genes with
 #' @return - A list where names are genes and values are lists of terms
+#' @export
 annotateGenes = function(geneSets){
   #this is a bit slow for large collections of gene sets (a few minutes)
   #think about whether it's necessary to speed up
@@ -436,6 +455,7 @@ annotateGenes = function(geneSets){
 #' transposeSeuratObject())
 #' @param genesAnno - genes annotated with gene sets
 #' @return - A list where names are genes and values are lists of terms.
+#' @export
 #' The values of the lists of terms are calculated according to the weights
 #' of the edges connecting the neighbors. 
 neighborTerms = function(fPrime,genesAnno, normalise = T){
