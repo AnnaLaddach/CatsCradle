@@ -20,6 +20,8 @@ transposeSeuratObject())
 \value{
 \itemize{
 \item A list where names are genes and values are lists of terms.
+The values of the lists of terms are calculated according to the weights
+of the edges connecting the neighbors.
 }
 }
 \description{

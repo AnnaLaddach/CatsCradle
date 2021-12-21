@@ -15,6 +15,9 @@ getNearestNeighborListsSeurat(f)
 \value{
 \itemize{
 \item This returns dataframe of neighbors:
+nodeA - node names for node A
+nodeB - node names for node B
+weight - edge weight
 }
 }
 \description{

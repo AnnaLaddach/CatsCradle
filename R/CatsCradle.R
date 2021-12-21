@@ -173,6 +173,24 @@ stripGeneSet = function(geneSet)
 }
 
 ## ####################################################
+## Used internally:
+geneListPValue = function(A,B,C,background=25000)
+{
+    M = matrix(0,nrow=2,ncol=2)
+    
+    M[1,1] = background - A
+    M[1,2] = A
+    M[2,1] = B - C
+    M[2,2] = C
+
+    
+
+    f = fisher.test(M,alternative='greater')
+
+    return(f$p.value)
+}
+
+## ####################################################
 #' This compares the gene clusters to other gene sets
 #' e.g., GO, Hallmark, and determines the p-value for
 #' their overlaps when compared to a set of background
@@ -182,7 +200,8 @@ stripGeneSet = function(geneSet)
 #' @param clusterDF - a data frame giving the cluster
 #' membership of each gene with columns gene and geneCluster
 #' @param backgroundGenes - a character vector of genes
-#' 
+#' @return a matrix of p-values
+#' @export
 geneSetsVsGeneClustersPValueMatrix = function(geneSets,
                                               clusterDF,
                                               backgroundGenes)
@@ -346,10 +365,10 @@ sankeyFromMatrix = function(M,disambiguation=c('R_','C_'),
 #'
 #' @param f - a Seurat object
 #' @return - This returns dataframe of neighbors:
-#' @export
 #' nodeA - node names for node A 
 #' nodeB - node names for node B
 #' weight - edge weight
+#' @export
 getNearestNeighborListsSeurat = function(f){
     
     #convert to dgTMatrix and extract relevant information
@@ -455,9 +474,9 @@ annotateGenes = function(geneSets){
 #' transposeSeuratObject())
 #' @param genesAnno - genes annotated with gene sets
 #' @return - A list where names are genes and values are lists of terms.
-#' @export
 #' The values of the lists of terms are calculated according to the weights
-#' of the edges connecting the neighbors. 
+#' of the edges connecting the neighbors.
+#' @export
 neighborTerms = function(fPrime,genesAnno, normalise = T){
     
     #determine genes
