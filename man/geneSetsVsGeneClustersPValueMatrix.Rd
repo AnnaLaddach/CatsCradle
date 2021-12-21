@@ -23,6 +23,9 @@ membership of each gene with columns gene and geneCluster
 \item a character vector of genes
 }}
 }
+\value{
+a matrix of p-values
+}
 \description{
 This compares the gene clusters to other gene sets
 e.g., GO, Hallmark, and determines the p-value for
