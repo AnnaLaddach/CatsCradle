@@ -7,7 +7,12 @@ e.g., GO, Hallmark, and determines the p-value for
 their overlaps when compared to a set of background
 genes.}
 \usage{
-geneSetsVsGeneClustersPValueMatrix(geneSets, clusterDF, backgroundGenes)
+geneSetsVsGeneClustersPValueMatrix(
+  geneSets,
+  clusterDF,
+  backgroundGenes,
+  adjust = FALSE
+)
 }
 \arguments{
 \item{geneSets}{\itemize{
@@ -21,6 +26,11 @@ membership of each gene with columns gene and geneCluster
 
 \item{backgroundGenes}{\itemize{
 \item a character vector of genes
+}}
+
+\item{adjust}{\itemize{
+\item a logical deciding whether to adjust
+p values.  Defaults to FALSE.
 }}
 }
 \value{

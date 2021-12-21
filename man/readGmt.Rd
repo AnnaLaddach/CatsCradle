@@ -4,11 +4,16 @@
 \alias{readGmt}
 \title{This function reads in gene sets in .gmt format}
 \usage{
-readGmt(gmtFile)
+readGmt(gmtFile, addDescr = F)
 }
 \arguments{
 \item{gmtFile}{\itemize{
 \item a .gmt file containing gene sets
+}}
+
+\item{addDescr}{\itemize{
+\item include gene set description (2nd column in .gmt file) in
+gene set name
 }}
 }
 \value{

@@ -200,40 +200,54 @@ geneListPValue = function(A,B,C,background=25000)
 #' @param clusterDF - a data frame giving the cluster
 #' membership of each gene with columns gene and geneCluster
 #' @param backgroundGenes - a character vector of genes
+#' @param adjust - a logical deciding whether to adjust
+#' p values.  Defaults to FALSE.
 #' @return a matrix of p-values
 #' @export
 geneSetsVsGeneClustersPValueMatrix = function(geneSets,
                                               clusterDF,
-                                              backgroundGenes)
+                                              backgroundGenes,
+                                              adjust=FALSE)
 {
-  background = length(backgroundGenes)
-  clusters = as.numeric(unique(clusterDF$geneCluster))
-  clusters = clusters[order(clusters)]
-  NClusters = length(clusters)
-  NGeneSets = length(geneSets)
-  
-  M = matrix(0,nrow=NGeneSets,ncol=NClusters)
-  rownames(M) = names(geneSets)
-  colnames(M) = as.character(clusters)
-  
-  for(i in 1:NGeneSets)
-  {
-    for(j in 1:NClusters)
+    background = length(backgroundGenes)
+    clusters = as.character(unique(clusterDF$geneCluster))
+    clusters = as.numeric(unique(clusterDF$geneCluster))
+    clusters = clusters[order(clusters)]
+    NClusters = length(clusters)
+    NGeneSets = length(geneSets)
+    
+    M = matrix(0,nrow=NGeneSets,ncol=NClusters)
+    rownames(M) = names(geneSets)
+    colnames(M) = as.character(clusters)
+    
+    for(i in 1:NGeneSets)
     {
-      cluster = clusters[j]
-      idx = clusterDF$geneCluster == cluster
-      clusterGenes = clusterDF$gene[idx]
-      
-      A = length(geneSets[[i]])
-      B = length(clusterGenes)
-      C = length(intersect(geneSets[[i]],clusterGenes))
-      
-      ## Maybe there's a better way to do this:
-      M[i,j] = geneListPValue(A,B,C,background)
+        for(j in 1:NClusters)
+        {
+            cluster = clusters[j]
+            idx = clusterDF$geneCluster == cluster
+            clusterGenes = clusterDF$gene[idx]
+            
+            A = length(geneSets[[i]])
+            B = length(clusterGenes)
+            C = length(intersect(geneSets[[i]],clusterGenes))
+            
+            ## Maybe there's a better way to do this:
+            M[i,j] = geneListPValue(A,B,C,background)
+        }
     }
-  }
-  
-  return(M)
+    
+    if(adjust)
+    {
+        N = p.adjust(M)
+        N = matrix(N,nrow=nrow(M))
+        rownames(N) = rownames(M)
+        colnames(N) = colnames(M)
+        
+        return(N)
+    } else {
+        return(M)
+    }
 }
 
 ## ####################################################
@@ -247,44 +261,42 @@ geneSetsVsGeneClustersPValueMatrix = function(geneSets,
 #' Defaults to TRUE, so that p-values will be ordered according
 #' to decreasing significance, should be set to FALSE if ordering
 #' -log p-value
-#' @param cutoff - Used to suppress non-significant gene sets in
-#' each column.  The value of ascending determines the direction
-#' of the cutoff
 #' @return This returns a data frame where each gene cluster has
 #' two columns, one giving the gene set name and the other giving
 #' its significance
+#' @export
 orderGeneSetPValues = function(M,ascending=TRUE,cutoff=NULL)
 {
-  for(i in 1:ncol(M))
-  {
-    a = data.frame(geneSet=rownames(M),
-                   value=M[,i],
-                   stringsAsFactors=FALSE)
-    
-    ## Order by significance:
-    if(ascending)
-      a = a[order(a$value),]
-    else
-      a = a[order(-a$value),]
-    
-    ## Supress insignificance:
-    if(ascending)
-      idx = a$value <= cutoff
-    else
-      idx = a$value >= cutoff
-    
-    a$value = as.character(a$value)
-    a$geneSet[!idx] = ''
-    a$value[!idx]
-    
-    ## Accumulate these:
-    if(i == 1)
-      df = a
-    else
-      df = cbind(df,a)
-  }
-  
-  return(df)
+
+    for(i in 1:ncol(M))
+    {
+        ## Get the two column df:
+        a = data.frame(geneSet=rownames(M),
+                       value=M[,i],
+                       stringsAsFactors=FALSE)
+        rownames(a) = NULL
+
+        ## Re-order the two-col df:
+        if(ascending)
+            a = a[order(a$value),]
+        else
+            a = a[order(-a$value),]
+        
+        ## Rename the columns:
+        names(a)[1] = paste0('geneSet_cluster_',
+                             colnames(M)[i])
+        names(a)[2] = paste0('value_cluster_',
+                             colnames(M)[i])
+        
+        ## Join them up:
+        if(i == 1)
+        {
+            df = a
+        } else {
+            df = cbind(df,a)
+        }
+    }
+    return(df)
 }
 
 ## ####################################################

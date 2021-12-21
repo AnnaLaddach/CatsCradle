@@ -20,12 +20,6 @@ Defaults to TRUE, so that p-values will be ordered according
 to decreasing significance, should be set to FALSE if ordering
 -log p-value
 }}
-
-\item{cutoff}{\itemize{
-\item Used to suppress non-significant gene sets in
-each column.  The value of ascending determines the direction
-of the cutoff
-}}
 }
 \value{
 This returns a data frame where each gene cluster has
