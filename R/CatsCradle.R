@@ -20,23 +20,23 @@
 transposeSeuratObject = function(f,active.assay=f@active.assay,
                                  npcs=30,dims=1:20,res=1)
 {
-    f@active.assay = active.assay
-    M = f@assays[[active.assay]]@data
-    M = as.matrix(M)
-    MPrime = t(M)
-    rownames(MPrime) = colnames(f)
-    colnames(MPrime) = rownames(f)
-
-    fPrime = CreateSeuratObject(MPrime,assay=active.assay)
-
-    fPrime = FindVariableFeatures(fPrime)
-    fPrime = ScaleData(fPrime)
-    fPrime = RunPCA(fPrime,npcs=npcs)
-    fPrime = RunUMAP(fPrime,reduction='pca',dims=dims)
-    fPrime = FindNeighbors(fPrime)
-    fPrime = FindClusters(fPrime,resolution=res)
-    
-    return(fPrime)
+  f@active.assay = active.assay
+  M = f@assays[[active.assay]]@data
+  M = as.matrix(M)
+  MPrime = t(M)
+  rownames(MPrime) = colnames(f)
+  colnames(MPrime) = rownames(f)
+  
+  fPrime = CreateSeuratObject(MPrime,assay=active.assay)
+  
+  fPrime = FindVariableFeatures(fPrime)
+  fPrime = ScaleData(fPrime)
+  fPrime = RunPCA(fPrime,npcs=npcs)
+  fPrime = RunUMAP(fPrime,reduction='pca',dims=dims)
+  fPrime = FindNeighbors(fPrime)
+  fPrime = FindClusters(fPrime,resolution=res)
+  
+  return(fPrime)
 }
 
 ## ###################################################
@@ -45,11 +45,11 @@ transposeSeuratObject = function(f,active.assay=f@active.assay,
 ## f - a Seurat object
 getExpression = function(f)
 {
-    M = f@assays[[f@active.assay]]@data
-    M = as.matrix(M)
-    rownames(M) = rownames(f)
-    
-    return(M)
+  M = f@assays[[f@active.assay]]@data
+  M = as.matrix(M)
+  rownames(M) = rownames(f)
+  
+  return(M)
 }
 
 ## ###################################################
@@ -58,13 +58,13 @@ getExpression = function(f)
 ## M - a matrix
 zScores = function(M)
 {
-    mu = rowMeans(M)
-    M = M - mu
-
-    for(i in 1:nrow(M))
-        M[i,] = M[i,] / sd(M[i,])
-    
-    return(M)
+  mu = rowMeans(M)
+  M = M - mu
+  
+  for(i in 1:nrow(M))
+    M[i,] = M[i,] / sd(M[i,])
+  
+  return(M)
 }
 
 
@@ -78,33 +78,33 @@ zScores = function(M)
 #' @export
 getAverageExpressionMatrix = function(f,fPrime)
 {
-    f$seurat_clusters = as.character(f$seurat_clusters)
-    cellCluster = unique(f$seurat_clusters)
-    cellCluster = cellCluster[order(as.numeric(cellCluster))]
-
-    fPrime$seurat_clusters = as.character(fPrime$seurat_clusters)
-    geneCluster = unique(fPrime$seurat_clusters)
-    geneCluster = geneCluster[order(as.numeric(geneCluster))]
-    
-    ## Get z-scored expression:
-    X = getExpression(f)
-    X = zScores(X)
-    
-    M = matrix(0,nrow=length(cellCluster),ncol=length(geneCluster))
-    rownames(M) = cellCluster
-    colnames(M) = geneCluster
-
-    for(i in cellCluster)
+  f$seurat_clusters = as.character(f$seurat_clusters)
+  cellCluster = unique(f$seurat_clusters)
+  cellCluster = cellCluster[order(as.numeric(cellCluster))]
+  
+  fPrime$seurat_clusters = as.character(fPrime$seurat_clusters)
+  geneCluster = unique(fPrime$seurat_clusters)
+  geneCluster = geneCluster[order(as.numeric(geneCluster))]
+  
+  ## Get z-scored expression:
+  X = getExpression(f)
+  X = zScores(X)
+  
+  M = matrix(0,nrow=length(cellCluster),ncol=length(geneCluster))
+  rownames(M) = cellCluster
+  colnames(M) = geneCluster
+  
+  for(i in cellCluster)
+  {
+    for(j in geneCluster)
     {
-        for(j in geneCluster)
-        {
-            idxI = f$seurat_clusters == i
-            idxJ = fPrime$seurat_clusters == j
-
-            M[i,j] = sum(X[idxJ,idxI]) / (sum(idxI) * sum(idxJ))
-        }
+      idxI = f$seurat_clusters == i
+      idxJ = fPrime$seurat_clusters == j
+      
+      M[i,j] = sum(X[idxJ,idxI]) / (sum(idxI) * sum(idxJ))
     }
-    return(M)
+  }
+  return(M)
 }
 
 ## ####################################################
@@ -116,10 +116,10 @@ getAverageExpressionMatrix = function(f,fPrime)
 #' @export
 tagRowAndColNames = function(M,ccTag='CC_',gcTag='GC_')
 {
-    rownames(M) = paste0(rownames(M),ccTag)
-    colnames(M) = paste0(colnames(M),gcTag)
-
-    return(M)
+  rownames(M) = paste0(rownames(M),ccTag)
+  colnames(M) = paste0(colnames(M),gcTag)
+  
+  return(M)
 }
 
 ## ####################################################
@@ -132,25 +132,25 @@ tagRowAndColNames = function(M,ccTag='CC_',gcTag='GC_')
 #' @export
 getAverageExpressionDF = function(M)
 {
-    N = nrow(M) * ncol(M)
-    df = data.frame(cellCluster=character(N),
-                    geneCluster=character(N),
-                    expression=numeric(N))
-
-    finger = 1
-    for(i in 1:nrow(M))
+  N = nrow(M) * ncol(M)
+  df = data.frame(cellCluster=character(N),
+                  geneCluster=character(N),
+                  expression=numeric(N))
+  
+  finger = 1
+  for(i in 1:nrow(M))
+  {
+    for(j in 1:ncol(M))
     {
-        for(j in 1:ncol(M))
-        {
-            df$cellCluster[finger] = rownames(M)[i]
-            df$geneCluster[finger] = colnames(M)[j]
-            df$expression[finger] = M[i,j]
-
-            finger = finger + 1
-        }
+      df$cellCluster[finger] = rownames(M)[i]
+      df$geneCluster[finger] = colnames(M)[j]
+      df$expression[finger] = M[i,j]
+      
+      finger = finger + 1
     }
-
-    return(df)
+  }
+  
+  return(df)
 }
 
 ## ####################################################
@@ -162,32 +162,32 @@ getAverageExpressionDF = function(M)
 #' @export
 stripGeneSet = function(geneSet)
 {
-    names = character(length(geneSet))
-    for(i in 1:length(geneSet))
-    {
-        names[i] = geneSet[[i]][1]
-        geneSet[[i]] = geneSet[[i]][3:length(geneSet[[i]])]
-    }
-
-    return(geneSet)
+  names = character(length(geneSet))
+  for(i in 1:length(geneSet))
+  {
+    names[i] = geneSet[[i]][1]
+    geneSet[[i]] = geneSet[[i]][3:length(geneSet[[i]])]
+  }
+  
+  return(geneSet)
 }
 
 ## ####################################################
 ## Used internally:
 geneListPValue = function(A,B,C,background=25000)
 {
-    M = matrix(0,nrow=2,ncol=2)
-    
-    M[1,1] = background - A
-    M[1,2] = A
-    M[2,1] = B - C
-    M[2,2] = C
-
-    
-
-    f = fisher.test(M,alternative='greater')
-
-    return(f$p.value)
+  M = matrix(0,nrow=2,ncol=2)
+  
+  M[1,1] = background - A
+  M[1,2] = A
+  M[2,1] = B - C
+  M[2,2] = C
+  
+  
+  
+  f = fisher.test(M,alternative='greater')
+  
+  return(f$p.value)
 }
 
 ## ####################################################
@@ -206,34 +206,34 @@ geneSetsVsGeneClustersPValueMatrix = function(geneSets,
                                               clusterDF,
                                               backgroundGenes)
 {
-    background = length(backgroundGenes)
-    clusters = as.numeric(unique(clusterDF$geneCluster))
-    clusters = clusters[order(clusters)]
-    NClusters = length(clusters)
-    NGeneSets = length(geneSets)
-
-    M = matrix(0,nrow=NGeneSets,ncol=NClusters)
-    rownames(M) = names(geneSets)
-    colnames(M) = as.character(clusters)
-
-    for(i in 1:NGeneSets)
+  background = length(backgroundGenes)
+  clusters = as.numeric(unique(clusterDF$geneCluster))
+  clusters = clusters[order(clusters)]
+  NClusters = length(clusters)
+  NGeneSets = length(geneSets)
+  
+  M = matrix(0,nrow=NGeneSets,ncol=NClusters)
+  rownames(M) = names(geneSets)
+  colnames(M) = as.character(clusters)
+  
+  for(i in 1:NGeneSets)
+  {
+    for(j in 1:NClusters)
     {
-        for(j in 1:NClusters)
-        {
-            cluster = clusters[j]
-            idx = clusterDF$geneCluster == cluster
-            clusterGenes = clusterDF$gene[idx]
-
-            A = length(geneSets[[i]])
-            B = length(clusterGenes)
-            C = length(intersect(geneSets[[i]],clusterGenes))
-
-            ## Maybe there's a better way to do this:
-            M[i,j] = geneListPValue(A,B,C,background)
-        }
+      cluster = clusters[j]
+      idx = clusterDF$geneCluster == cluster
+      clusterGenes = clusterDF$gene[idx]
+      
+      A = length(geneSets[[i]])
+      B = length(clusterGenes)
+      C = length(intersect(geneSets[[i]],clusterGenes))
+      
+      ## Maybe there's a better way to do this:
+      M[i,j] = geneListPValue(A,B,C,background)
     }
-    
-    return(M)
+  }
+  
+  return(M)
 }
 
 ## ####################################################
@@ -255,36 +255,36 @@ geneSetsVsGeneClustersPValueMatrix = function(geneSets,
 #' its significance
 orderGeneSetPValues = function(M,ascending=TRUE,cutoff=NULL)
 {
-    for(i in 1:ncol(M))
-    {
-        a = data.frame(geneSet=rownames(M),
-                       value=M[,i],
-                       stringsAsFactors=FALSE)
-
-        ## Order by significance:
-        if(ascending)
-            a = a[order(a$value),]
-        else
-            a = a[order(-a$value),]
-
-        ## Supress insignificance:
-        if(ascending)
-            idx = a$value <= cutoff
-        else
-            idx = a$value >= cutoff
-
-        a$value = as.character(a$value)
-        a$geneSet[!idx] = ''
-        a$value[!idx]
-
-        ## Accumulate these:
-        if(i == 1)
-            df = a
-        else
-            df = cbind(df,a)
-    }
-        
-    return(df)
+  for(i in 1:ncol(M))
+  {
+    a = data.frame(geneSet=rownames(M),
+                   value=M[,i],
+                   stringsAsFactors=FALSE)
+    
+    ## Order by significance:
+    if(ascending)
+      a = a[order(a$value),]
+    else
+      a = a[order(-a$value),]
+    
+    ## Supress insignificance:
+    if(ascending)
+      idx = a$value <= cutoff
+    else
+      idx = a$value >= cutoff
+    
+    a$value = as.character(a$value)
+    a$geneSet[!idx] = ''
+    a$value[!idx]
+    
+    ## Accumulate these:
+    if(i == 1)
+      df = a
+    else
+      df = cbind(df,a)
+  }
+  
+  return(df)
 }
 
 ## ####################################################
@@ -304,58 +304,58 @@ orderGeneSetPValues = function(M,ascending=TRUE,cutoff=NULL)
 sankeyFromMatrix = function(M,disambiguation=c('R_','C_'),
                             fontSize=20,minus='red',plus='blue')
 {
-    ## Maybe the matrix doesn't have row and column names:
-    if(is.null(rownames(M)))
-        rownames(M) = paste0(disambiguation[1],1:nrow(M))
-    if(is.null(colnames(M)))
-        colnames(M) = paste0(disambiguation[1],1:ncol(M))
- 
-    ## Create the links DF:
-    from = rownames(M)
-    to = colnames(M)
-
-    if(length(intersect(from,to)) > 0)
-    {
-        from = paste0(disambiguation[1],from)
-        to = paste0(disambiguation[2],to)
-    }
-
-    source = rep(from,each=length(to))
-    target = rep(to,length(from))
-
-    value = as.numeric(t(M))
-
-    links = data.frame(source,target,value,
-                       stringsAsFactors=FALSE)
-
-    ## Color the links DF:
-    idx = links$value >= 0
-    links$group = ''
-    links$group[idx] = 'plus'
-    links$group[!idx] = 'minus'
-
-    links$value = abs(links$value)
-
-    ## Create the nodes DF:
-    nodes = unique(c(links$source,links$target))
-    nodes = data.frame(name=nodes,
-                       stringsAsFactors=FALSE)
-
-    links$IDsource = match(links$source,nodes$name) - 1
-    links$IDtarget = match(links$target,nodes$name) - 1
-
-    linkColor = 'd3.scaleOrdinal() .domain(["minus","plus"]) .range(["X", "Y"])'
-    linkColor = str_replace(linkColor,'X',minus)
-    linkColor = str_replace(linkColor,'Y',plus)  
-    
-
-    p = sankeyNetwork(Links = links, Nodes = nodes, Source = "IDsource", Target = "IDtarget", 
-                      Value = "value", NodeID = "name", 
-                      ##colourScale=linkColor,
-                      LinkGroup="group",
-                      fontSize=fontSize)
-
-    return(p)
+  ## Maybe the matrix doesn't have row and column names:
+  if(is.null(rownames(M)))
+    rownames(M) = paste0(disambiguation[1],1:nrow(M))
+  if(is.null(colnames(M)))
+    colnames(M) = paste0(disambiguation[1],1:ncol(M))
+  
+  ## Create the links DF:
+  from = rownames(M)
+  to = colnames(M)
+  
+  if(length(intersect(from,to)) > 0)
+  {
+    from = paste0(disambiguation[1],from)
+    to = paste0(disambiguation[2],to)
+  }
+  
+  source = rep(from,each=length(to))
+  target = rep(to,length(from))
+  
+  value = as.numeric(t(M))
+  
+  links = data.frame(source,target,value,
+                     stringsAsFactors=FALSE)
+  
+  ## Color the links DF:
+  idx = links$value >= 0
+  links$group = ''
+  links$group[idx] = 'plus'
+  links$group[!idx] = 'minus'
+  
+  links$value = abs(links$value)
+  
+  ## Create the nodes DF:
+  nodes = unique(c(links$source,links$target))
+  nodes = data.frame(name=nodes,
+                     stringsAsFactors=FALSE)
+  
+  links$IDsource = match(links$source,nodes$name) - 1
+  links$IDtarget = match(links$target,nodes$name) - 1
+  
+  linkColor = 'd3.scaleOrdinal() .domain(["minus","plus"]) .range(["X", "Y"])'
+  linkColor = str_replace(linkColor,'X',minus)
+  linkColor = str_replace(linkColor,'Y',plus)  
+  
+  
+  p = sankeyNetwork(Links = links, Nodes = nodes, Source = "IDsource", Target = "IDtarget", 
+                    Value = "value", NodeID = "name", 
+                    ##colourScale=linkColor,
+                    LinkGroup="group",
+                    fontSize=fontSize)
+  
+  return(p)
 }
 
 
@@ -370,17 +370,17 @@ sankeyFromMatrix = function(M,disambiguation=c('R_','C_'),
 #' weight - edge weight
 #' @export
 getNearestNeighborListsSeurat = function(f){
-    
-    #convert to dgTMatrix and extract relevant information
-    graph = as(f@graphs$RNA_snn, "dgTMatrix") 
-    neighborListDf = data.frame("nodeA" = graph@Dimnames[[1]][graph@i+1],
-                                "nodeB" =  graph@Dimnames[[2]][graph@j+1], 
-                                "weight" = graph@x)
-    
-    #remove self-loops
-    neighborListDf = 
-        neighborListDf[neighborListDf$nodeA != neighborListDf$nodeB,]
-    return(neighborListDf)
+  
+  #convert to dgTMatrix and extract relevant information
+  graph = as(f@graphs$RNA_snn, "dgTMatrix") 
+  neighborListDf = data.frame("nodeA" = graph@Dimnames[[1]][graph@i+1],
+                              "nodeB" =  graph@Dimnames[[2]][graph@j+1], 
+                              "weight" = graph@x)
+  
+  #remove self-loops
+  neighborListDf = 
+    neighborListDf[neighborListDf$nodeA != neighborListDf$nodeB,]
+  return(neighborListDf)
 }
 
 
@@ -393,35 +393,35 @@ getNearestNeighborListsSeurat = function(f){
 #' @return - a matrix with randomised indices for node B
 #' @export
 randomiseNodeIndices = function(neighborListDf, n = 100, useWeights = F){
+  
+  #determine number of edges and create empty matrix for randomised indices
+  nEdges = nrow(neighborListDf)
+  indices = 1:nEdges
+  randomIndices = matrix(, nrow = nEdges, ncol = n)
+  
+  #check if weights are to be used
+  if (useWeights){
     
-    #determine number of edges and create empty matrix for randomised indices
-    nEdges = nrow(neighborListDf)
-    indices = 1:nEdges
-    randomIndices = matrix(, nrow = nEdges, ncol = n)
-    
-    #check if weights are to be used
-    if (useWeights){
-        
-        #determine unique weights
-        weights = unique(neighborListDf$weight)
-        for (i in 1:n){
-            
-            #randomise indices within each weight category
-            for (weight in weights){
-                selected = neighborListDf$weight == weight
-                randomIndices[selected,i] =
-                    sample(indices[selected])
-            }
-        }
+    #determine unique weights
+    weights = unique(neighborListDf$weight)
+    for (i in 1:n){
+      
+      #randomise indices within each weight category
+      for (weight in weights){
+        selected = neighborListDf$weight == weight
+        randomIndices[selected,i] =
+          sample(indices[selected])
+      }
     }
-    
-    #otherwise ignore weights and randomise indices
-    else {
-        for (i in 1:n){
-            randomIndices[,i] = sample(indices)
-        }
+  }
+  
+  #otherwise ignore weights and randomise indices
+  else {
+    for (i in 1:n){
+      randomIndices[,i] = sample(indices)
     }
-    return(randomIndices)
+  }
+  return(randomIndices)
 }
 
 
@@ -429,16 +429,23 @@ randomiseNodeIndices = function(neighborListDf, n = 100, useWeights = F){
 #' This function reads in gene sets in .gmt format
 #'
 #' @param gmtFile - a .gmt file containing gene sets 
+#' @param addDescr - include gene set description (2nd column in .gmt file) in 
+#' gene set name  
 #' @return - A named list of gene sets
 #' @export
-readGmt = function(gmtFile){
- lines = readLines(gmtFile)
- geneSets = list()
- for (line in lines){
-     info = strsplit(line, "\t")[[1]]
-     geneSets[paste(info[1],info[2])] = list(info[3:length(info)])
- } 
- return(geneSets)
+readGmt = function(gmtFile, addDescr = F){
+  lines = readLines(gmtFile)
+  geneSets = list()
+  for (line in lines){
+    info = strsplit(line, "\t")[[1]]
+    if (addDescr){
+      name = paste(info[1],info[2])
+    } else {
+      name = info[1]
+    }
+    geneSets[name] = list(info[3:length(info)])
+  } 
+  return(geneSets)
 }
 
 
@@ -454,15 +461,15 @@ annotateGenes = function(geneSets){
   genesAnno = list()
   for (geneSet in names(geneSets)){
     for (gene in geneSets[[geneSet]]){
-        if (gene %in% names(genesAnno)){
-            genesAnno[[gene]] = c(genesAnno[[gene]], geneSet)
-        }
-       else {
-           genesAnno[[gene]] = c(geneSet)
-       }
+      if (gene %in% names(genesAnno)){
+        genesAnno[[gene]] = c(genesAnno[[gene]], geneSet)
+      }
+      else {
+        genesAnno[[gene]] = c(geneSet)
       }
     }
-    return(genesAnno)
+  }
+  return(genesAnno)
 }
 
 
@@ -478,58 +485,57 @@ annotateGenes = function(geneSets){
 #' of the edges connecting the neighbors.
 #' @export
 neighborTerms = function(fPrime,genesAnno, normalise = T){
-    
-    #determine genes
-    genes = rownames(fPrime@graphs$RNA_snn)
-    genesPredictedTerms = list()
-    i = 1
-    
-    #iterate through genes
-    for (gene in genes){
-        if (i %% 100 == 0){
-            print(paste(i, "genes processed"))
-        }
-        i = i + 1
-        genesPredictedTerms[[gene]] = list()
-        
-        #determine neighbors
-        neighbors = genes[fPrime@graphs$RNA_snn[gene,] > 0]
-        neighbors = neighbors[neighbors != gene]
-        
-        #calculate total weight of edges to neighbors
-        total = sum(fPrime@graphs$RNA_snn[gene,])
-        
-        #iterate through neighbors
-        for (neighbor in neighbors){
-            
-            #determine weight of connecting edge and normalise if T
-            weight = fPrime@graphs$RNA_snn[gene,neighbor]
-            if (normalise){
-                weight = weight/total
-            }
-            if (!(neighbor %in% names(genesAnno))){
-                next
-            }
-            
-            #extract terms for neighbor
-            terms = genesAnno[[neighbor]]
-            
-            #add these to predicted terms with appropriate weights
-            for (term in terms){
-                if (term %in% names(genesPredictedTerms[[gene]])){
-                    genesPredictedTerms[[gene]][[term]] = 
-                        genesPredictedTerms[[gene]][[term]] + weight
-                } else {
-                    genesPredictedTerms[[gene]][[term]] = weight 
-                }
-            }
-        }
-        termNames = names(genesPredictedTerms[[gene]])
-        genesPredictedTerms[[gene]] = as.numeric(genesPredictedTerms[[gene]])
-        names(genesPredictedTerms[[gene]]) = termNames
-        genesPredictedTerms[[gene]] =  
-            genesPredictedTerms[[gene]][order(-genesPredictedTerms[[gene]])]
+  
+  #determine genes
+  genes = rownames(fPrime@graphs$RNA_snn)
+  genesPredictedTerms = list()
+  i = 1
+  
+  #iterate through genes
+  for (gene in genes){
+    if (i %% 100 == 0){
+      print(paste(i, "genes processed"))
     }
-    return(genesPredictedTerms)
+    i = i + 1
+    genesPredictedTerms[[gene]] = list()
+    
+    #determine neighbors
+    neighbors = genes[fPrime@graphs$RNA_snn[gene,] > 0]
+    neighbors = neighbors[neighbors != gene]
+    
+    #calculate total weight of edges to neighbors
+    total = sum(fPrime@graphs$RNA_snn[gene,])
+    
+    #iterate through neighbors
+    for (neighbor in neighbors){
+      
+      #determine weight of connecting edge and normalise if T
+      weight = fPrime@graphs$RNA_snn[gene,neighbor]
+      if (normalise){
+        weight = weight/total
+      }
+      if (!(neighbor %in% names(genesAnno))){
+        next
+      }
+      
+      #extract terms for neighbor
+      terms = genesAnno[[neighbor]]
+      
+      #add these to predicted terms with appropriate weights
+      for (term in terms){
+        if (term %in% names(genesPredictedTerms[[gene]])){
+          genesPredictedTerms[[gene]][[term]] = 
+            genesPredictedTerms[[gene]][[term]] + weight
+        } else {
+          genesPredictedTerms[[gene]][[term]] = weight 
+        }
+      }
+    }
+    termNames = names(genesPredictedTerms[[gene]])
+    genesPredictedTerms[[gene]] = as.numeric(genesPredictedTerms[[gene]])
+    names(genesPredictedTerms[[gene]]) = termNames
+    genesPredictedTerms[[gene]] =  
+      genesPredictedTerms[[gene]][order(-genesPredictedTerms[[gene]])]
+  }
+  return(genesPredictedTerms)
 }
-
