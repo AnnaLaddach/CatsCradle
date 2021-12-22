@@ -261,15 +261,21 @@ geneSetsVsGeneClustersPValueMatrix = function(geneSets,
 #' Defaults to TRUE, so that p-values will be ordered according
 #' to decreasing significance, should be set to FALSE if ordering
 #' -log p-value
-#' @return This returns a data frame where each gene cluster has
-#' two columns, one giving the gene set name and the other giving
-#' its significance
+#' @param cutoff - if non-null this is used to extract only
+#' significant cases
+#' @param nameTag - can be used to modify the names of the list.
+#' @return This returns a list of whose entries are data frames,
+#' one for each gene cluster, each giving the significant gene sets
+#' for that cluster and their significance.
 #' @export
-orderGeneSetPValues = function(M,ascending=TRUE,cutoff=NULL)
+orderGeneSetPValues = function(M,ascending=TRUE,cutoff=NULL,nameTag='')
 {
-
+    answer = list()
+    
     for(i in 1:ncol(M))
     {
+        tag = paste0(nameTag,colnames(M)[i])
+
         ## Get the two column df:
         a = data.frame(geneSet=rownames(M),
                        value=M[,i],
@@ -282,21 +288,19 @@ orderGeneSetPValues = function(M,ascending=TRUE,cutoff=NULL)
         else
             a = a[order(-a$value),]
         
-        ## Rename the columns:
-        names(a)[1] = paste0('geneSet_cluster_',
-                             colnames(M)[i])
-        names(a)[2] = paste0('value_cluster_',
-                             colnames(M)[i])
-        
-        ## Join them up:
-        if(i == 1)
+        ## Apply the cutoff:
+        if(!is.null(cutoff))
         {
-            df = a
-        } else {
-            df = cbind(df,a)
+            if(ascending)
+                idx = a$value <= cutoff
+            else
+                idx = a$value >= cutoff
+
+            a = a[idx,]
         }
+        answer[[tag]] = a
     }
-    return(df)
+    return(answer)
 }
 
 ## ####################################################

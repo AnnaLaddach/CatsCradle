@@ -6,7 +6,7 @@
 applies a cutoff (if given) to show only the significant
 gene sets for each gene cluster}
 \usage{
-orderGeneSetPValues(M, ascending = TRUE, cutoff = NULL)
+orderGeneSetPValues(M, ascending = TRUE, cutoff = NULL, nameTag = "")
 }
 \arguments{
 \item{M}{\itemize{
@@ -20,11 +20,20 @@ Defaults to TRUE, so that p-values will be ordered according
 to decreasing significance, should be set to FALSE if ordering
 -log p-value
 }}
+
+\item{cutoff}{\itemize{
+\item if non-null this is used to extract only
+significant cases
+}}
+
+\item{nameTag}{\itemize{
+\item can be used to modify the names of the list.
+}}
 }
 \value{
-This returns a data frame where each gene cluster has
-two columns, one giving the gene set name and the other giving
-its significance
+This returns a list of whose entries are data frames,
+one for each gene cluster, each giving the significant gene sets
+for that cluster and their significance.
 }
 \description{
 This orders the gene set p-values (or -log10 p-values) and
