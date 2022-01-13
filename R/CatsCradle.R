@@ -376,19 +376,21 @@ sankeyFromMatrix = function(M,disambiguation=c('R_','C_'),
 
 
 ## ####################################################
-#' This function extracts a nearest neighbor network
+#' This function extracts a shared nearest neighbor network
 #' from a Seurat object
 #'
 #' @param f - a Seurat object
+#' @param assay - name of assay used to construct the SNN graph 
+#' (defaults to "RNA")
 #' @return - This returns dataframe of neighbors:
 #' nodeA - node names for node A 
 #' nodeB - node names for node B
 #' weight - edge weight
 #' @export
-getNearestNeighborListsSeurat = function(f){
+getNearestNeighborListsSeurat = function(f, assay = "RNA"){
   
   #convert to dgTMatrix and extract relevant information
-  graph = as(f@graphs$RNA_snn, "dgTMatrix") 
+  graph = as(f@graphs[[paste0(assay,"_snn")]], "dgTMatrix") 
   neighborListDf = data.frame("nodeA" = graph@Dimnames[[1]][graph@i+1],
                               "nodeB" =  graph@Dimnames[[2]][graph@j+1], 
                               "weight" = graph@x)
@@ -490,8 +492,68 @@ annotateGenes = function(geneSets){
 
 
 ## ####################################################
-#' This function predicts the functions of genes based on the functions of their
+#' This function predicts the functions of a gene based on the functions of its
 #' neighbours.
+#'
+#' @param gene - gene to annotate
+#' @param fPrime - a transposed Seurat object (generated with 
+#' transposeSeuratObject())
+#' @param genesAnno - genes annotated with gene sets
+#' @param normalise - choose whether to normalise 
+#' (divide scores by total weight of edges)
+#' @return - A lists of terms where values are scores.
+#' Scores are calculated according to the weights of the SNN graph.
+#'
+#' @export
+predictTerms = function(gene, fPrime, genesAnno, normalise = T){
+  
+  predictedTerms = list()
+  
+  #determine neighbors
+  genes = rownames(fPrime@graphs$RNA_snn)
+  neighbors = genes[fPrime@graphs$RNA_snn[gene,] > 0]
+  neighbors = neighbors[neighbors != gene]
+  
+  #calculate total weight of edges to neighbors
+  total = sum(fPrime@graphs$RNA_snn[gene,])
+  
+  #iterate through neighbors
+  for (neighbor in neighbors){
+    
+    #determine weight of connecting edge and normalise if T
+    weight = fPrime@graphs$RNA_snn[gene,neighbor]
+    if (normalise){
+      weight = weight/total
+    }
+    if (!(neighbor %in% names(genesAnno))){
+      next
+    }
+    
+    #extract terms for neighbor
+    terms = genesAnno[[neighbor]]
+    
+    #add these to predicted terms with appropriate weights
+    for (term in terms){
+      if (term %in% names(predictedTerms)){
+        predictedTerms[[term]] = 
+          predictedTerms[[term]] + weight
+      } else {
+        predictedTerms[[term]] = weight 
+      }
+    }
+    termNames = names(predictedTerms)
+    predictedTerms = as.numeric(predictedTerms)
+    names(predictedTerms) = termNames
+    predictedTerms =  
+      predictedTerms[order(-predictedTerms)]
+  }
+  return(predictedTerms)
+}
+
+
+## ####################################################
+#' This function predicts the functions of all genes based on the functions of 
+#' their neighbours.
 #'
 #' @param fPrime - a transposed Seurat object (generated with 
 #' transposeSeuratObject())
@@ -500,7 +562,7 @@ annotateGenes = function(geneSets){
 #' The values of the lists of terms are calculated according to the weights
 #' of the edges connecting the neighbors.
 #' @export
-neighborTerms = function(fPrime,genesAnno, normalise = T){
+predictTermsAllGenes = function(fPrime,genesAnno, normalise = T){
   
   #determine genes
   genes = rownames(fPrime@graphs$RNA_snn)
@@ -513,45 +575,8 @@ neighborTerms = function(fPrime,genesAnno, normalise = T){
       print(paste(i, "genes processed"))
     }
     i = i + 1
-    genesPredictedTerms[[gene]] = list()
-    
-    #determine neighbors
-    neighbors = genes[fPrime@graphs$RNA_snn[gene,] > 0]
-    neighbors = neighbors[neighbors != gene]
-    
-    #calculate total weight of edges to neighbors
-    total = sum(fPrime@graphs$RNA_snn[gene,])
-    
-    #iterate through neighbors
-    for (neighbor in neighbors){
-      
-      #determine weight of connecting edge and normalise if T
-      weight = fPrime@graphs$RNA_snn[gene,neighbor]
-      if (normalise){
-        weight = weight/total
-      }
-      if (!(neighbor %in% names(genesAnno))){
-        next
-      }
-      
-      #extract terms for neighbor
-      terms = genesAnno[[neighbor]]
-      
-      #add these to predicted terms with appropriate weights
-      for (term in terms){
-        if (term %in% names(genesPredictedTerms[[gene]])){
-          genesPredictedTerms[[gene]][[term]] = 
-            genesPredictedTerms[[gene]][[term]] + weight
-        } else {
-          genesPredictedTerms[[gene]][[term]] = weight 
-        }
-      }
-    }
-    termNames = names(genesPredictedTerms[[gene]])
-    genesPredictedTerms[[gene]] = as.numeric(genesPredictedTerms[[gene]])
-    names(genesPredictedTerms[[gene]]) = termNames
-    genesPredictedTerms[[gene]] =  
-      genesPredictedTerms[[gene]][order(-genesPredictedTerms[[gene]])]
+    genesPredictedTerms[[gene]] = predictTerms(gene, fPrime, genesAnno, 
+                                               normalise)
   }
   return(genesPredictedTerms)
 }
