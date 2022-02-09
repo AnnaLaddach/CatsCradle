@@ -70,7 +70,7 @@ zScores = function(M)
 
 ## ###################################################
 #' This computes average expression of each gene cluster in
-#' each cell cell cluster and returns the result as a matrix
+#' each cell cluster and returns the result as a matrix
 #'
 #' @param f - The Seurat object of cells
 #' @param fPrime - The Seurat object of genes
@@ -112,7 +112,7 @@ getAverageExpressionMatrix = function(f,fPrime)
 #'
 #' @param M - a matrix, typically the average expression matrix
 #' @param ccTag - a prefix for the row (cell cluster) names
-#' @param gcTag - a prefix for the column (gene cluster names
+#' @param gcTag - a prefix for the column (gene cluster) names
 #' @export
 tagRowAndColNames = function(M,ccTag='CC_',gcTag='GC_')
 {
@@ -182,8 +182,6 @@ geneListPValue = function(A,B,C,background=25000)
   M[1,2] = A
   M[2,1] = B - C
   M[2,2] = C
-  
-  
   
   f = fisher.test(M,alternative='greater')
   
@@ -374,6 +372,59 @@ sankeyFromMatrix = function(M,disambiguation=c('R_','C_'),
   return(p)
 }
 
+## ####################################################
+#' This produces a matrix giving the average expression of gene
+#' clusters in cells.  By default, it uses all cells and all gene
+#' clusters.
+#'
+#' @param f - the cell Seurat object
+#' @param fPrime - the genes Seurat object
+#' @param cells - the cells to compute this for
+#' @param geneClusters - the geneClusters to compute average
+#' expression for
+#' @return A matrix where the rows correspond to cells, the columns
+#' correspond to geneClusters and the entries give average expression
+#' for each cluster in each cell
+#' @export
+getGeneClusterAveragesPerCell = function(f,
+                                         fPrime,
+                                         cells=colnames(f),
+                                         geneClusters=getClusterOrder(fPrime))
+{
+    M = matrix(0,nrow=length(cells),ncol=length(geneClusters))
+    rownames(M) = cells
+    colnames(M) = paste0('cluster_',geneClusters)
+
+    for(i in 1:length(geneClusters))
+    {
+        cluster = geneClusters[i]
+        idx = fPrime$seurat_clusters == cluster
+        theseGenes = colnames(fPrime)[idx]
+        expression = data.matrix(FetchData(f,theseGenes))
+        expression = expression[rownames(expression) %in% cells,]
+
+        M[,i] = rowMeans(expression)
+    }
+
+    return(M)
+}
+
+## ####################################################
+#' This gets the clusters in their cannonical order
+#'
+#' Note: seurat_clusters might be either a factor or a numeric.
+#' This will keep the class.
+#'
+#' @param f - a Seurat object with meta.data column seurat_clusters
+#' @return A vector of these unique values in order
+#' @export
+getClusterOrder = function(f)
+{
+    a = unique(f$seurat_clusters)
+    a = a[order(a)]
+
+    return(a)
+}
 
 ## ####################################################
 #' This function extracts a shared nearest neighbor network

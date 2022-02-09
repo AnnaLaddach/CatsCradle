@@ -3,7 +3,7 @@
 \name{getAverageExpressionMatrix}
 \alias{getAverageExpressionMatrix}
 \title{This computes average expression of each gene cluster in
-each cell cell cluster and returns the result as a matrix}
+each cell cluster and returns the result as a matrix}
 \usage{
 getAverageExpressionMatrix(f, fPrime)
 }
@@ -21,5 +21,5 @@ A matrix of the average expression
 }
 \description{
 This computes average expression of each gene cluster in
-each cell cell cluster and returns the result as a matrix
+each cell cluster and returns the result as a matrix
 }

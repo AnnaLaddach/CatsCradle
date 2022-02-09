@@ -2,14 +2,19 @@
 % Please edit documentation in R/CatsCradle.R
 \name{getNearestNeighborListsSeurat}
 \alias{getNearestNeighborListsSeurat}
-\title{This function extracts a nearest neighbor network
+\title{This function extracts a shared nearest neighbor network
 from a Seurat object}
 \usage{
-getNearestNeighborListsSeurat(f)
+getNearestNeighborListsSeurat(f, assay = "RNA")
 }
 \arguments{
 \item{f}{\itemize{
 \item a Seurat object
+}}
+
+\item{assay}{\itemize{
+\item name of assay used to construct the SNN graph
+(defaults to "RNA")
 }}
 }
 \value{
@@ -21,6 +26,6 @@ weight - edge weight
 }
 }
 \description{
-This function extracts a nearest neighbor network
+This function extracts a shared nearest neighbor network
 from a Seurat object
 }
