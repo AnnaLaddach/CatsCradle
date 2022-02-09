@@ -16,7 +16,7 @@ tagRowAndColNames(M, ccTag = "CC_", gcTag = "GC_")
 }}
 
 \item{gcTag}{\itemize{
-\item a prefix for the column (gene cluster names
+\item a prefix for the column (gene cluster) names
 }}
 }
 \description{
