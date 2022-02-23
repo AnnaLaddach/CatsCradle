@@ -237,7 +237,7 @@ geneSetsVsGeneClustersPValueMatrix = function(geneSets,
     
     if(adjust)
     {
-        N = p.adjust(M)
+        N = p.adjust(M,method='fdr')
         N = matrix(N,nrow=nrow(M))
         rownames(N) = rownames(M)
         colnames(N) = colnames(M)
