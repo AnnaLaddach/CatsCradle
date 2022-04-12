@@ -20,6 +20,7 @@ RoxygenNote: 7.1.2
 Imports: Seurat,
 	 ggplot2,
 	 plotly,
-	 networkD3
+	 networkD3,
+	 stringr
 Depends: 
     R (>= 4.0)	 

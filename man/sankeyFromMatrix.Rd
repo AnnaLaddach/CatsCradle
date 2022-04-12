@@ -10,7 +10,9 @@ sankeyFromMatrix(
   disambiguation = c("R_", "C_"),
   fontSize = 20,
   minus = "red",
-  plus = "blue"
+  plus = "blue",
+  height = 1200,
+  width = 900
 )
 }
 \arguments{
@@ -34,6 +36,14 @@ values
 
 \item{plus}{\itemize{
 \item color for positive values
+}}
+
+\item{height}{\itemize{
+\item height in pixels, defaults to 1200
+}}
+
+\item{width}{\itemize{
+\item width in pixels, defaults to 900
 }}
 }
 \value{
