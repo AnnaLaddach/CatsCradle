@@ -312,11 +312,15 @@ orderGeneSetPValues = function(M,ascending=TRUE,cutoff=NULL,nameTag='')
 #' @param minus - color to use for links with negative
 #' values
 #' @param plus - color for positive values
+#' @param height - height in pixels, defaults to 1200
+#' @param width - width in pixels, defaults to 900
 #' @return A sankey graph
 #' @export
 #' @import networkD3
+#' @import stringr
 sankeyFromMatrix = function(M,disambiguation=c('R_','C_'),
-                            fontSize=20,minus='red',plus='blue')
+                            fontSize=20,minus='red',plus='blue',
+                            height=1200,width=900)
 {
   ## Maybe the matrix doesn't have row and column names:
   if(is.null(rownames(M)))
@@ -367,7 +371,9 @@ sankeyFromMatrix = function(M,disambiguation=c('R_','C_'),
                     Value = "value", NodeID = "name", 
                     ##colourScale=linkColor,
                     LinkGroup="group",
-                    fontSize=fontSize)
+                    fontSize=fontSize,
+                    height=height,
+                    width=width)
   
   return(p)
 }
