@@ -605,7 +605,7 @@ combinatorialSpheres = function(NN,origin,radius)
                 {
                     ## New territory:
                     ball[w,'radius'] = r
-                    ball[w,'distance'] = edgeWeight
+                    ball[w,'distance'] = ball[v,'distance'] + edgeWeight
                         
                 }
                 else
