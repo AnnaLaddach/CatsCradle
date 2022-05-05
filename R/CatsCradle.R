@@ -501,6 +501,137 @@ randomiseNodeIndices = function(neighborListDf, n = 100, useWeights = F){
 
 
 ## ####################################################
+#' Tests whether a nearest neighbor graph is symmetric
+#'
+#' The nearest neighbor relationship is not inherently
+#' symmetric.  This tests whether the nearest neighbor graph
+#' retrieved from a Seurat object is.
+#'
+#' @param NN - a nearest neighbor graph.  This is in the form
+#' of a data frame  as returned by getNearestNeighborListsSeurat.
+#' Its coloumns include nodeA and nodeB.
+#'
+#' @return TRUE or FALSE
+#' @export
+symmetryCheckNN = function(NN)
+{
+    tagA = paste(NN$nodeA,NN$nodeB)
+    tagA = tagA[order(tagA)]
+    
+    tagB = paste(NN$nodeB,NN$nodeA)
+    tagB = tagB[order(tagB)]
+    
+    return(identical(tagA,tagB))
+}
+
+
+## ####################################################
+#' This symmetrizes a nearest neighbors graph.
+#'
+#' This first checks to see if the NN graph is symmetric
+#' and if not symmetrizes it.
+#'
+#' @param NN - a nearest neighbors graph as returned
+#' by getNearestNeighborListsSeurat
+#'
+#' @return a nearest neighbors graph
+#' 
+#' @export
+symmetrizeNN = function(NN)
+{
+    ## Is it already symmetric?
+    if(symmetryCheckNN(NN))
+        return(NN)
+
+    ## If not, symmetrize:
+    NN2 = NN[,c(2,1,3)]
+    NN = rbind(NN,NN2)
+
+    tag = paste(NN$nodeA,NN$nodeB)
+    idx = ! duplicated(tag)
+
+    NN = NN[idx,]
+
+    return(NN)
+}
+
+
+## ####################################################
+#' Discovers the combinatorial ball of a given radius
+#' around a fixed set of genes in the nearest neighbor
+#' graph of a Seurat object.
+#'
+#' @param NN - a nearest neighbors graph
+#' @param origin - a gene or list of genes
+#' @param radius - the radius of the combinatorial ball
+#' to be found.
+#'
+#' @return This returns a data frame whose columns are the
+#' gene name, the radius from the origin at which it is found
+#' and the weighted distance from the origin at which it is
+#' found.
+#'
+#' @export
+combinatorialSpheres = function(NN,origin,radius)
+{
+    stopifnot(symmetryCheckNN(NN))
+    
+    nodes = unique(NN$nodeA)
+    ball = data.frame(nodes,
+                      radius=-1,
+                      distance=-1)
+    rownames(ball) = nodes
+
+    ## Initialize:
+    ball[origin,'radius'] = 0
+    ball[origin,'distance'] = 0
+
+    ## Iterate:
+    for(r in 1:radius)
+    {
+        writeLines(paste('radius',r))
+        ## Which vertices can we sprout from:
+        fromThese = rownames(ball[ball$radius==r-1,])
+        for(v in fromThese)
+        {
+            ## Get the edges out:
+            idx = NN$nodeA == v
+            toThese = NN$nodeB[idx]
+
+            for(w in toThese)
+            {
+                edgeWeight = NN[NN$nodeA==v & NN$nodeB==w,'weight']
+                if(ball[w,'radius']==-1)
+                {
+                    ## New territory:
+                    ball[w,'radius'] = r
+                    ball[w,'distance'] = edgeWeight
+                        
+                }
+                else
+                {
+                    ## Maybe a new route:
+                    ball[w,'distance'] =
+                        min(ball[w,'distance'],
+                            ball[v,'distance'] + edgeWeight)
+                }
+            }
+        }
+    }
+
+    ## Trim:
+    idx = ball$radius != -1
+    ball = ball[idx,]
+
+    ## Order:
+    ball = ball[order(rownames(ball)),]
+    ball = ball[order(ball$radius),]
+
+    return(ball)
+}
+
+
+## ####################################################
 #' This function reads in gene sets in .gmt format
 #'
 #' @param gmtFile - a .gmt file containing gene sets 
