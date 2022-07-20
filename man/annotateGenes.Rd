@@ -7,8 +7,9 @@
 annotateGenes(geneSets)
 }
 \arguments{
-\item{gmtFile}{\itemize{
-\item a .gmt file containing gene sets to annotate genes with
+\item{geneSets}{\itemize{
+\item a list of gene sets, e.g., as produced by
+readGmt
 }}
 }
 \value{

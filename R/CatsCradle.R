@@ -303,7 +303,7 @@ orderGeneSetPValues = function(M,ascending=TRUE,cutoff=NULL,nameTag='')
 
 ## ####################################################
 #' This makes a sankey graph from a matrix of average
-#' express.  Our "Cat's Cradle".
+#' expression.  Our "Cat's Cradle".
 #'
 #' @param M - a matrix of gene expression
 #' @param disambiguation - used to distinguish between
@@ -433,31 +433,58 @@ getClusterOrder = function(f)
 }
 
 ## ####################################################
+## Default graph
+defaultGraph = function(f)
+{
+    graph = paste0(f@active.assay,'_snn')
+    return(graph)
+}
+
+## ####################################################
 #' This function extracts a shared nearest neighbor network
 #' from a Seurat object
 #'
 #' @param f - a Seurat object
-#' @param assay - name of assay used to construct the SNN graph 
-#' (defaults to "RNA")
+#' @param graph - which graph to extract.  Defaults to
+#' paste0(f@active.assay,'_snn')
 #' @return - This returns dataframe of neighbors:
 #' nodeA - node names for node A 
 #' nodeB - node names for node B
 #' weight - edge weight
 #' @export
-getNearestNeighborListsSeurat = function(f, assay = "RNA"){
+getNearestNeighborListsSeurat = function(f, graph=defaultGraph(f)){
   
-  #convert to dgTMatrix and extract relevant information
-  graph = as(f@graphs[[paste0(assay,"_snn")]], "dgTMatrix") 
-  neighborListDf = data.frame("nodeA" = graph@Dimnames[[1]][graph@i+1],
-                              "nodeB" =  graph@Dimnames[[2]][graph@j+1], 
-                              "weight" = graph@x)
-  
-  #remove self-loops
-  neighborListDf = 
-    neighborListDf[neighborListDf$nodeA != neighborListDf$nodeB,]
-  return(neighborListDf)
+    ## convert to dgTMatrix and extract relevant information
+    graph = as(f@graphs[[graph]], "dgTMatrix") 
+    neighborListDf = data.frame("nodeA" = graph@Dimnames[[1]][graph@i+1],
+                                "nodeB" =  graph@Dimnames[[2]][graph@j+1], 
+                                "weight" = graph@x)
+    
+    ## remove self-loops
+    neighborListDf = 
+        neighborListDf[neighborListDf$nodeA != neighborListDf$nodeB,]
+    return(neighborListDf)
 }
 
+## ####################################################
+#' This function gets the neighbors of a given gene
+#' using either the gene Seurat object or its nearest
+#' neighbor graph returned from getNearestNeighborListsSeurat
+#'
+#' @param gene - the gene in question
+#' @param NN - either the gene Seurat object or its nearest
+#' neighbor graph as found by getNearestNeighborListsSeurat
+#' @return the neighboring genes
+#' @export
+getGeneNeighbors = function(gene,NN)
+{
+    if(class(NN) == 'Seurat')
+        NN = getNearestNeighborListsSeurat(NN)
+
+    idx = NN$nodeA == gene
+
+    return(NN$nodeB[idx])
+}
 
 ## ####################################################
 #' This function generates random indices for node B
@@ -658,7 +685,8 @@ readGmt = function(gmtFile, addDescr = F){
 ## ####################################################
 #' This function annotates genes with terms
 #'
-#' @param gmtFile - a .gmt file containing gene sets to annotate genes with
+#' @param geneSets - a list of gene sets, e.g., as produced by
+#' readGmt
 #' @return - A list where names are genes and values are lists of terms
 #' @export
 annotateGenes = function(geneSets){
@@ -678,6 +706,33 @@ annotateGenes = function(geneSets){
   return(genesAnno)
 }
 
+## ####################################################
+#' This function returns a numeric indicating which gene
+#' sets it does and does not belong to.  This vector can
+#' be normalised to account for the sizes of the sets.
+#'
+#' @param gene - the gene to annotate
+#' @param geneSets - a list of gene sets
+#' @param normalise - whether to normalise by set size
+#' @return a numeric
+#' @export
+annotateGeneAsVector = function(gene,geneSets,normalise=FALSE)
+{
+    N = length(geneSets)
+    annotation = rep(0,N)
+    names(annotation) = names(geneSets)
+    for(set in names(geneSets))
+    {
+        if(! gene %in% geneSets[[set]])
+            next
+        if(normalise)
+            annotation[set] = 1 / length(geneSets[[set]])
+        else
+            annotation[set] = 1
+    }
+    return(annotation)
+}
+
 
 ## ####################################################
 #' This function predicts the functions of a gene based on the functions of its
@@ -689,53 +744,57 @@ annotateGenes = function(geneSets){
 #' @param genesAnno - genes annotated with gene sets
 #' @param normalise - choose whether to normalise 
 #' (divide scores by total weight of edges)
+#' @param graph - which graph to use.  Defaults to the
+#' active.assay followed by _snn
 #' @return - A lists of terms where values are scores.
 #' Scores are calculated according to the weights of the SNN graph.
 #'
 #' @export
-predictTerms = function(gene, fPrime, genesAnno, normalise = T){
+predictTerms = function(gene, fPrime, genesAnno, normalise = T,
+                        graph=defaultGraph(fPrime)){
   
-  predictedTerms = list()
-  
-  #determine neighbors
-  genes = rownames(fPrime@graphs$RNA_snn)
-  neighbors = genes[fPrime@graphs$RNA_snn[gene,] > 0]
-  neighbors = neighbors[neighbors != gene]
-  
-  #calculate total weight of edges to neighbors
-  total = sum(fPrime@graphs$RNA_snn[gene,])
-  
-  #iterate through neighbors
-  for (neighbor in neighbors){
+    predictedTerms = list()
     
-    #determine weight of connecting edge and normalise if T
-    weight = fPrime@graphs$RNA_snn[gene,neighbor]
-    if (normalise){
-      weight = weight/total
-    }
-    if (!(neighbor %in% names(genesAnno))){
-      next
-    }
+    ## determine neighbors
+    theGraph = fPrime@graphs[[graph]]
+    genes = rownames(theGraph)
+    neighbors = genes[theGraph[gene,] > 0]
+    neighbors = neighbors[neighbors != gene]
+  
+    ## calculate total weight of edges to neighbors
+    total = sum(fPrime@graphs[[graph]][gene,])
+  
+    ## iterate through neighbors
+    for (neighbor in neighbors){
+        
+        ## determine weight of connecting edge and normalise if T
+        weight = fPrime@graphs[[graph]][gene,neighbor]
+        if (normalise){
+            weight = weight/total
+        }
+        if (!(neighbor %in% names(genesAnno))){
+            next
+        }
     
-    #extract terms for neighbor
-    terms = genesAnno[[neighbor]]
+        ## extract terms for neighbor
+        terms = genesAnno[[neighbor]]
     
-    #add these to predicted terms with appropriate weights
-    for (term in terms){
-      if (term %in% names(predictedTerms)){
-        predictedTerms[[term]] = 
-          predictedTerms[[term]] + weight
-      } else {
-        predictedTerms[[term]] = weight 
-      }
+        ## add these to predicted terms with appropriate weights
+        for (term in terms){
+            if (term %in% names(predictedTerms)){
+                predictedTerms[[term]] = 
+                    predictedTerms[[term]] + weight
+            } else {
+                predictedTerms[[term]] = weight 
+            }
+        }
+        termNames = names(predictedTerms)
+        predictedTerms = as.numeric(predictedTerms)
+        names(predictedTerms) = termNames
+        predictedTerms =  
+            predictedTerms[order(-predictedTerms)]
     }
-    termNames = names(predictedTerms)
-    predictedTerms = as.numeric(predictedTerms)
-    names(predictedTerms) = termNames
-    predictedTerms =  
-      predictedTerms[order(-predictedTerms)]
-  }
-  return(predictedTerms)
+    return(predictedTerms)
 }
 
 
@@ -750,7 +809,8 @@ predictTerms = function(gene, fPrime, genesAnno, normalise = T){
 #' The values of the lists of terms are calculated according to the weights
 #' of the edges connecting the neighbors.
 #' @export
-predictTermsAllGenes = function(fPrime,genesAnno, normalise = T){
+predictTermsAllGenes = function(fPrime,genesAnno, normalise = T,
+                                graph=defaultGraph(fPrime)){
   
   #determine genes
   genes = rownames(fPrime@graphs$RNA_snn)

@@ -5,7 +5,12 @@
 \title{This function predicts the functions of all genes based on the functions of
 their neighbours.}
 \usage{
-predictTermsAllGenes(fPrime, genesAnno, normalise = T)
+predictTermsAllGenes(
+  fPrime,
+  genesAnno,
+  normalise = T,
+  graph = defaultGraph(fPrime)
+)
 }
 \arguments{
 \item{fPrime}{\itemize{

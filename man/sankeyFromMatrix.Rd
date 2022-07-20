@@ -3,7 +3,7 @@
 \name{sankeyFromMatrix}
 \alias{sankeyFromMatrix}
 \title{This makes a sankey graph from a matrix of average
-express.  Our "Cat's Cradle".}
+expression.  Our "Cat's Cradle".}
 \usage{
 sankeyFromMatrix(
   M,
@@ -51,5 +51,5 @@ A sankey graph
 }
 \description{
 This makes a sankey graph from a matrix of average
-express.  Our "Cat's Cradle".
+expression.  Our "Cat's Cradle".
 }

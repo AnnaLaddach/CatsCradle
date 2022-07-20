@@ -5,16 +5,16 @@
 \title{This function extracts a shared nearest neighbor network
 from a Seurat object}
 \usage{
-getNearestNeighborListsSeurat(f, assay = "RNA")
+getNearestNeighborListsSeurat(f, graph = defaultGraph(f))
 }
 \arguments{
 \item{f}{\itemize{
 \item a Seurat object
 }}
 
-\item{assay}{\itemize{
-\item name of assay used to construct the SNN graph
-(defaults to "RNA")
+\item{graph}{\itemize{
+\item which graph to extract.  Defaults to
+paste0(f@active.assay,'_snn')
 }}
 }
 \value{
