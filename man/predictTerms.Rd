@@ -5,7 +5,13 @@
 \title{This function predicts the functions of a gene based on the functions of its
 neighbours.}
 \usage{
-predictTerms(gene, fPrime, genesAnno, normalise = T)
+predictTerms(
+  gene,
+  fPrime,
+  genesAnno,
+  normalise = T,
+  graph = defaultGraph(fPrime)
+)
 }
 \arguments{
 \item{gene}{\itemize{
@@ -24,6 +30,11 @@ transposeSeuratObject())
 \item{normalise}{\itemize{
 \item choose whether to normalise
 (divide scores by total weight of edges)
+}}
+
+\item{graph}{\itemize{
+\item which graph to use.  Defaults to the
+active.assay followed by _snn
 }}
 }
 \value{
