@@ -455,7 +455,8 @@ defaultGraph = function(f)
 getNearestNeighborListsSeurat = function(f, graph=defaultGraph(f)){
   
     ## convert to dgTMatrix and extract relevant information
-    graph = as(f@graphs[[graph]], "dgTMatrix") 
+    ## graph = as(f@graphs[[graph]], "dgTMatrix")
+    graph = as(f@graphs[[graph]], "TsparseMatrix") 
     neighborListDf = data.frame("nodeA" = graph@Dimnames[[1]][graph@i+1],
                                 "nodeB" =  graph@Dimnames[[2]][graph@j+1], 
                                 "weight" = graph@x)
@@ -595,8 +596,6 @@ symmetrizeNN = function(NN)
 #'
 #' @return This returns a data frame whose columns are the
 #' gene name, the radius from the origin at which it is found
-#' and the weighted distance from the origin at which it is
-#' found.
 #'
 #' @export
 combinatorialSpheres = function(NN,origin,radius)
@@ -605,45 +604,40 @@ combinatorialSpheres = function(NN,origin,radius)
     
     nodes = unique(NN$nodeA)
     ball = data.frame(nodes,
-                      radius=-1,
-                      distance=-1)
+                      radius=-1)
     rownames(ball) = nodes
 
     ## Initialize:
     ball[origin,'radius'] = 0
-    ball[origin,'distance'] = 0
 
+    numGenes = length(nodes)
+    numFound = sum(ball$radius > -.5)
     ## Iterate:
-    for(r in 1:radius)
+    r = 0
+    while(numFound < numGenes)
     {
+        r = r + 1
+        if(is.numeric(radius) &
+           r > radius)
+            break
+           
         writeLines(paste('radius',r))
         ## Which vertices can we sprout from:
         fromThese = rownames(ball[ball$radius==r-1,])
-        for(v in fromThese)
-        {
-            ## Get the edges out:
-            idx = NN$nodeA == v
-            toThese = NN$nodeB[idx]
 
-            for(w in toThese)
-            {
-                edgeWeight = NN[NN$nodeA==v & NN$nodeB==w,'weight']
-                if(ball[w,'radius']==-1)
-                {
-                    ## New territory:
-                    ball[w,'radius'] = r
-                    ball[w,'distance'] = ball[v,'distance'] + edgeWeight
-                        
-                }
-                else
-                {
-                    ## Maybe a new route:
-                    ball[w,'distance'] =
-                        min(ball[w,'distance'],
-                            ball[v,'distance'] + edgeWeight)
-                }
-            }
-        }
+        ## Candidate nodes:
+        idx = NN$nodeA %in% fromThese
+        toThese = NN$nodeB[idx]
+        toThese = unique(toThese)
+
+        ## Which ones are new:
+        idx = rownames(ball) %in% toThese &
+            ball$radius == -1
+
+        ball$radius[idx] = r
+
+        numFound = sum(ball$radius > -.5)
+        writeLines(paste('   ',numFound))
     }
 
     ## Trim:

@@ -25,8 +25,6 @@ to be found.
 \value{
 This returns a data frame whose columns are the
 gene name, the radius from the origin at which it is found
-and the weighted distance from the origin at which it is
-found.
 }
 \description{
 Discovers the combinatorial ball of a given radius
