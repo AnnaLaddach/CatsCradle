@@ -29,3 +29,7 @@ This function returns a numeric indicating which gene
 sets it does and does not belong to.  This vector can
 be normalised to account for the sizes of the sets.
 }
+\examples{
+Myc = annotateGeneAsVector('Myc',hallmark)
+MycNormalised = annotateGeneAsVector('Myc',hallmark,TRUE)
+}

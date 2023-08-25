@@ -2,8 +2,8 @@
 % Please edit documentation in R/CatsCradle.R
 \name{predictTerms}
 \alias{predictTerms}
-\title{This function predicts the functions of a gene based on the functions of its
-neighbours.}
+\title{This function predicts the functions of a gene based
+on the functions of its neighbours.#'}
 \usage{
 predictTerms(
   gene,
@@ -44,6 +44,10 @@ Scores are calculated according to the weights of the SNN graph.
 }
 }
 \description{
-This function predicts the functions of a gene based on the functions of its
-neighbours.
+This function predicts the functions of a gene based
+on the functions of its neighbours.#'
+}
+\examples{
+genesAnno = annotateGenes(hallmark)
+predictions = predictTerms('Myc',STranspose,genesAnno)
 }

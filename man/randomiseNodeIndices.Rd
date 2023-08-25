@@ -27,3 +27,6 @@ randomiseNodeIndices(neighborListDf, n = 100, useWeights = F)
 \description{
 This function generates random indices for node B
 }
+\examples{
+randomIndices = randomiseNodeIndices(NN,10,TRUE)
+}

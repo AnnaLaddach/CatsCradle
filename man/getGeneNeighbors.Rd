@@ -26,3 +26,7 @@ This function gets the neighbors of a given gene
 using either the gene Seurat object or its nearest
 neighbor graph returned from getNearestNeighborListsSeurat
 }
+\examples{
+neighbors = getGeneNeighbors("Ccl6",STranspose)
+neighborsAgain = getGeneNeighbors("Ccl6",NN)
+}

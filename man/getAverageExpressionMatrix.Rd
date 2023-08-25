@@ -23,3 +23,6 @@ A matrix of the average expression
 This computes average expression of each gene cluster in
 each cell cluster and returns the result as a matrix
 }
+\examples{
+M = getAverageExpression(S,STranspose)
+}

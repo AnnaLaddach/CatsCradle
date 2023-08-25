@@ -19,3 +19,6 @@ a nearest neighbors graph
 This first checks to see if the NN graph is symmetric
 and if not symmetrizes it.
 }
+\examples{
+NNStar = symmetrizeNN(NN)
+}

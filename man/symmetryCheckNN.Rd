@@ -21,3 +21,6 @@ The nearest neighbor relationship is not inherently
 symmetric.  This tests whether the nearest neighbor graph
 retrieved from a Seurat object is.
 }
+\examples{
+symmetryTest = symmetryCheckNN(NN)
+}

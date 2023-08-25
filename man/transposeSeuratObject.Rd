@@ -42,3 +42,6 @@ A Seurat object
 This takes a Seurat object f and creates a new Seurat object whose
 expression matrix is the transpose of that of f.
 }
+\examples{
+STranspose = transposeSeuratObject(S)
+}
