@@ -41,3 +41,6 @@ This produces a matrix giving the average expression of gene
 clusters in cells.  By default, it uses all cells and all gene
 clusters.
 }
+\examples{
+clusterExpression = getGeneClusterAveragesPerCell(S,STranspose)
+}

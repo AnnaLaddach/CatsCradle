@@ -8,7 +8,7 @@ readGmt(gmtFile, addDescr = F)
 }
 \arguments{
 \item{gmtFile}{\itemize{
-\item a .gmt file containing gene sets
+\item a .gmt file containing gene sets, e.g., Hallmark of GO
 }}
 
 \item{addDescr}{\itemize{

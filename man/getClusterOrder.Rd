@@ -15,6 +15,6 @@ getClusterOrder(f)
 A vector of these unique values in order
 }
 \description{
-Note: seurat_clusters might be either a factor or a numeric.
-This will keep the class.
+This deals with skullduggery in which seurat_clusters
+has been converted to a character or a numeric.
 }

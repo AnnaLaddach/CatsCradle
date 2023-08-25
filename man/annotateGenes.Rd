@@ -18,5 +18,12 @@ readGmt
 }
 }
 \description{
-This function annotates genes with terms
+This essentially inverts a list of gene sets.  It takes
+a list (e.g., Hallmark or GO) where each list item is a
+name of a gene set and gives the genes in that set and
+returns a list where each item is a gene and gives the
+gene sets that gene is in.
+}
+\examples{
+annotatedGenes = annotateGenes(hallmark)
 }

@@ -22,3 +22,6 @@ tagRowAndColNames(M, ccTag = "CC_", gcTag = "GC_")
 \description{
 This gussies up the rownames and colnames of M
 }
+\examples{
+averageExpMatrix = tagRowAndColNames(averageExpMatrix)
+}

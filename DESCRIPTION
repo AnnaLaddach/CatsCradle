@@ -16,11 +16,13 @@ Description: The basic insight driving this package is the idea that by transpos
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3.9000
 Imports: Seurat,
 	 ggplot2,
 	 plotly,
 	 networkD3,
-	 stringr
+	 stringr,
+	 pracma
 Depends: 
     R (>= 4.0)	 
+LazyData: true

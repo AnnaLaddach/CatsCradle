@@ -20,3 +20,6 @@ and average expression
 This converts an average gene expression matrix to a
 data frame.
 }
+\examples{
+averageExpDF = getAverageExpressionDF(averageExpMatrix)
+}

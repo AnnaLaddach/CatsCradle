@@ -53,3 +53,10 @@ A sankey graph
 This makes a sankey graph from a matrix of average
 expression.  Our "Cat's Cradle".
 }
+\examples{
+set.seed(100)
+M = matrix(runif(12)-.3,nrow=3)
+rownames(M) = as.character(1:3)
+colnames(M) = as.character(1:4)
+S = sankeyFromMatrix(M)
+}

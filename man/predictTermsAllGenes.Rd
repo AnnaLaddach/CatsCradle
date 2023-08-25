@@ -2,14 +2,14 @@
 % Please edit documentation in R/CatsCradle.R
 \name{predictTermsAllGenes}
 \alias{predictTermsAllGenes}
-\title{This function predicts the functions of all genes based on the functions of
-their neighbours.}
+\title{This function predicts the functions of all genes based
+on the functions of their neighbours.}
 \usage{
 predictTermsAllGenes(
   fPrime,
   genesAnno,
-  normalise = T,
-  graph = defaultGraph(fPrime)
+  genes = colnames(fPrime),
+  normalise = T
 )
 }
 \arguments{
@@ -21,6 +21,15 @@ transposeSeuratObject())
 \item{genesAnno}{\itemize{
 \item genes annotated with gene sets
 }}
+
+\item{genes}{\itemize{
+\item the genes to be predicted, defaults to all
+}}
+
+\item{normalise}{\itemize{
+\item whether to normalise to gene set size, defauls
+to TRUE
+}}
 }
 \value{
 \itemize{
@@ -30,6 +39,12 @@ of the edges connecting the neighbors.
 }
 }
 \description{
-This function predicts the functions of all genes based on the functions of
-their neighbours.
+This function predicts the functions of all genes based
+on the functions of their neighbours.
+}
+\examples{
+set.seed(100)
+genes = sample(colnames(STranspose),50)
+genesAnno = annotateGenes(hallmark)
+predictions = predictTermsAllGenes(STranspose,genesAnno,genes)
 }

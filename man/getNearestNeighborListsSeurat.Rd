@@ -29,3 +29,6 @@ weight - edge weight
 This function extracts a shared nearest neighbor network
 from a Seurat object
 }
+\examples{
+NN = getNearestNeighborListsSeurat(STranspose)
+}

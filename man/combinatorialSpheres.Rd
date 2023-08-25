@@ -31,3 +31,6 @@ Discovers the combinatorial ball of a given radius
 around a fixed set of genes in the nearest neighbor
 graph of a Seurat object.
 }
+\examples{
+spheres = combinatorialSpheres(NN,'Ccl6',3)
+}
