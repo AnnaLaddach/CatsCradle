@@ -2,52 +2,59 @@
 % Please edit documentation in R/CatsCradle.R
 \name{predictTerms}
 \alias{predictTerms}
-\title{This function predicts the functions of a gene based
-on the functions of its neighbours.#'}
+\title{This function makes annotation predictions for a
+set of genes based on gene sets (e.g., hallmark)
+and a CatsCradle object by considering the annotations of
+its neighboring genes.}
 \usage{
 predictTerms(
-  gene,
+  genes,
+  geneSets,
   fPrime,
-  genesAnno,
-  normalise = T,
-  graph = defaultGraph(fPrime)
+  normaliseByGeneSet = TRUE,
+  normaliseByEdgeWeight = TRUE,
+  normaliseToUnitVector = TRUE
 )
 }
 \arguments{
-\item{gene}{\itemize{
-\item gene to annotate
+\item{genes}{\itemize{
+\item a character vector of genes
+}}
+
+\item{geneSets}{\itemize{
+\item a set of annotations, e.g., hallmark
+or GO
 }}
 
 \item{fPrime}{\itemize{
-\item a transposed Seurat object (generated with
-transposeSeuratObject())
+\item a Seurat object of genes
 }}
 
-\item{genesAnno}{\itemize{
-\item genes annotated with gene sets
+\item{normaliseByGeneSet}{\itemize{
+\item determines whether vector annotations
+are normalised by gene set size.  Defaults to TRUE
 }}
 
-\item{normalise}{\itemize{
-\item choose whether to normalise
-(divide scores by total weight of edges)
+\item{normaliseByEdgeWeight}{\itemize{
+\item determines whether neighbor
+contributions are normalised by edge weight.  Defaults to
+TRUE.
 }}
 
-\item{graph}{\itemize{
-\item which graph to use.  Defaults to the
-active.assay followed by _snn
+\item{normaliseToUnitVector}{\itemize{
+\item determines whether to normalise
+returned values to unit length.  Defaults to TRUE
 }}
-}
-\value{
-\itemize{
-\item A lists of terms where values are scores.
-Scores are calculated according to the weights of the SNN graph.
-}
 }
 \description{
-This function predicts the functions of a gene based
-on the functions of its neighbours.#'
+This function makes annotation predictions for a
+set of genes based on gene sets (e.g., hallmark)
+and a CatsCradle object by considering the annotations of
+its neighboring genes.
 }
 \examples{
-genesAnno = annotateGenes(hallmark)
-predictions = predictTerms('Myc',STranspose,genesAnno)
+set.seed(100)
+genes = sample(colnames(STranspose),5)
+predictions = predictTerms(genes,hallmark,STranspose)
+
 }

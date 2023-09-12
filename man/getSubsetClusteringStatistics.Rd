@@ -57,3 +57,7 @@ clustering of a gene set (in UMAP or PCA reduction)
 based on the median distance from its complement to
 the set.
 }
+\examples{
+geneSubset = intersect(colnames(STranspose),hallmark[[1]])
+stats = getSubsetClusteringStatistics(STranspose,geneSubset,100)
+}
