@@ -50,7 +50,7 @@ transposeSeuratObject = function(f,active.assay=f@active.assay,
 #' @return A matrix of the average expression
 #' @export
 #' @examples
-#' M = getAverageExpression(S,STranspose)
+#' M = getAverageExpressionMatrix(S,STranspose)
 getAverageExpressionMatrix = function(f,fPrime)
 {
   f$seurat_clusters = as.character(f$seurat_clusters)
@@ -63,6 +63,10 @@ getAverageExpressionMatrix = function(f,fPrime)
   
   ## Get assay data:
   X = GetAssayData(f,slot='scale')
+
+  ## Seems X can be smaller:
+  f = f[rownames(X),]
+  fPrime = fPrime[,rownames(X)]
    
   M = matrix(0,nrow=length(cellCluster),ncol=length(geneCluster))
   rownames(M) = cellCluster
@@ -459,9 +463,44 @@ getGeneNeighbors = function(gene,NN)
     if(class(NN) == 'Seurat')
         NN = getNearestNeighborListsSeurat(NN)
 
+    NN = symmetrise(NN)
+
     idx = NN$nodeA == gene
 
     return(NN$nodeB[idx])
+}
+
+## ####################################################
+#' This function takes the data frame of neighbor genes
+#' and reduces it so that each undirected edge is
+#' represented by only one directed edge.  This ensures
+#' that randomisation does not magically split undirected
+#' edges into two edges.
+#'
+#' @param neighborListDf - a dataframe containing the neighborlist
+#' @return - a neighborListDF with only one directed edge per
+#' undirected edge.
+#' @export
+#' @examples
+#' print(dim(NN))
+#' NNN = desymmetrise(NN)
+#' print(dim(NNN))
+desymmetriseNN = function(NN)
+{
+    orderGenes = function(i)
+    {
+        if(order(c(NN$nodeA[i],NN$nodeB[i]))[1] == 2)
+            return(TRUE)
+        return(FALSE)
+    }
+
+    idx = unlist(lapply(1:nrow(NN),orderGenes))
+    NN[idx,1:2] = NN[idx,2:1]
+    
+    tag = paste(NN$nodeA,NN$nodeB,sep='___')
+    NN = NN[!duplicated(tag),]
+
+    return(NN)
 }
 
 ## ####################################################
@@ -475,6 +514,10 @@ getGeneNeighbors = function(gene,NN)
 #' @examples
 #' randomIndices = randomiseNodeIndices(NN,10,TRUE)
 randomiseNodeIndices = function(neighborListDf, n = 100, useWeights = F){
+    NN = desymmetrize(neighborListDf)
+    if(!identical(NN,neighborListDf))
+        stop(paste0('randomiseNodeIndices is meant to be used',
+                    'with a desymmetrised neighborList'))
   
   #determine number of edges and create empty matrix for randomised indices
   nEdges = nrow(neighborListDf)
@@ -535,10 +578,10 @@ symmetryCheckNN = function(NN)
 
 
 ## ####################################################
-#' This symmetrizes a nearest neighbors graph.
+#' This symmetrises a nearest neighbors graph.
 #'
 #' This first checks to see if the NN graph is symmetric
-#' and if not symmetrizes it.
+#' and if not symmetrises it.
 #'
 #' @param NN - a nearest neighbors graph as returned
 #' by getNearestNeighborListsSeurat
@@ -547,14 +590,14 @@ symmetryCheckNN = function(NN)
 #' 
 #' @export
 #' @examples
-#' NNStar = symmetrizeNN(NN)
-symmetrizeNN = function(NN)
+#' NNStar = symmetriseNN(NN)
+symmetriseNN = function(NN)
 {
     ## Is it already symmetric?
     if(symmetryCheckNN(NN))
         return(NN)
 
-    ## If not, symmetrize:
+    ## If not, symmetrise:
     NN2 = NN[,c(2,1,3)]
     NN = rbind(NN,NN2)
 
@@ -585,14 +628,14 @@ symmetrizeNN = function(NN)
 #' spheres = combinatorialSpheres(NN,'Ccl6',3)
 combinatorialSpheres = function(NN,origin,radius)
 {
-    NN = symmetrizeNN(NN)
+    NN = symmetriseNN(NN)
     
     nodes = unique(NN$nodeA)
     ball = data.frame(nodes,
                       radius=-1)
     rownames(ball) = nodes
 
-    ## Initialize:
+    ## Initialise:
     ball[origin,'radius'] = 0
 
     numGenes = length(nodes)
@@ -681,21 +724,30 @@ readGmt = function(gmtFile, addDescr = F){
 #' @export
 #' @examples
 #' annotatedGenes = annotateGenes(hallmark)
-annotateGenes = function(geneSets){
-  #this is a bit slow for large collections of gene sets (a few minutes)
-  #think about whether it's necessary to speed up
-  genesAnno = list()
-  for (geneSet in names(geneSets)){
-    for (gene in geneSets[[geneSet]]){
-      if (gene %in% names(genesAnno)){
-        genesAnno[[gene]] = c(genesAnno[[gene]], geneSet)
-      }
-      else {
-        genesAnno[[gene]] = c(geneSet)
-      }
+annotateGenes = function(geneSets)
+{
+    genes = unique(unlist(geneSets))
+    genes = genes[order(genes)]
+
+    numSets = length(geneSets)
+    numGenes = length(genes)
+
+    M = matrix(NA,nrow=numGenes,ncol=numSets)
+    rownames(M) = genes
+    colnames(M) = names(geneSets)
+    
+
+    for(geneSet in names(geneSets))
+        for(gene in geneSets[[geneSet]])
+            M[gene,geneSet] = geneSet
+
+    genesAnno = list()
+    for(gene in genes)
+    {
+        genesAnno[[gene]] = M[gene,]
+        genesAnno[[gene]] = genesAnno[[gene]][!is.na(genesAnno[[gene]])]
     }
-  }
-  return(genesAnno)
+    return(genesAnno)   
 }
 
 ## ####################################################
@@ -728,16 +780,73 @@ annotateGeneAsVector = function(gene,geneSets,normalise=FALSE)
     return(annotation)
 }
 
+## ####################################################
+#' This function makes annotation predictions for a
+#' set of genes based on gene sets (e.g., hallmark)
+#' and a CatsCradle object by considering the annotations of
+#' its neighboring genes.
+#'
+#' @param genes - a character vector of genes
+#' @param geneSets - a set of annotations, e.g., hallmark
+#' or GO
+#' @param fPrime - a Seurat object of genes
+#' @param normaliseByGeneSet - determines whether vector annotations
+#'     are normalised by gene set size.  Defaults to TRUE
+#' @param normaliseByEdgeWeight - determines whether neighbor
+#'     contributions are normalised by edge weight.  Defaults to
+#'     TRUE.
+#' @param normaliseToUnitVector - determines whether to normalise
+#'     returned values to unit length.  Defaults to TRUE
+#' @export
+#' @examples
+#' set.seed(100)
+#' genes = sample(colnames(STranspose),5)
+#' predictions = predictTerms(genes,hallmark,STranspose)
+#' 
+predictTerms = function(genes,
+                        geneSets,
+                        fPrime,
+                        normaliseByGeneSet=TRUE,
+                        normaliseByEdgeWeight=TRUE,
+                        normaliseToUnitVector=TRUE)
+{
+    genesAnno = annotateGenes(geneSets)
+
+    predictions = list()
+    for(gene in genes)
+    {
+        p = predictTermsImpl(gene,fPrime,genesAnno,normaliseByEdgeWeight)
+
+        wrapped = rep(0,length(geneSets))
+        names(wrapped) = names(geneSets)
+
+        for(n in names(p))
+        {
+            if(normaliseByGeneSet)
+                wrapped[n] = p[n] / length(geneSets[[n]])
+            else
+                wrapped[n] = p[n]
+        }
+
+        if(normaliseToUnitVector)
+            wrapped = wrapped / Norm(wrapped)
+
+        predictions[[gene]] = wrapped
+    }
+
+    return(predictions)
+}
 
 ## ####################################################
-#' This function predicts the functions of a gene based
-#' on the functions of its neighbours.#' 
+#' This function is the implementation for predicting the
+#' functions of a gene based on the functions of its
+#' neighbours.
 #'
 #' @param gene - gene to annotate
 #' @param fPrime - a transposed Seurat object (generated with 
 #' transposeSeuratObject())
 #' @param genesAnno - genes annotated with gene sets
-#' @param normalise - choose whether to normalise 
+#' @param normaliseByEdgeWeight - choose whether to normalise 
 #' (divide scores by total weight of edges)
 #' @param graph - which graph to use.  Defaults to the
 #' active.assay followed by _snn
@@ -747,9 +856,10 @@ annotateGeneAsVector = function(gene,geneSets,normalise=FALSE)
 #' @export
 #' @examples
 #' genesAnno = annotateGenes(hallmark)
-#' predictions = predictTerms('Myc',STranspose,genesAnno)
-predictTerms = function(gene, fPrime, genesAnno, normalise = T,
-                        graph=defaultGraph(fPrime)){
+#' predictions = predictTermsImpl('Myc',STranspose,genesAnno)
+predictTermsImpl = function(gene, fPrime, genesAnno,
+                            normaliseByEdgeWeight = TRUE,
+                            graph=defaultGraph(fPrime)){
   
     predictedTerms = list()
     
@@ -767,7 +877,7 @@ predictTerms = function(gene, fPrime, genesAnno, normalise = T,
         
         ## determine weight of connecting edge and normalise if T
         weight = fPrime@graphs[[graph]][gene,neighbor]
-        if (normalise){
+        if (normaliseByEdgeWeight){
             weight = weight/total
         }
         if (!(neighbor %in% names(genesAnno))){

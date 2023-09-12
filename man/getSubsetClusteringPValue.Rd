@@ -53,5 +53,6 @@ based on the median distance from its complement to
 the set.
 }
 \examples{
-p = getSubsetClusteringPValue(STranspose,hallmark[[1]],100)
+geneSubset = intersect(colnames(STranspose),hallmark[[1]])
+p = getSubsetClusteringPValue(STranspose,geneSubset,100)
 }
