@@ -463,7 +463,7 @@ getGeneNeighbors = function(gene,NN)
     if(class(NN) == 'Seurat')
         NN = getNearestNeighborListsSeurat(NN)
 
-    NN = symmetrise(NN)
+    NN = symmetriseNN(NN)
 
     idx = NN$nodeA == gene
 
@@ -483,7 +483,7 @@ getGeneNeighbors = function(gene,NN)
 #' @export
 #' @examples
 #' print(dim(NN))
-#' NNN = desymmetrise(NN)
+#' NNN = desymmetriseNN(NN)
 #' print(dim(NNN))
 desymmetriseNN = function(NN)
 {
