@@ -30,6 +30,6 @@ edges into two edges.
 }
 \examples{
 print(dim(NN))
-NNN = desymmetrise(NN)
+NNN = desymmetriseNN(NN)
 print(dim(NNN))
 }
