@@ -35,6 +35,7 @@ transposeSeuratObject = function(f,active.assay=f@active.assay,
   fPrime = ScaleData(fPrime)
   fPrime = RunPCA(fPrime,npcs=npcs)
   fPrime = RunUMAP(fPrime,reduction='pca',dims=dims)
+  fPrime = RunTSNE(fPrime)
   fPrime = FindNeighbors(fPrime)
   fPrime = FindClusters(fPrime,resolution=res)
   
