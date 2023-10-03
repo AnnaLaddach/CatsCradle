@@ -24,5 +24,7 @@ Imports: Seurat,
 	 stringr,
 	 pracma
 Depends: 
-    R (>= 4.0)	 
+    R (>= 4.0)
+Suggests: sf    
 LazyData: true
+VignetteBuilder: knitr
