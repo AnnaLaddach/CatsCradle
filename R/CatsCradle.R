@@ -1042,7 +1042,28 @@ getSubsetClusteringStatistics = function(fPrime,
 }
 
 ## ####################################################
-## Used internally
+#' This runs random trials to determine the statistical
+#' significance of the clustering of a set of points
+#' within a larger set.
+#' 
+#' This function takes a matrix whose rows are geometric
+#' coordinates and a subset of these points either given
+#' as a character vector which is a subset of the rownames
+#' or as a logical vector.  It returns statistics on the
+#' mean distance of the complement to the subset.
+#'
+#' @param S - a set of points given as a matrix. The rows
+#' are the coordinates of these points
+#' geneSubset - this is either a subset of the rownames of
+#' S or a logical whose length is nrow(S)
+#' numTrials - the number or random trials to perform
+#' @return This returns a list. subsetDistance gives the
+#' median complement distance for the actual set,
+#' randomSubsetDistance gives the complement distances for
+#' the numTrials random sets, pValue gives a p-value based
+#' on the rank of the actual distance among the random
+#' distances and zScore gives its z-score.
+#' @export
 runClusteringTrials = function(S,
                                geneSubset,
                                numTrials)
@@ -1071,10 +1092,10 @@ runClusteringTrials = function(S,
     std = sd(randomSubsetDistance)
     answer$zScore = (answer$subsetDistance - mu) / std
 
-    return(answer)
+     return(answer)
 }
 
-## ####################################################
+
 ## Used internally
 medianComplementDistance = function(S,geneSubset)
 {
@@ -1095,4 +1116,54 @@ medianComplementDistance = function(S,geneSubset)
     d = median(rowMin)
     
     return(d)
+}
+
+## ####################################################
+#' Nearby genes
+#'
+#' This finds the gens near a give subset using either
+#' a dimensional reduction or the nearest neighbor graph
+#'
+#' @param fPrime - a Seurat object of genes
+#' @param geneSet - set of genes
+#' @param metric - the metric to use, one of umap, tsne,
+#' pca or nearest neighbor
+#' @param radius - the distance around the given set
+#' @param numPCs - used only if the metric is pca
+#' @export
+#' @examples
+#' geneSet = intersect(colnames(STranspose),hallmark[[1]])
+#' nearby = nearbyGenes(STranspose,geneSet,0.1)
+nearbyGenes = function(fPrime,geneSet,radius,metric='umap',numPCs=NULL)
+{
+    stopifnot(metric %in% c('umap','tsne','pca','NN'))
+    if(metric == 'NN')
+        stop('nearbyGenes not implemented for nearest neighbor')
+
+    ## Get the coords:
+    if(metric == 'umap')
+        a = FetchData(fPrime,c('UMAP_1','UMAP_2'))
+    if(metric == 'tsne')
+        a = FetchData(fPrime,c('tSNE_1','tSNE_2'))
+    if(metric == 'pca')
+    {
+        pcs = paste0('PC_',1:numPCs)
+        a = FetchData(fPrime,pcs)
+    }
+    S = data.matrix(a)
+    rownames(S) = colnames(fPrime)
+
+    idx = rownames(S) %in% geneSet
+    X = S[idx,]
+    SHat = S[!idx,]
+
+    D = distmat(SHat,X)
+    rowMin = c()
+    for(i in 1:nrow(D))
+        rowMin[i] = min(D[i,])
+    idx = rowMin <= radius
+
+    nearby = rownames(SHat)[idx]
+
+    return(nearby)
 }

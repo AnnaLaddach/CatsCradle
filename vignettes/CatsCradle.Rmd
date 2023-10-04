@@ -135,6 +135,55 @@ strongly clustered.
 
 ![Hallmark G2M](hallmark_g2m_onUMAP.png){width=6in}
 
+## Determining statistical significance of clustering
 
+Given a set of points, $S$ and a non-empty proper subset $X \subset S$
+we would like to determine the statistical significance of the degree
+to which $X$ is clustered.  To compute this we ask the opposite
+question: what do would we see if $X$ were randomly chosen.  In this
+case we expect to see $X$ broadly spread out across $S$, i.e., most of
+$S$ should be close to a point of $X$.  In particular we expect the
+median distance from the complement $S \setminus X$ to $X$ to be low.
+Of course, how low, depends on the size of $X$.  Conversely, if the
+points of $X$ cluster together, we expect much of $S \setminus X$ to
+be further from $X$, at least compared to other sets of the same
+size.  We use a distance function inspired by Hausdorf distance. Give
+as set $X$, for each $s_k \in S \setminus X$, we take $d_k$ to be the
+distance from $s_k$ to the nearest point of $X$. We then take the __median
+complement distance__ to be the median of the values $d_k$.  Comparing
+this median complement distance for $X \subset S$ with those for
+randomly chosen sets $X_i \subset S$ allows us to assess the
+clustering of $X$.  (These $X_i$ are chosen to be the same size as
+$X$.)
+```{r eval = FALSE}
+g2mGenes = intersect(colnames(STranspose),
+                     hallmark[['HALLMARK_G2M_CHECKPOINT']])
+stats = getSubsetClusteringStatistics(STranspose,
+                                      g2mGenes,
+                                      numTrials=1000)
+```				      
+This uses UMAP as the default reduction and returns the median
+complement distance to the G2M genes in STranspose, and the distances
+for 1000 randomly chosen sets of 56 genes.  It computes a p-value
+based on the rank of the actual distance among the random distances
+and its z-score.  Here we report a p-value of 0.001. However, as can
+be seen from the figure, the actual p-value is lower by many orders of
+magnitude. 
+![clustering statistics](g2mClusteringStats.png){width=6in}
+
+## Nearby genes
+
+We have seen that genes with similar annotation have a tendency to
+cluster.  This suggests that nearby genes may have similar functions.
+To this end, we have supplied a function which finds nearby
+genes. Here we find those genes which are within radius 0.2 in UMAP
+coordinates of genes in the HALLMARK_INTERFERON_ALPHA_RESPONSE gene
+set.
+```{r eval = FALSE}
+geneSet = intersect(colnames(STranspose),
+	            hallmark[['HALLMARK_INTERFERON_ALPHA_RESPONSE']])
+nearby = nearbyGenes(STranspose,geneSet,radius=0.2,metric='umap')
+```
+![finding nearby genes](nearbyGenes.png){width=6in}
 
 
