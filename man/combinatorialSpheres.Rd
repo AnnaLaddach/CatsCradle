@@ -33,4 +33,6 @@ graph of a Seurat object.
 }
 \examples{
 spheres = combinatorialSpheres(NN,'Ccl6',3)
+geneSet = intersect(hallmark[[1]],colnames(STranspose))
+sphereAroundSet = combinatorialSpheres(NN,geneSet,1)
 }

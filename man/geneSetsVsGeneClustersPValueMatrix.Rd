@@ -34,7 +34,9 @@ p values.  Defaults to FALSE.
 }}
 }
 \value{
-a matrix of p-values
+a matrix of p-values rows correspond to the gene
+sets and the columns correspond the the CatsCradle gene
+clusters
 }
 \description{
 This compares the gene clusters to other gene sets

@@ -16,5 +16,6 @@ A vector of these unique values in order
 }
 \description{
 This deals with skullduggery in which seurat_clusters
-has been converted to a character or a numeric.
+has been converted from a factor to a character or a
+numeric.
 }

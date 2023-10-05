@@ -17,7 +17,9 @@ getAverageExpressionMatrix(f, fPrime)
 }}
 }
 \value{
-A matrix of the average expression
+A matrix of the average expression where the rows
+correspond to cell clusters and the columns correspond to
+gene clusters.
 }
 \description{
 This computes average expression of each gene cluster in

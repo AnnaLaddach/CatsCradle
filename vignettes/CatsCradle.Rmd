@@ -175,16 +175,23 @@ magnitude.
 We have seen that genes with similar annotation have a tendency to
 cluster.  This suggests that nearby genes may have similar functions.
 To this end, we have supplied a function which finds nearby
-genes. This can be done using either PCA, UMAP or tSNE as the
-embedding.  Here we find those genes which are within radius 0.2 in UMAP
+genes. This can be done geometrically using either PCA, UMAP or tSNE
+as the embedding or combinatorially using the nearest neighbor graph.
+Here we find those genes which are within radius 0.2 in UMAP
 coordinates of genes in the HALLMARK_INTERFERON_ALPHA_RESPONSE gene
-set.
+set.  As you can see, the combinatorial radius of a gene set can grow
+quite quickly and need not have a close relation to UMAP distance.
+
 ```{r eval = FALSE}
 geneSet = intersect(colnames(STranspose),
-	            hallmark[['HALLMARK_INTERFERON_ALPHA_RESPONSE']])
-nearby = nearbyGenes(STranspose,geneSet,radius=0.2,metric='umap')
+                    hallmark[['HALLMARK_INTERFERON_ALPHA_RESPONSE']])
+geometricallyNearbyGenes = nearbyGenes(STranspose,geneSet,radius=0.2,metric='umap')
+combinatoriallyNearbyGenes = nearbyGenes(STranspose,geneSet,radius=1,metric='NN')
 ```
-![finding nearby genes](nearbyGenes.png){width=6in}
+
+![finding geometrically nearby genes](nearbyGenes.png){width=6in}
+
+![finding combinatorially nearby genes](combinatorialNearbyGenes.png){width=6in}
 
 ## Predicting gene function
 
