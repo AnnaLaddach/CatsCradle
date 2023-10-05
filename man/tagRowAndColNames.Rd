@@ -23,5 +23,6 @@ tagRowAndColNames(M, ccTag = "CC_", gcTag = "GC_")
 This gussies up the rownames and colnames of M
 }
 \examples{
-averageExpMatrix = tagRowAndColNames(averageExpMatrix)
+averageExpMatrix = tagRowAndColNames(averageExpMatrix,
+                                     'cellCluster_','geneCluster_')
 }
