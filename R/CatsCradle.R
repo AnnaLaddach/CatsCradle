@@ -48,7 +48,9 @@ transposeSeuratObject = function(f,active.assay=f@active.assay,
 #'
 #' @param f - The Seurat object of cells
 #' @param fPrime - The Seurat object of genes
-#' @return A matrix of the average expression
+#' @return A matrix of the average expression where the rows
+#' correspond to cell clusters and the columns correspond to
+#' gene clusters.
 #' @export
 #' @examples
 #' M = getAverageExpressionMatrix(S,STranspose)
@@ -170,7 +172,9 @@ geneListPValue = function(A,B,C,background=25000)
 #' @param backgroundGenes - a character vector of genes
 #' @param adjust - a logical deciding whether to adjust
 #' p values.  Defaults to FALSE.
-#' @return a matrix of p-values
+#' @return a matrix of p-values rows correspond to the gene
+#' sets and the columns correspond the the CatsCradle gene
+#' clusters
 #' @export
 geneSetsVsGeneClustersPValueMatrix = function(geneSets,
                                               clusterDF,
@@ -397,7 +401,8 @@ getGeneClusterAveragesPerCell = function(f,
 #' This gets the clusters in their cannonical order
 #'
 #' This deals with skullduggery in which seurat_clusters
-#' has been converted to a character or a numeric. 
+#' has been converted from a factor to a character or a
+#' numeric. 
 #'
 #' @param f - a Seurat object with meta.data column seurat_clusters
 #' @return A vector of these unique values in order
@@ -628,6 +633,8 @@ symmetriseNN = function(NN)
 #' @export
 #' @examples
 #' spheres = combinatorialSpheres(NN,'Ccl6',3)
+#' geneSet = intersect(hallmark[[1]],colnames(STranspose))
+#' sphereAroundSet = combinatorialSpheres(NN,geneSet,1)
 combinatorialSpheres = function(NN,origin,radius)
 {
     NN = symmetriseNN(NN)
@@ -1096,7 +1103,7 @@ runClusteringTrials = function(S,
      return(answer)
 }
 
-
+## ####################################################
 ## Used internally
 medianComplementDistance = function(S,geneSubset)
 {
@@ -1122,7 +1129,7 @@ medianComplementDistance = function(S,geneSubset)
 ## ####################################################
 #' Nearby genes
 #'
-#' This finds the gens near a give subset using either
+#' This finds the genes near a give subset using either
 #' a dimensional reduction or the nearest neighbor graph
 #'
 #' @param fPrime - a Seurat object of genes
@@ -1134,13 +1141,26 @@ medianComplementDistance = function(S,geneSubset)
 #' @export
 #' @examples
 #' geneSet = intersect(colnames(STranspose),hallmark[[1]])
-#' nearby = nearbyGenes(STranspose,geneSet,0.1)
+#' geometricallyNearby = nearbyGenes(STranspose,geneSet,radius=0.2,metric='umap')
+#' combinatoriallyNearby = nearbyGenes(STranspose,geneSet,radius=1,metric='NN')
 nearbyGenes = function(fPrime,geneSet,radius,metric='umap',numPCs=NULL)
 {
     stopifnot(metric %in% c('umap','tsne','pca','NN'))
-    if(metric == 'NN')
-        stop('nearbyGenes not implemented for nearest neighbor')
 
+    ## ####################################################
+    ## Combinatorial:
+    if(metric == 'NN')
+    {
+        NN = getNearestNeighborListsSeurat(fPrime)
+        spheres = combinatorialSpheres(NN,geneSet,radius)
+        nodes = spheres$nodes
+        nearby = nodes[!nodes %in% geneSet]
+
+        return(nearby)
+    }
+
+    ## ####################################################
+    ## Metric:
     ## Get the coords:
     if(metric == 'umap')
         a = FetchData(fPrime,c('UMAP_1','UMAP_2'))

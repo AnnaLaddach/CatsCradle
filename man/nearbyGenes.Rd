@@ -29,10 +29,11 @@ pca or nearest neighbor
 }}
 }
 \description{
-This finds the gens near a give subset using either
+This finds the genes near a give subset using either
 a dimensional reduction or the nearest neighbor graph
 }
 \examples{
 geneSet = intersect(colnames(STranspose),hallmark[[1]])
-nearby = nearbyGenes(STranspose,geneSet,0.1)
+geometricallyNearby = nearbyGenes(STranspose,geneSet,radius=0.2,metric='umap')
+combinatoriallyNearby = nearbyGenes(STranspose,geneSet,radius=1,metric='NN')
 }
