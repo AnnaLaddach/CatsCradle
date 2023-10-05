@@ -94,7 +94,8 @@ getAverageExpressionMatrix = function(f,fPrime)
 #' @param gcTag - a prefix for the column (gene cluster) names
 #' @export
 #' @examples
-#' averageExpMatrix = tagRowAndColNames(averageExpMatrix)
+#' averageExpMatrix = tagRowAndColNames(averageExpMatrix,
+#'                                      'cellCluster_','geneCluster_')
 tagRowAndColNames = function(M,ccTag='CC_',gcTag='GC_')
 {
   rownames(M) = paste0(ccTag,rownames(M))

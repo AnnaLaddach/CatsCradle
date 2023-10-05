@@ -15,7 +15,6 @@ knitr::opts_chunk$set(
     comment = "#>"
 )
 ```
-# CatsCradle
 
 ## Introduction
 
@@ -176,7 +175,8 @@ magnitude.
 We have seen that genes with similar annotation have a tendency to
 cluster.  This suggests that nearby genes may have similar functions.
 To this end, we have supplied a function which finds nearby
-genes. Here we find those genes which are within radius 0.2 in UMAP
+genes. This can be done using either PCA, UMAP or tSNE as the
+embedding.  Here we find those genes which are within radius 0.2 in UMAP
 coordinates of genes in the HALLMARK_INTERFERON_ALPHA_RESPONSE gene
 set.
 ```{r eval = FALSE}
@@ -185,5 +185,9 @@ geneSet = intersect(colnames(STranspose),
 nearby = nearbyGenes(STranspose,geneSet,radius=0.2,metric='umap')
 ```
 ![finding nearby genes](nearbyGenes.png){width=6in}
+
+## Predicting gene function
+
+
 
 
