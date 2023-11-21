@@ -177,16 +177,23 @@ cluster.  This suggests that nearby genes may have similar functions.
 To this end, we have supplied a function which finds nearby
 genes. This can be done geometrically using either PCA, UMAP or tSNE
 as the embedding or combinatorially using the nearest neighbor graph.
-Here we find those genes which are within radius 0.2 in UMAP
-coordinates of genes in the HALLMARK_INTERFERON_ALPHA_RESPONSE gene
-set.  As you can see, the combinatorial radius of a gene set can grow
-quite quickly and need not have a close relation to UMAP distance.
+The function returns a named vector whose values are the distances
+from the gene set and whose names are the genes. Here we find those
+genes which are within radius 0.2 in UMAP coordinates of genes in the
+HALLMARK_INTERFERON_ALPHA_RESPONSE gene set.  As you can see, the
+combinatorial radius of a gene set can grow quite quickly and need not
+have a close relation to UMAP distance. This function will also return
+weighted combinatorial distance from a single gene where distance is
+the reciprocal of edge weight.
 
 ```{r eval = FALSE}
 geneSet = intersect(colnames(STranspose),
                     hallmark[['HALLMARK_INTERFERON_ALPHA_RESPONSE']])
 geometricallyNearbyGenes = nearbyGenes(STranspose,geneSet,radius=0.2,metric='umap')
+theGeometricGenesThemselves = names(geometricallyNearbyGenes)
 combinatoriallyNearbyGenes = nearbyGenes(STranspose,geneSet,radius=1,metric='NN')
+theCombinatoricGenesThemselves = names(combinatoriallyNearbyGenes)
+
 ```
 
 ![finding geometrically nearby genes](nearbyGenes.png){width=6in}

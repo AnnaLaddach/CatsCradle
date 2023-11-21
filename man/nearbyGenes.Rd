@@ -4,7 +4,14 @@
 \alias{nearbyGenes}
 \title{Nearby genes}
 \usage{
-nearbyGenes(fPrime, geneSet, radius, metric = "umap", numPCs = NULL)
+nearbyGenes(
+  fPrime,
+  geneSet,
+  radius,
+  metric = "umap",
+  numPCs = NULL,
+  weights = FALSE
+)
 }
 \arguments{
 \item{fPrime}{\itemize{
@@ -28,6 +35,10 @@ pca or nearest neighbor
 \item used only if the metric is pca
 }}
 }
+\value{
+This returns a named vector whose values are distance
+from geneSet and whose names are the nearby genes.
+}
 \description{
 This finds the genes near a give subset using either
 a dimensional reduction or the nearest neighbor graph
@@ -36,4 +47,5 @@ a dimensional reduction or the nearest neighbor graph
 geneSet = intersect(colnames(STranspose),hallmark[[1]])
 geometricallyNearby = nearbyGenes(STranspose,geneSet,radius=0.2,metric='umap')
 combinatoriallyNearby = nearbyGenes(STranspose,geneSet,radius=1,metric='NN')
+weightedNearby = nearbyGenes(STranspose,'Myc',radius=1,metric='NN',weights=TRUE)
 }

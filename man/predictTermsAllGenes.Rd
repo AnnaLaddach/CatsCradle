@@ -6,36 +6,52 @@
 on the functions of their neighbours.}
 \usage{
 predictTermsAllGenes(
+  geneSets,
   fPrime,
-  genesAnno,
-  genes = colnames(fPrime),
-  normalise = T
+  radius,
+  metric = "umap",
+  normaliseByGeneSet = TRUE,
+  normaliseByDistance = TRUE,
+  normaliseToUnitVector = TRUE
 )
 }
 \arguments{
+\item{geneSets}{\itemize{
+\item a set of gene sets, e.g., hallmark
+}}
+
 \item{fPrime}{\itemize{
 \item a transposed Seurat object (generated with
 transposeSeuratObject())
 }}
 
-\item{genesAnno}{\itemize{
-\item genes annotated with gene sets
+\item{radius}{\itemize{
+\item radius of the region to use for prediction
 }}
 
-\item{genes}{\itemize{
-\item the genes to be predicted, defaults to all
+\item{metric}{\itemize{
+\item reduction or NN, defaults to umap
 }}
 
-\item{normalise}{\itemize{
-\item whether to normalise to gene set size, defauls
-to TRUE
+\item{normaliseByGeneSet}{\itemize{
+\item normalise by size of each gene set,
+defaults to TRUE
+}}
+
+\item{normaliseByDistance}{\itemize{
+\item attenutate neighbour contributions
+based on distance, defaults to TRUE
+}}
+
+\item{normaliseToUnitVector}{\itemize{
+\item return results as unit
+vectors, defaults to TRUE
 }}
 }
 \value{
 \itemize{
-\item A list where names are genes and values are lists of terms.
-The values of the lists of terms are calculated according to the weights
-of the edges connecting the neighbors.
+\item A list where names are genes and values are vectors
+of gene annotations whose entries correspond to the geneSets
 }
 }
 \description{
