@@ -11,8 +11,11 @@ predictTerms(
   genes,
   geneSets,
   fPrime,
+  radius,
+  metric = "umap",
+  numPCs = NULL,
   normaliseByGeneSet = TRUE,
-  normaliseByEdgeWeight = TRUE,
+  normaliseByDistance = TRUE,
   normaliseToUnitVector = TRUE
 )
 }
@@ -30,12 +33,24 @@ or GO
 \item a Seurat object of genes
 }}
 
+\item{radius}{\itemize{
+\item radius for prediction neighborhood
+}}
+
+\item{metric}{\itemize{
+\item reduction or NN, defaults to umap
+}}
+
+\item{numPCs}{\itemize{
+\item used only if reduction is pca, defaults to NULL
+}}
+
 \item{normaliseByGeneSet}{\itemize{
 \item determines whether vector annotations
 are normalised by gene set size.  Defaults to TRUE
 }}
 
-\item{normaliseByEdgeWeight}{\itemize{
+\item{normaliseByDistance}{\itemize{
 \item determines whether neighbor
 contributions are normalised by edge weight.  Defaults to
 TRUE.
@@ -46,6 +61,11 @@ TRUE.
 returned values to unit length.  Defaults to TRUE
 }}
 }
+\value{
+This returns a list of prediction vectors, one vector
+for each gene in genes, each vector corresponding to the sets
+in geneSets
+}
 \description{
 This function makes annotation predictions for a
 set of genes based on gene sets (e.g., hallmark)
@@ -55,6 +75,5 @@ its neighboring genes.
 \examples{
 set.seed(100)
 genes = sample(colnames(STranspose),5)
-predictions = predictTerms(genes,hallmark,STranspose)
-
+predictions = predictTerms(genes,hallmark,STranspose,radius=.5)
 }

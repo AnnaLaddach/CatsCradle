@@ -2,16 +2,18 @@
 % Please edit documentation in R/CatsCradle.R
 \name{predictTermsImpl}
 \alias{predictTermsImpl}
-\title{This function is the implementation for predicting the
-functions of a gene based on the functions of its
+\title{This function is the implementation for predicting
+the functions of a gene based on the functions of its
 neighbours.}
 \usage{
 predictTermsImpl(
   gene,
   fPrime,
   genesAnno,
-  normaliseByEdgeWeight = TRUE,
-  graph = defaultGraph(fPrime)
+  radius,
+  metric,
+  numPCs = NULL,
+  normaliseByDistance = TRUE
 )
 }
 \arguments{
@@ -20,33 +22,38 @@ predictTermsImpl(
 }}
 
 \item{fPrime}{\itemize{
-\item a transposed Seurat object (generated with
-transposeSeuratObject())
+\item a Seurat object of genes
 }}
 
 \item{genesAnno}{\itemize{
 \item genes annotated with gene sets
 }}
 
-\item{normaliseByEdgeWeight}{\itemize{
-\item choose whether to normalise
-(divide scores by total weight of edges)
+\item{radius}{\itemize{
+\item radius of neighbours to consider
 }}
 
-\item{graph}{\itemize{
-\item which graph to use.  Defaults to the
-active.assay followed by _snn
+\item{metric}{\itemize{
+\item which metric to use to discover
+neighbours, can be one of 'umap', 'tsne', 'pca', 'NN',
+defaults to umap
+numPCs - used only if metric is pca. Defaults to NULL
+}}
+
+\item{normaliseByDistance}{\itemize{
+\item choose whether to normalise
+contributions of neighbors by their distance, defaults to
+TRUE
 }}
 }
 \value{
-\itemize{
-\item A lists of terms where values are scores.
-Scores are calculated according to the weights of the SNN graph.
-}
+This returns a named list.  The names are
+the anotations that apply to the neighbour genes, the values
+are the relative wieghts of the contributions.
 }
 \description{
-This function is the implementation for predicting the
-functions of a gene based on the functions of its
+This function is the implementation for predicting
+the functions of a gene based on the functions of its
 neighbours.
 }
 \examples{

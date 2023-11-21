@@ -35,7 +35,7 @@ transposeSeuratObject = function(f,active.assay=f@active.assay,
   fPrime = ScaleData(fPrime)
   fPrime = RunPCA(fPrime,npcs=npcs)
   fPrime = RunUMAP(fPrime,reduction='pca',dims=dims)
-  fPrime = RunTSNE(fPrime)
+  ## fPrime = RunTSNE(fPrime)
   fPrime = FindNeighbors(fPrime)
   fPrime = FindClusters(fPrime,resolution=res)
   
@@ -799,24 +799,32 @@ annotateGeneAsVector = function(gene,geneSets,normalise=FALSE)
 #' @param geneSets - a set of annotations, e.g., hallmark
 #' or GO
 #' @param fPrime - a Seurat object of genes
+#' @param radius - radius for prediction neighborhood
+#' @param metric - reduction or NN, defaults to umap
+#' @param numPCs - used only if reduction is pca, defaults to NULL
 #' @param normaliseByGeneSet - determines whether vector annotations
 #'     are normalised by gene set size.  Defaults to TRUE
-#' @param normaliseByEdgeWeight - determines whether neighbor
+#' @param normaliseByDistance - determines whether neighbor
 #'     contributions are normalised by edge weight.  Defaults to
 #'     TRUE.
 #' @param normaliseToUnitVector - determines whether to normalise
 #'     returned values to unit length.  Defaults to TRUE
+#' @return This returns a list of prediction vectors, one vector
+#' for each gene in genes, each vector corresponding to the sets
+#' in geneSets
 #' @export
 #' @examples
 #' set.seed(100)
 #' genes = sample(colnames(STranspose),5)
-#' predictions = predictTerms(genes,hallmark,STranspose)
-#' 
+#' predictions = predictTerms(genes,hallmark,STranspose,radius=.5)
 predictTerms = function(genes,
                         geneSets,
                         fPrime,
+                        radius,
+                        metric='umap',
+                        numPCs=NULL,
                         normaliseByGeneSet=TRUE,
-                        normaliseByEdgeWeight=TRUE,
+                        normaliseByDistance=TRUE,
                         normaliseToUnitVector=TRUE)
 {
     genesAnno = annotateGenes(geneSets)
@@ -824,8 +832,13 @@ predictTerms = function(genes,
     predictions = list()
     for(gene in genes)
     {
-        p = predictTermsImpl(gene,fPrime,genesAnno,normaliseByEdgeWeight)
+        ## This returns only the gene sets that show up:
+        p = predictTermsImpl(gene,fPrime,genesAnno,
+                             radius,metric,numPCs,
+                             normaliseByDistance)
 
+        ## The 'wrapping' here is to produce a vector using
+        ## all the gene sets:
         wrapped = rep(0,length(geneSets))
         names(wrapped) = names(geneSets)
 
@@ -837,7 +850,7 @@ predictTerms = function(genes,
                 wrapped[n] = p[n]
         }
 
-        if(normaliseToUnitVector)
+        if(normaliseToUnitVector & sum(wrapped) != 0)
             wrapped = wrapped / Norm(wrapped)
 
         predictions[[gene]] = wrapped
@@ -847,111 +860,110 @@ predictTerms = function(genes,
 }
 
 ## ####################################################
-#' This function is the implementation for predicting the
-#' functions of a gene based on the functions of its
+#' This function is the implementation for predicting
+#' the functions of a gene based on the functions of its
 #' neighbours.
 #'
 #' @param gene - gene to annotate
-#' @param fPrime - a transposed Seurat object (generated with 
-#' transposeSeuratObject())
+#' @param fPrime - a Seurat object of genes
 #' @param genesAnno - genes annotated with gene sets
-#' @param normaliseByEdgeWeight - choose whether to normalise 
-#' (divide scores by total weight of edges)
-#' @param graph - which graph to use.  Defaults to the
-#' active.assay followed by _snn
-#' @return - A lists of terms where values are scores.
-#' Scores are calculated according to the weights of the SNN graph.
-#'
-#' @export
+#' @param radius - radius of neighbours to consider
+#' @param metric - which metric to use to discover
+#' neighbours, can be one of 'umap', 'tsne', 'pca', 'NN',
+#' defaults to umap
+#' numPCs - used only if metric is pca. Defaults to NULL
+#' @param normaliseByDistance - choose whether to normalise
+#' contributions of neighbors by their distance, defaults to
+#' TRUE
+#' @return This returns a named list.  The names are
+#' the anotations that apply to the neighbour genes, the values
+#' are the relative wieghts of the contributions.
+#' @export 
 #' @examples
 #' genesAnno = annotateGenes(hallmark)
 #' predictions = predictTermsImpl('Myc',STranspose,genesAnno)
-predictTermsImpl = function(gene, fPrime, genesAnno,
-                            normaliseByEdgeWeight = TRUE,
-                            graph=defaultGraph(fPrime)){
-  
+predictTermsImpl = function(gene,fPrime,genesAnno,
+                            radius,metric,numPCs=NULL,
+                            normaliseByDistance=TRUE)
+{
     predictedTerms = list()
-    
-    ## determine neighbors
-    theGraph = fPrime@graphs[[graph]]
-    genes = rownames(theGraph)
-    neighbors = genes[theGraph[gene,] > 0]
-    neighbors = neighbors[neighbors != gene]
-  
-    ## calculate total weight of edges to neighbors
-    total = sum(fPrime@graphs[[graph]][gene,])
-  
-    ## iterate through neighbors
-    for (neighbor in neighbors){
-        
-        ## determine weight of connecting edge and normalise if T
-        weight = fPrime@graphs[[graph]][gene,neighbor]
-        if (normaliseByEdgeWeight){
-            weight = weight/total
-        }
-        if (!(neighbor %in% names(genesAnno))){
+
+    ## Use weights only in this case:
+    weights = (metric == 'NN' & normaliseByDistance==TRUE)
+    nearby = nearbyGenes(fPrime,gene,radius,metric,numPCs,weights)
+
+    ## Neighbour genes are names.
+    ## Distances are values.
+    for(neighbour in names(nearby))
+    {
+        if (!(neighbour %in% names(genesAnno)))
             next
-        }
-    
-        ## extract terms for neighbor
-        terms = genesAnno[[neighbor]]
-    
+        
+        ## extract terms for neighbour
+        terms = genesAnno[[neighbour]]
+
         ## add these to predicted terms with appropriate weights
-        for (term in terms){
-            if (term %in% names(predictedTerms)){
-                predictedTerms[[term]] = 
-                    predictedTerms[[term]] + weight
-            } else {
-                predictedTerms[[term]] = weight 
-            }
+        for (term in terms)
+        {
+            if(term %in% names(predictedTerms))
+                predictedTerms[[term]] =
+                    predictedTerms[[term]] + 1 / nearby[neighbour]
+            else
+                predictedTerms[[term]] = 1 / nearby[neighbour]
         }
-        termNames = names(predictedTerms)
-        predictedTerms = as.numeric(predictedTerms)
-        names(predictedTerms) = termNames
-        predictedTerms =  
-            predictedTerms[order(-predictedTerms)]
     }
+    termNames = names(predictedTerms)
+    predictedTerms = as.numeric(predictedTerms)
+    names(predictedTerms) = termNames
+    predictedTerms =  
+        predictedTerms[order(-predictedTerms)]
+    
     return(predictedTerms)
 }
+
 
 
 ## ####################################################
 #' This function predicts the functions of all genes based
 #' on the functions of their neighbours.
 #'
+#' @param geneSets - a set of gene sets, e.g., hallmark
 #' @param fPrime - a transposed Seurat object (generated with 
 #' transposeSeuratObject())
-#' @param genesAnno - genes annotated with gene sets
-#' @param genes - the genes to be predicted, defaults to all
-#' @param normalise - whether to normalise to gene set size, defauls
-#' to TRUE
-#' @return - A list where names are genes and values are lists of terms.
-#' The values of the lists of terms are calculated according to the weights
-#' of the edges connecting the neighbors.
+#' @param radius - radius of the region to use for prediction
+#' @param metric - reduction or NN, defaults to umap
+#' @param normaliseByGeneSet - normalise by size of each gene set,
+#' defaults to TRUE
+#' @param normaliseByDistance - attenutate neighbour contributions
+#' based on distance, defaults to TRUE
+#' @param normaliseToUnitVector - return results as unit
+#' vectors, defaults to TRUE
+#' @return - A list where names are genes and values are vectors
+#' of gene annotations whose entries correspond to the geneSets
 #' @export
 #' @examples
 #' set.seed(100)
 #' genes = sample(colnames(STranspose),50)
 #' genesAnno = annotateGenes(hallmark)
 #' predictions = predictTermsAllGenes(STranspose,genesAnno,genes)
-predictTermsAllGenes = function(fPrime,
-                                genesAnno,
-                                genes=colnames(fPrime),
-                                normalise = T){
-  
-  genesPredictedTerms = list()
-  i = 1
-  
-  #iterate through genes
-  for (gene in genes){
-    if (i %% 100 == 0){
-        writeLines(paste(i, "genes processed"))
-    }
-    i = i + 1
-    genesPredictedTerms[[gene]] = predictTerms(gene, fPrime, genesAnno, 
-                                               normalise)
-  }
-  return(genesPredictedTerms)
+predictTermsAllGenes = function(geneSets,
+                                fPrime,
+                                radius,
+                                metric='umap',
+                                normaliseByGeneSet=TRUE,
+                                normaliseByDistance=TRUE,
+                                normaliseToUnitVector=TRUE)
+{
+    genes = colnames(fPrime)
+    
+    return(predictTerms(genes,
+                        geneSets,
+                        fPrime,
+                        radius,
+                        metric,
+                        normaliseByGeneSet,
+                        normaliseByDistance,
+                        normaliseToUnitVector))
 }
 
 ## ####################################################
@@ -1138,14 +1150,28 @@ medianComplementDistance = function(S,geneSubset)
 #' pca or nearest neighbor
 #' @param radius - the distance around the given set
 #' @param numPCs - used only if the metric is pca
+#' @return This returns a named vector whose values are distance
+#' from geneSet and whose names are the nearby genes.
 #' @export
 #' @examples
 #' geneSet = intersect(colnames(STranspose),hallmark[[1]])
 #' geometricallyNearby = nearbyGenes(STranspose,geneSet,radius=0.2,metric='umap')
 #' combinatoriallyNearby = nearbyGenes(STranspose,geneSet,radius=1,metric='NN')
-nearbyGenes = function(fPrime,geneSet,radius,metric='umap',numPCs=NULL)
+#' weightedNearby = nearbyGenes(STranspose,'Myc',radius=1,metric='NN',weights=TRUE)
+nearbyGenes = function(fPrime,geneSet,radius,metric='umap',
+                       numPCs=NULL,weights=FALSE)
 {
     stopifnot(metric %in% c('umap','tsne','pca','NN'))
+
+    ## ####################################################
+    ## Combinatorial with weights:
+    if(weights)
+    {
+        stopifnot(length(geneSet) == 1 &
+                  metric == 'NN' &
+                  radius == 1)
+        return(nearbyGenesWeighted(fPrime,geneSet))
+    }
 
     ## ####################################################
     ## Combinatorial:
@@ -1153,9 +1179,13 @@ nearbyGenes = function(fPrime,geneSet,radius,metric='umap',numPCs=NULL)
     {
         NN = getNearestNeighborListsSeurat(fPrime)
         spheres = combinatorialSpheres(NN,geneSet,radius)
-        nodes = spheres$nodes
-        nearby = nodes[!nodes %in% geneSet]
+        idx = ! spheres$nodes %in% geneSet
+        spheres = spheres[idx,]
 
+        
+        nearby = spheres$radius
+        names(nearby) = spheres$nodes
+        
         return(nearby)
     }
 
@@ -1184,7 +1214,49 @@ nearbyGenes = function(fPrime,geneSet,radius,metric='umap',numPCs=NULL)
         rowMin[i] = min(D[i,])
     idx = rowMin <= radius
 
-    nearby = rownames(SHat)[idx]
+    nearby = rowMin[idx]
+    names(nearby) = rownames(SHat)[idx]
 
     return(nearby)
+}
+
+## ####################################################
+nearbyGenesWeighted = function(fPrime,gene)
+{
+    NN = getNearestNeighborListsSeurat(fPrime)
+    NN = symmetriseNN(NN)
+    idx = NN$nodeA == gene
+    neighbours = NN$nodeB[idx]
+    distance = 1 / NN$weight
+    names(distance) = neighbours
+
+    return(distance)
+}
+
+## ####################################################
+#' Mean gene cluster on cell umap
+#'
+#' This function paints gene expression for a
+#' given gene cluster on cell umap.
+#'
+#' @param f - a Seurat object of cells
+#' @param fPrime - the corresponding Seurat object of genes
+#' @param geneCluster - a gene cluster of fPrime
+#' @return This returns a ggplot object
+#' @export
+#' @examples
+#' g = meanGeneClusterOnCellUMAP(S,STranspose,geneCluster=0)
+meanGeneClusterOnCellUMAP = function(f,fPrime,geneCluster)
+{
+    plotDF = FetchData(f,c('UMAP_1','UMAP_2'))
+    idx = fPrime$seurat_clusters == geneCluster
+    genes = colnames(fPrime)[idx]
+    genes = intersect(genes,rownames(f))
+    expression = FetchData(f,genes)
+    plotDF$expression = rowMeans(expression)
+
+    g = ggplot(plotDF,aes(x=UMAP_1,y=UMAP_2,color=expression)) +
+        geom_point()
+
+    return(g)
 }
