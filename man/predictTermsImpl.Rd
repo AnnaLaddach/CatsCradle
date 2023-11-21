@@ -37,7 +37,10 @@ predictTermsImpl(
 \item which metric to use to discover
 neighbours, can be one of 'umap', 'tsne', 'pca', 'NN',
 defaults to umap
-numPCs - used only if metric is pca. Defaults to NULL
+}}
+
+\item{numPCs}{\itemize{
+\item used only if metric is pca. Defaults to NULL
 }}
 
 \item{normaliseByDistance}{\itemize{
@@ -58,5 +61,6 @@ neighbours.
 }
 \examples{
 genesAnno = annotateGenes(hallmark)
-predictions = predictTermsImpl('Myc',STranspose,genesAnno)
+predictions = predictTermsImpl('Myc',STranspose,genesAnno,
+radius=.5,metric='umap')
 }

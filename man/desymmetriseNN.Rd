@@ -11,7 +11,7 @@ edges into two edges.}
 desymmetriseNN(NN)
 }
 \arguments{
-\item{neighborListDf}{\itemize{
+\item{NN}{\itemize{
 \item a dataframe containing the neighborlist
 }}
 }

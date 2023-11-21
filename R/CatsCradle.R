@@ -8,8 +8,7 @@
 #' expression matrix is the transpose of that of f.
 #'
 #' @param f - a Seurat object
-#' @param active.assay - the assay to use.  Defaults to the
-#'     active.assay
+#' @param active.assay - the assay to use.  Defaults to 'RNA'
 #' @param npcs - number of principal components, defaults to 30
 #' @param dims - dimensions to use for umap and nearest neighbors,
 #'     defaults to 1:20
@@ -19,27 +18,23 @@
 #' @import Seurat
 #' @examples
 #' STranspose = transposeSeuratObject(S)
-transposeSeuratObject = function(f,active.assay=f@active.assay,
+transposeSeuratObject = function(f,active.assay='RNA',
                                  npcs=30,dims=1:20,res=1)
 {
-  f@active.assay = active.assay
-  M = f@assays[[active.assay]]@data
-  M = as.matrix(M)
-  MPrime = t(M)
-  rownames(MPrime) = colnames(f)
-  colnames(MPrime) = rownames(f)
-  
-  fPrime = CreateSeuratObject(MPrime,assay=active.assay)
-  
-  fPrime = FindVariableFeatures(fPrime)
-  fPrime = ScaleData(fPrime)
-  fPrime = RunPCA(fPrime,npcs=npcs)
-  fPrime = RunUMAP(fPrime,reduction='pca',dims=dims)
-  ## fPrime = RunTSNE(fPrime)
-  fPrime = FindNeighbors(fPrime)
-  fPrime = FindClusters(fPrime,resolution=res)
-  
-  return(fPrime)
+    f@active.assay = active.assay
+    df = FetchData(f,rownames(f),layer='counts')
+    MPrime = as.matrix(df)
+   
+    fPrime = CreateSeuratObject(MPrime)
+    fPrime = NormalizeData(fPrime)
+    fPrime = ScaleData(fPrime)
+    fPrime = FindVariableFeatures(fPrime)    
+    fPrime = RunPCA(fPrime,npcs=npcs)
+    fPrime = RunUMAP(fPrime,reduction='pca',dims=dims)
+    fPrime = FindNeighbors(fPrime)
+    fPrime = FindClusters(fPrime,resolution=res)
+    
+    return(fPrime)
 }
 
 ## ###################################################
@@ -175,6 +170,7 @@ geneListPValue = function(A,B,C,background=25000)
 #' @return a matrix of p-values rows correspond to the gene
 #' sets and the columns correspond the the CatsCradle gene
 #' clusters
+#' @import stats
 #' @export
 geneSetsVsGeneClustersPValueMatrix = function(geneSets,
                                               clusterDF,
@@ -467,7 +463,7 @@ getNearestNeighborListsSeurat = function(f, graph=defaultGraph(f)){
 #' neighborsAgain = getGeneNeighbors("Ccl6",NN)
 getGeneNeighbors = function(gene,NN)
 {
-    if(class(NN) == 'Seurat')
+    if(inherits(NN,'Seurat'))
         NN = getNearestNeighborListsSeurat(NN)
 
     NN = symmetriseNN(NN)
@@ -484,7 +480,7 @@ getGeneNeighbors = function(gene,NN)
 #' that randomisation does not magically split undirected
 #' edges into two edges.
 #'
-#' @param neighborListDf - a dataframe containing the neighborlist
+#' @param NN - a dataframe containing the neighborlist
 #' @return - a neighborListDF with only one directed edge per
 #' undirected edge.
 #' @export
@@ -519,9 +515,10 @@ desymmetriseNN = function(NN)
 #' @return - a matrix with randomised indices for node B
 #' @export
 #' @examples
+#' NN = desymmetriseNN(NN)
 #' randomIndices = randomiseNodeIndices(NN,10,TRUE)
 randomiseNodeIndices = function(neighborListDf, n = 100, useWeights = F){
-    NN = desymmetrize(neighborListDf)
+    NN = desymmetriseNN(neighborListDf)
     if(!identical(NN,neighborListDf))
         stop(paste0('randomiseNodeIndices is meant to be used',
                     'with a desymmetrised neighborList'))
@@ -871,7 +868,7 @@ predictTerms = function(genes,
 #' @param metric - which metric to use to discover
 #' neighbours, can be one of 'umap', 'tsne', 'pca', 'NN',
 #' defaults to umap
-#' numPCs - used only if metric is pca. Defaults to NULL
+#' @param numPCs - used only if metric is pca. Defaults to NULL
 #' @param normaliseByDistance - choose whether to normalise
 #' contributions of neighbors by their distance, defaults to
 #' TRUE
@@ -881,7 +878,8 @@ predictTerms = function(genes,
 #' @export 
 #' @examples
 #' genesAnno = annotateGenes(hallmark)
-#' predictions = predictTermsImpl('Myc',STranspose,genesAnno)
+#' predictions = predictTermsImpl('Myc',STranspose,genesAnno,
+#' radius=.5,metric='umap')
 predictTermsImpl = function(gene,fPrime,genesAnno,
                             radius,metric,numPCs=NULL,
                             normaliseByDistance=TRUE)
@@ -942,10 +940,7 @@ predictTermsImpl = function(gene,fPrime,genesAnno,
 #' of gene annotations whose entries correspond to the geneSets
 #' @export
 #' @examples
-#' set.seed(100)
-#' genes = sample(colnames(STranspose),50)
-#' genesAnno = annotateGenes(hallmark)
-#' predictions = predictTermsAllGenes(STranspose,genesAnno,genes)
+#' predictions = predictTermsAllGenes(hallmark,STranspose,radius=.5)
 predictTermsAllGenes = function(geneSets,
                                 fPrime,
                                 radius,
@@ -1074,9 +1069,9 @@ getSubsetClusteringStatistics = function(fPrime,
 #'
 #' @param S - a set of points given as a matrix. The rows
 #' are the coordinates of these points
-#' geneSubset - this is either a subset of the rownames of
+#' @param geneSubset - this is either a subset of the rownames of
 #' S or a logical whose length is nrow(S)
-#' numTrials - the number or random trials to perform
+#' @param numTrials - the number or random trials to perform
 #' @return This returns a list. subsetDistance gives the
 #' median complement distance for the actual set,
 #' randomSubsetDistance gives the complement distances for
@@ -1088,7 +1083,7 @@ runClusteringTrials = function(S,
                                geneSubset,
                                numTrials)
 {
-    if(class(geneSubset) == 'character')
+    if(inherits(geneSubset,'character'))
         geneSubset = rownames(S) %in% geneSubset
     
     answer = list()
@@ -1119,7 +1114,7 @@ runClusteringTrials = function(S,
 ## Used internally
 medianComplementDistance = function(S,geneSubset)
 {
-    if(class(geneSubset) == 'character')
+    if(inherits(geneSubset,'character'))
         geneSubset = colnames(S) %in% geneSubset
     
     ## The complement:
@@ -1150,6 +1145,7 @@ medianComplementDistance = function(S,geneSubset)
 #' pca or nearest neighbor
 #' @param radius - the distance around the given set
 #' @param numPCs - used only if the metric is pca
+#' @param weights - whether to use edge weights in the NN case
 #' @return This returns a named vector whose values are distance
 #' from geneSet and whose names are the nearby genes.
 #' @export
@@ -1243,6 +1239,7 @@ nearbyGenesWeighted = function(fPrime,gene)
 #' @param fPrime - the corresponding Seurat object of genes
 #' @param geneCluster - a gene cluster of fPrime
 #' @return This returns a ggplot object
+#' @import ggplot2
 #' @export
 #' @examples
 #' g = meanGeneClusterOnCellUMAP(S,STranspose,geneCluster=0)

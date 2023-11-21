@@ -3,30 +3,20 @@
 \docType{data}
 \name{shorterHallmark}
 \alias{shorterHallmark}
-\title{hallmark}
+\title{shorterHallmark}
 \format{
-A named list
-\describe{
-The mouse hallmark gene sets.
-}
-
 A named list
 \describe{
 The alphabetically first ten gene hallmark gene sets.
 }
 }
 \source{
-https://www.gsea-msigdb.org/gsea/msigdb/mouse/collections.jsp
-shorterHallmark
-
-An abbreviation of mouse hallmark gene sets.
-
 Abbreviated from hallmark
 }
 \usage{
 shorterHallmark
 }
 \description{
-The mouse hallmark gene sets.
+An abbreviation of mouse hallmark gene sets.
 }
 \keyword{datasets}
