@@ -19,12 +19,12 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
 Imports: Seurat,
 	 ggplot2,
-	 plotly,
 	 networkD3,
 	 stringr,
-	 pracma
+	 pracma,
+	 knitr,
+	 reshape2
 Depends: 
     R (>= 4.0)
-Suggests: sf    
 LazyData: true
 VignetteBuilder: knitr

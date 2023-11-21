@@ -4,13 +4,7 @@
 \alias{transposeSeuratObject}
 \title{Create the transpose of a Seurat object}
 \usage{
-transposeSeuratObject(
-  f,
-  active.assay = f@active.assay,
-  npcs = 30,
-  dims = 1:20,
-  res = 1
-)
+transposeSeuratObject(f, active.assay = "RNA", npcs = 30, dims = 1:20, res = 1)
 }
 \arguments{
 \item{f}{\itemize{
@@ -18,8 +12,7 @@ transposeSeuratObject(
 }}
 
 \item{active.assay}{\itemize{
-\item the assay to use.  Defaults to the
-active.assay
+\item the assay to use.  Defaults to 'RNA'
 }}
 
 \item{npcs}{\itemize{

@@ -52,6 +52,7 @@
 #' The mouse hallmark gene sets.
 #' }
 #' @source https://www.gsea-msigdb.org/gsea/msigdb/mouse/collections.jsp
+"hallmark"
 
 ## ####################################################
 #' shorterHallmark

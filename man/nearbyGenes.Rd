@@ -34,6 +34,10 @@ pca or nearest neighbor
 \item{numPCs}{\itemize{
 \item used only if the metric is pca
 }}
+
+\item{weights}{\itemize{
+\item whether to use edge weights in the NN case
+}}
 }
 \value{
 This returns a named vector whose values are distance

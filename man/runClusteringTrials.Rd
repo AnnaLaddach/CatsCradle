@@ -12,9 +12,15 @@ runClusteringTrials(S, geneSubset, numTrials)
 \item{S}{\itemize{
 \item a set of points given as a matrix. The rows
 are the coordinates of these points
-geneSubset - this is either a subset of the rownames of
+}}
+
+\item{geneSubset}{\itemize{
+\item this is either a subset of the rownames of
 S or a logical whose length is nrow(S)
-numTrials - the number or random trials to perform
+}}
+
+\item{numTrials}{\itemize{
+\item the number or random trials to perform
 }}
 }
 \value{

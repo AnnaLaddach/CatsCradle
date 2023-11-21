@@ -59,8 +59,5 @@ This function predicts the functions of all genes based
 on the functions of their neighbours.
 }
 \examples{
-set.seed(100)
-genes = sample(colnames(STranspose),50)
-genesAnno = annotateGenes(hallmark)
-predictions = predictTermsAllGenes(STranspose,genesAnno,genes)
+predictions = predictTermsAllGenes(hallmark,STranspose,radius=.5)
 }
