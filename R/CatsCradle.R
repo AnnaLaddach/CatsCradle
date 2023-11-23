@@ -1036,7 +1036,7 @@ getSubsetClusteringStatistics = function(fPrime,
                                          numPCs=10)
 {
     if(reduction == 'UMAP')
-        S = FetchData(fPrime,c('UMAP_1','UMAP_2'))
+        S = fetchUMAP(fPrime)
 
     if(reduction == 'PCA')
     {
@@ -1189,7 +1189,7 @@ nearbyGenes = function(fPrime,geneSet,radius,metric='umap',
     ## Metric:
     ## Get the coords:
     if(metric == 'umap')
-        a = FetchData(fPrime,c('UMAP_1','UMAP_2'))
+        a = fetchUMAP(fPrime)
     if(metric == 'tsne')
         a = FetchData(fPrime,c('tSNE_1','tSNE_2'))
     if(metric == 'pca')
@@ -1245,7 +1245,7 @@ nearbyGenesWeighted = function(fPrime,gene)
 #' g = meanGeneClusterOnCellUMAP(S,STranspose,geneCluster=0)
 meanGeneClusterOnCellUMAP = function(f,fPrime,geneCluster)
 {
-    plotDF = FetchData(f,c('UMAP_1','UMAP_2'))
+    plotDF = fetchUMAP(f)
     idx = fPrime$seurat_clusters == geneCluster
     genes = colnames(fPrime)[idx]
     genes = intersect(genes,rownames(f))
@@ -1256,4 +1256,14 @@ meanGeneClusterOnCellUMAP = function(f,fPrime,geneCluster)
         geom_point()
 
     return(g)
+}
+
+## ####################################################
+## Used to fetch umap agnostically as to upper or lower case:
+fetchUMAP = function(f)
+{
+    umapIsCalled = names(f@reductions$umap)
+    df = FetchData(f,umapIsCalled)
+
+    return(df)
 }
