@@ -49,7 +49,7 @@ transposeSeuratObject = function(f,active.assay='RNA',
 #' @export
 #' @examples
 #' M = getAverageExpressionMatrix(S,STranspose)
-getAverageExpressionMatrix = function(f,fPrime)
+getAverageExpressionMatrix = function(f,fPrime, v5 = F)
 {
   f$seurat_clusters = as.character(f$seurat_clusters)
   cellCluster = unique(f$seurat_clusters)
@@ -60,8 +60,11 @@ getAverageExpressionMatrix = function(f,fPrime)
   geneCluster = geneCluster[order(as.numeric(geneCluster))]
   
   ## Get assay data:
-  X = GetAssayData(f,slot='scale')
-
+  if (v5 == T){
+    X = GetAssayData(f,layer='scale.data')
+  } else {
+    X = GetAssayData(f,slot='scale')
+  }
   ## Seems X can be smaller:
   f = f[rownames(X),]
   fPrime = fPrime[,rownames(X)]
