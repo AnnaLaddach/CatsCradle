@@ -6,6 +6,7 @@
 #' where rownames are cellnames and columns contain x 
 #' and y coordinates respectively.
 #' @return a graph in neighbour format.
+#' @import interp
 #' @export
 #' @examples
 computeNeighboursDelaunay = function(centroids){
@@ -47,6 +48,7 @@ computeNeighboursDelaunay = function(centroids){
 #' and y coordinates respectively.
 #' @param threshold - a distance cut off to compute neighbours.
 #' @return a graph in neighbour format.
+#' @import rdist
 #' @export
 #' @examples
 computeNeighboursEuclidean = function(coords, threshold){
@@ -170,6 +172,7 @@ computeNeighbourhoodByCTMatrix = function(neighbourhoods, cellTypes){
 #' @param resolution - resolution for clustering (default 0.1)
 #' @return a seurat object based on a neighbourhood by cell type matrix,
 #' containing clusters and UMAP.
+#' @import Seurat
 #' @export
 #' @examples
 
@@ -202,6 +205,8 @@ computeNeighbourhoodByCTSeurat= function(neighbourhoodByCT, resolution = 0.1,
 #' @param graph - which graph to extract.  Defaults to
 #' paste0(f@active.assay,'_snn')
 #' @return a seurat object with a "graph" dimensionality reduction.
+#' @import Seurat  
+#' @import igraph
 #' @export
 #' @examples
 
