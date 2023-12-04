@@ -111,9 +111,9 @@ computeNeighbourhoods = function(spatialGraph, cellNames, addSelf = F){
   
 
 ## ####################################################
-#' This function computes a matrix where neighbour are rows and 
+#' This function computes a matrix where neighbourhoods are rows and 
 #' cell types are columns. The values in the matrix indicate the  
-#' number of cell types wtihin a neighbourhood. 
+#' number of cells of a given type within a neighbourhood. 
 #' 
 #' @param neighbourhoods- a named list of neighbourhoods where a neighbourhood 
 #' is a set of cells. 
@@ -184,9 +184,14 @@ computeNeighbourhoodByCTSeurat= function(neighbourhoodByCT, resolution = 0.1,
   neighbourhoodSeurat = RunPCA(neighbourhoodSeurat, assay = "RNA", 
                                features = rownames(neighbourhoodSeurat), 
                                npcs = npcs)
-  neighbourhoodSeurat = RunUMAP(neighbourhoodSeurat,assay='RNA',
-                                features=rownames(neighbourhoodSeurat), 
-                                n.neighbors = n.neighbors)
+  if (transpose){
+    neighbourhoodSeurat = RunUMAP(neighbourhoodSeurat,assay='RNA',
+                                  n.neighbors = n.neighbors)
+  } else{
+    neighbourhoodSeurat = RunUMAP(neighbourhoodSeurat,assay='RNA',
+                                  features=rownames(neighbourhoodSeurat), 
+                                  n.neighbors = n.neighbors)
+  }
   if (transpose){
     neighbourhoodSeurat = FindNeighbors(neighbourhoodSeurat, dims = 1:npcs)
   } else{

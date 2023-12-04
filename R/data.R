@@ -91,6 +91,35 @@
 #' @source Extracted from STranspose by getNearestNeighborListsSeurat
 "NN"
 
+## ####################################################
+#' centroids
+#'
+#' Cell centroids from xenium spatial data
+#'
+#' @format a dataframe
+#' where rownames are cellnames and columns contain x 
+#' and y coordinates respectively.
+#' \describe{
+#' THis gives the x and y coordinates for cell centroids from xenium  
+#' mouse brain spatial data.
+#' }
+#' @source tiny subset from
+#' https://www.10xgenomics.com/resources/datasets/fresh-frozen-mouse-brain-for-xenium-explorer-demo-1-standard
+
+
+## ####################################################
+#' clusters
+#'
+#' Clusters from xenium spatial data
+#'
+#' @format a named vector of cluster where names are each cell and
+#' clusters are a factor.
+#' \describe{
+#' This contains cluster annotations for xenium mouse brain data extracted from
+#' a Seurat analysis. 
+#' }
+#' @source clusters from Seurat analysis of 
+#' https://www.10xgenomics.com/resources/datasets/fresh-frozen-mouse-brain-for-xenium-explorer-demo-1-standard
 
 
 
