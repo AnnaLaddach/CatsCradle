@@ -495,5 +495,6 @@ cellTypesPerCellTypeGraph = function(nbhdByCellType,
                                             edgeWeighting=edgeWeighting,
                                             plotGraph=plotGraph)
 
+    
     return(G)
 }
