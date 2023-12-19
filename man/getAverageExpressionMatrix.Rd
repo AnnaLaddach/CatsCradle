@@ -5,7 +5,7 @@
 \title{This computes average expression of each gene cluster in
 each cell cluster and returns the result as a matrix}
 \usage{
-getAverageExpressionMatrix(f, fPrime)
+getAverageExpressionMatrix(f, fPrime, v5 = F)
 }
 \arguments{
 \item{f}{\itemize{

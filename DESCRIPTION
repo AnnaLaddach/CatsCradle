@@ -23,7 +23,9 @@ Imports: Seurat,
 	 stringr,
 	 pracma,
 	 knitr,
-	 reshape2
+	 reshape2,
+	 rdist,
+	 igraph
 Depends: 
     R (>= 4.0)
 LazyData: true
