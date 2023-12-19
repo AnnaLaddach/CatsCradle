@@ -1,0 +1,114 @@
+---
+title: "Cats Cradle Spatial Vignette"
+output: html_notebook
+---
+
+## Introduction
+
+### Cats Cradle: cells and genes
+
+Cats Cradle exploits the duality between cells and genes.  A standard
+Seurat analysis is based on a genes-by-cells matrix, that is, a matrix
+whose rows correspond to genes, whose columns correspond to cells and
+whose entries give the expression of each gene in each cell.
+Typically, one clusters the cells and displays the resulting cell
+types on a dimension reduction such as UMAP.
+
+Cats Cradle exploits the duality by transposing the matrix so that
+rows correspond to cells and columns correspond to genes.  This allows
+one to cluster the genes and display the resulting gene types on a
+UMAP of genes.
+
+### Spatial Cats Cradle: neighbourhoods and cell types
+
+Adding spatial information to this mix allows an additional level of
+analysis.  Here the role of individual cells is played by sets of
+cells (i.e., spatial neighbourhoods) and the role of genes is played
+by types of cells in each neighbourhood.  (We'll say more about
+neighbourhoods in a moment.)  The underlying data is now a matrix
+whose rows correspond to cell types and whose columns correspond
+to neighbourhoods.  Each entry gives the number of cells of a given cell
+type in each neighbourhood.  With poetic license, we can say that a
+neighbourhood "expresses" cell types.
+
+One can then cluster neighbourhoods on the basis of the cell
+types. That is, neighbourhoods are clustered into types based on the
+mix of cell types that they contain.  One also has a UMAP of
+neighbourhoods based on their cell type mix.
+
+Exploiting the duality between neighbourhoods and cell types, we can
+also produce a Seurat object whose rows are neighbourhoods and whose
+columns columns are cell types.  This allows one to cluster the cell
+types.  Cell types then cluster together if they associated into the
+same sorts of neighbourhoods.
+
+## Neighbourhoods
+
+A neighbourhood is simply a set of cells.  For our puposes, we will
+take it to be a spatially contiguous set of cells, though
+mathematically, this is not necessary.  Here we exhibit several ways
+of aggregating cells into neigbourhoods based on their spatial
+locations.
+
+First load the spatial data:
+```{r}
+#xenium.obj = read.rds("/path/to/xenium.obj.rds")
+```
+
+### Nearest neighbour graphs:
+
+The centroids of the cells are given as points in the plane. Delaunay
+triangulation discovers and optimal way of connecting each of these
+points to its neighbors.  For each cell in the spatial Seurat object
+the following discovers its neighbours based on this Delaunay
+triangulation:
+
+Compute spatial neighbours based on Delaunay triangulation.
+```{r}
+delaunayNeighbours = computeNeighboursDelaunay(centroids)
+```
+
+Another way to compute the neighbours of a given cell is to simply ask
+for all the cells within a fixed (Euclidean) distance of that cell:
+
+```{r}
+euclideanNeighbours = computeNeighboursEuclidean(centroids,
+threshold=20)
+```
+In either of these cases the spatial nearest neighbour graph can be
+converted into a list of neighbourhoods:
+
+```{r}
+neighbourhoods = computeNeighbourhoods(delaunayNeighbours,
+names(clusters))
+```
+
+```{r}
+neighbourhoodsWithCenters = computeNeighbourhoods(delaunayNeighbours,
+names(clusters),addSelf=TRUE)
+```
+
+```{r}
+euclideanNeighbourhoods = computeNeighbourhoods(euclideanNeighbours,
+names(clusters))
+
+
+Notice that when using this spatial nearest neighbours method each
+neighbourhood corresponds to an individual cell - it is the
+neighbourhood around that cell.  Also note that these neighbourhoods
+are not disjoint.  We speculate that Delaunay neighbourhoods are more
+appropriate for investigating cell-cell interactions while Euclidean
+neighbourhoods are more appropriate for investigating diffusible
+ligands.
+
+### TO DO: COMBINATORIAL BALLS OF LARGER RADIUS
+
+### TO DO: NEIGHBOURHOODS BASED ON RECTANGLES
+
+
+
+
+
+
+
+
