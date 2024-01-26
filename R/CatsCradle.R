@@ -43,6 +43,8 @@ transposeSeuratObject = function(f,active.assay='RNA',
 #'
 #' @param f - The Seurat object of cells
 #' @param fPrime - The Seurat object of genes
+#' @param v5 - A logical. Are we using Seurat v5? Defaults
+#' to FALSE
 #' @return A matrix of the average expression where the rows
 #' correspond to cell clusters and the columns correspond to
 #' gene clusters.
@@ -1270,3 +1272,114 @@ fetchUMAP = function(f)
 
     return(df)
 }
+
+
+## ####################################################
+#' This finds the directed Hausdorf distance from A to B
+#'
+#' @param A - an m x d matrix representing m points in
+#' dimension d
+#' @param B - an n x d matrix representing n points in
+#' dimension d
+#' @return This returns the distance of the furthest point
+#' in A from its nearest point in B.
+#' @export
+directedHausdorf = function(A,B)
+{
+    D = distmat(A,B)
+    
+    rowMin = c()
+    for(i in 1:nrow(D))
+        rowMin[i] = min(D[i,])
+    d = max(rowMin)
+    
+    return(d)
+}
+
+## ####################################################
+directedMedianDistance =function(A,B)
+{
+    D = distmat(A,B)
+    
+    rowMin = c()
+    for(i in 1:nrow(D))
+        rowMin[i] = min(D[i,])
+    d = median(rowMin)
+    
+    return(d)
+}
+
+## ####################################################
+#' This takes a set S of n points in dimension d given
+#' by an n x d matrix and a subset A given by a logical
+#' and returns the median distance from the complement to
+#' the given subset.
+#'
+#' @param S - an n x d matrix representing a set of n points
+#' in dimension d
+#' @param idx - a logical of length n representing a subset of
+#' S.  This should not be the empty set or all of S.
+#' @return This returns the median distance from the complement
+#' to the subset
+#' @export
+medianComplementDistance = function(S,idx)
+{
+    ## The complement:
+    A = S[!idx,]
+    
+    ## The subset:
+    B = S[idx,]
+    
+    return(directedMedianDistance(A,B))
+}
+
+## ####################################################
+#' This takes a set S of n points in dimension d and a subset
+#' A and computes a p-value for the co-localization of the subset
+#' by comparing the median complement distance for the given set
+#' to values of the median complement distance computed for random
+#' subsets of the same size.
+#'
+#' @param  S - an n x d matrix representing a set of n points
+#' in dimension d
+#' @param idx - a logical of length n representing a subset of
+#' S.  This should not be the empty set or all of S.
+#' @param numTrials - the number of random trials to perform,
+#' defaults to 1000
+#' @param returnTrials - whether to report the real and random median
+#' complement distances.
+#' @return By default this reports a p-value.  If returnTrials is set,
+#' this returns a list giving the p-value, the actual complement distance
+#' and the random complement distances.
+#' @export
+medianComplementPValue = function(S,idx,numTrials=1000,returnTrials=FALSE)
+{
+    actual = medianComplementDistance(S,idx)
+    
+    numSuper = nrow(S)
+    numSub = sum(idx)
+    
+    random = c()
+
+    for(i in 1:numTrials)
+    {
+        IDX = rep(FALSE,numSuper)
+        r = sample(numSuper,numSub)
+        IDX[r] = TRUE
+        random[i] = medianComplementDistance(S,IDX)
+    }
+    n = sum(random >= actual)
+    n = max(1,n)
+    
+    answer = list()
+    answer$pValue = n / numTrials    
+    answer$medianDist = actual
+    answer$random = random
+
+    if(!returnTrials)
+        return(answer$pValue)
+    
+    return(answer)
+}
+
+        

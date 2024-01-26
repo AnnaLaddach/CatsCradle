@@ -15,6 +15,11 @@ getAverageExpressionMatrix(f, fPrime, v5 = F)
 \item{fPrime}{\itemize{
 \item The Seurat object of genes
 }}
+
+\item{v5}{\itemize{
+\item A logical. Are we using Seurat v5? Defaults
+to FALSE
+}}
 }
 \value{
 A matrix of the average expression where the rows

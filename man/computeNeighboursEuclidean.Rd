@@ -6,17 +6,17 @@
 neighbors are identified based on euclidean distance and a
 user defined threshold.}
 \usage{
-computeNeighboursEuclidean(coords, threshold)
+computeNeighboursEuclidean(centroids, threshold)
 }
 \arguments{
-\item{threshold}{\itemize{
-\item a distance cut off to compute neighbours.
-}}
-
 \item{centroids}{\itemize{
 \item a dataframe containing centroids
 where rownames are cellnames and columns contain x
 and y coordinates respectively.
+}}
+
+\item{threshold}{\itemize{
+\item a distance cut off to compute neighbours.
 }}
 }
 \value{

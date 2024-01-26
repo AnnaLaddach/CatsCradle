@@ -100,12 +100,12 @@
 #' where rownames are cellnames and columns contain x 
 #' and y coordinates respectively.
 #' \describe{
-#' THis gives the x and y coordinates for cell centroids from xenium  
+#' This gives the x and y coordinates for cell centroids from xenium  
 #' mouse brain spatial data.
 #' }
 #' @source tiny subset from
 #' https://www.10xgenomics.com/resources/datasets/fresh-frozen-mouse-brain-for-xenium-explorer-demo-1-standard
-
+"centroids"
 
 ## ####################################################
 #' clusters
@@ -120,6 +120,34 @@
 #' }
 #' @source clusters from Seurat analysis of 
 #' https://www.10xgenomics.com/resources/datasets/fresh-frozen-mouse-brain-for-xenium-explorer-demo-1-standard
+"clusters"
+
+## ####################################################
+#' humanLRN
+#'
+#' A data frame giving 12019 human ligand receptor pairs
+#'
+#' @format a data frame with two columns, 'from' and 'to'
+#' \describe{A data frame with two columns, 'from' and 'to'.
+#' Each row represents a human ligand - receptor pair.
+#' }
+#' @source This is derived from the nichenetr human ligand -
+#' receptor network.
+"humanLNR"
+
+## ####################################################
+#' mouseLRN
+#'
+#' A data frame giving 11592 mouse ligand receptor pairs
+#'
+#' @format a data frame with two columns, 'from' and 'to'
+#' \describe{A data frame with two columns, 'from' and 'to'.
+#' Each row represents a mouse ligand - receptor pair.
+#' }
+#' @source This is derived from the nichenetr mouse ligand -
+#' receptor network.
+"mouseLNR"
+
 
 
 
