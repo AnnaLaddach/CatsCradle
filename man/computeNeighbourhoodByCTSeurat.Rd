@@ -22,6 +22,22 @@ computeNeighbourhoodByCTSeurat(
 \item{resolution}{\itemize{
 \item resolution for clustering (default 0.1)
 }}
+
+\item{npcs}{\itemize{
+\item number of pcs used for PCA, defaults to 10
+}}
+
+\item{n.neighbors}{\itemize{
+\item number of neighbors used by UMAP, defaults to 30
+}}
+
+\item{compute_UMAP}{\itemize{
+\item defaults to TRUE
+}}
+
+\item{transpose}{\itemize{
+\item defaults to FALSE
+}}
 }
 \value{
 a seurat object based on a neighbourhood by cell type matrix,

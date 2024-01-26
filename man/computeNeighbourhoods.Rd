@@ -15,6 +15,15 @@ computeNeighbourhoods(
 \item{spatialGraph}{\itemize{
 \item a spatial graph in neighbour list format.
 }}
+
+\item{cellNames}{\itemize{
+\item defaults to the names in the spatial graph
+}}
+
+\item{addSelf}{\itemize{
+\item logical determining whether to include the cell at
+the center of the neighbourhood.  Defaults to FALSE
+}}
 }
 \value{
 a named list of neighbourhoods where a neighborhood is a set of a

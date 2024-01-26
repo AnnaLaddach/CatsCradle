@@ -9,13 +9,15 @@ number of cells of a given type within a neighbourhood.}
 computeNeighbourhoodByCTMatrix(neighbourhoods, cellTypes)
 }
 \arguments{
+\item{neighbourhoods}{\itemize{
+\item a named list of neighbourhoods where a neighbourhood
+is a set of cells.
+}}
+
 \item{cellTypes}{\itemize{
 \item named vector of cell types where names are each cell and
 cell types are a factor
 }}
-
-\item{neighbourhoods-}{a named list of neighbourhoods where a neighbourhood
-is a set of cells.}
 }
 \value{
 a matrix of neighbourhoods by cell types
