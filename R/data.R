@@ -133,7 +133,7 @@
 #' }
 #' @source This is derived from the nichenetr human ligand -
 #' receptor network.
-"humanLNR"
+"humanLRN"
 
 ## ####################################################
 #' mouseLRN
@@ -146,7 +146,7 @@
 #' }
 #' @source This is derived from the nichenetr mouse ligand -
 #' receptor network.
-"mouseLNR"
+"mouseLRN"
 
 
 
