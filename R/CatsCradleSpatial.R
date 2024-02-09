@@ -523,10 +523,10 @@ getLigandReceptorNetwork = function(species)
     stopifnot(species %in% c('human','mouse'))
     
     if(species == 'human')
-        return(humanLNR)
+        return(humanLRN)
 
     if(species == 'mouse')
-        return(mouseLNR)
+        return(mouseLRN)
 }
 
 ## ####################################################
