@@ -7,40 +7,37 @@
 #' and y coordinates respectively.
 #' @return a graph in neighbour format, i.e., a data frame with
 #'     columns nodeA and nodeB.
-#' @import interp
+#' @import geometry
+#' @import Rfast
 #' @export
 ## #' @examples
 computeNeighboursDelaunay = function(centroids){
-    
-    ##compute delaunay triangulation
-    delaunay = tri.mesh(centroids[,1], centroids[,2])
-    
-    ##extract triangles from results dataframe
-    triangles = delaunay$trlist
-    
-    results = matrix(nrow = 0, ncol = 2)
-    cellNames = rownames(centroids)
-    
-    ##convert triangle indices to cell names
-    triangles[,1] = cellNames[as.numeric(triangles[,1])]
-    triangles[,2] = cellNames[as.numeric(triangles[,2])]
-    triangles[,3] = cellNames[as.numeric(triangles[,3])]
-    
-    ##create neighbour list
-    for (i in 1:nrow(triangles)){
-        results = rbind(results,sort(c(triangles[i,1],triangles[i,2])))
-        results = rbind(results,sort(c(triangles[i,1],triangles[i,3])))
-        results = rbind(results,sort(c(triangles[i,2],triangles[i,3])))
-    }
-    
-    ##remove duplicate edges
-    results = unique(results)
-    
-    ## Convert to data.frame and name as nodeA, nodeB:
-    results = as.data.frame(results)
-    names(results) = c('nodeA','nodeB')
-    
-    return(results)
+  
+  ##get cell names
+  cellNames = rownames(centroids)
+  
+  ##compute delaunay triangulation
+  triangles = delaunayn(centroids)
+  
+  ##extract neighbours
+  results = rbind(triangles[,c(1,2)],triangles[,c(1,3)],triangles[,c(2,3)])
+  
+  ##sort rows
+  results = rowSort(results)
+  
+  ## remove duplicates
+  results = unique(results)
+  
+  ##convert indices to cell names
+  results[,1] = cellNames[as.numeric(results[,1])]
+  results[,2] = cellNames[as.numeric(results[,2])]
+  
+  
+  ## Convert to data.frame and name as nodeA, nodeB:
+  results = as.data.frame(results)
+  names(results) = c('nodeA','nodeB')
+  
+  return(results)
 }
 
 
@@ -134,59 +131,57 @@ computeNeighbourhoods = function(spatialGraph,
 }
   
 
-## ####################################################
-#' This function computes a matrix where neighbourhoods are rows and 
-#' cell types are columns. The values in the matrix indicate the  
-#' number of cells of a given type within a neighbourhood. 
+#' ## ####################################################
+#' #' This function computes a matrix where neighbourhoods are rows and 
+#' #' cell types are columns. The values in the matrix indicate the  
+#' #' number of cells of a given type within a neighbourhood. 
+#' #' 
+#' #' @param neighbourhoods - a named list of neighbourhoods where a neighbourhood 
+#' #' is a set of cells. 
+#' #' @param cellTypes - named vector of cell types where names are each cell and
+#' #' cell types are a factor
+#' #' @return a matrix of neighbourhoods by cell types
+#' #' @export
+#' ## #' @examples
 #' 
-#' @param neighbourhoods - a named list of neighbourhoods where a neighbourhood 
-#' is a set of cells. 
+#' computeNeighbourhoodByCTMatrix = function(neighbourhoods, cellTypes){
+#'   
+#'     cellNames = names(cellTypes)
+#'     neighbourhoodByCT = matrix(nrow = 0, ncol = length(levels(cellTypes)))
+#'     
+#'     for (neighbourhood in neighbourhoods){
+#'         neighbourhoodByCT = rbind(neighbourhoodByCT,table(cellTypes[neighbourhood]))
+#'     }
+#'     rownames(neighbourhoodByCT) = names(neighbourhoods)
+#'     
+#'     return(neighbourhoodByCT)
+#' }
+  
+
+## ####################################################
+#' This function computes a matrix where neighbourhoods are rows and
+#' cell types are columns. The values in the matrix indicate the
+#' number of cells of a given type within a neighbourhood.
+#'
+#' @param  spatialGraph - a spatial graph in neighbour list format.
 #' @param cellTypes - named vector of cell types where names are each cell and
 #' cell types are a factor
 #' @return a matrix of neighbourhoods by cell types
 #' @export
-## #' @examples
+#' @examples
 
-computeNeighbourhoodByCTMatrix = function(neighbourhoods, cellTypes){
+computeNeighbourhoodByCTMatrix = function(spatialGraph, cellTypes){
   
-    cellNames = names(cellTypes)
-    neighbourhoodByCT = matrix(nrow = 0, ncol = length(levels(cellTypes)))
-    
-    for (neighbourhood in neighbourhoods){
-        neighbourhoodByCT = rbind(neighbourhoodByCT,table(cellTypes[neighbourhood]))
-    }
-    rownames(neighbourhoodByCT) = names(neighbourhoods)
-    
-    return(neighbourhoodByCT)
+  spatialGraphBA = spatialGraph[,c(2,1)]
+  names(spatialGraphBA) = c("nodeA","nodeB")
+  spatialGraph = rbind(spatialGraph,spatialGraphBA)
+  spatialGraph[,2] = cellTypes[spatialGraph[,2]]
+  neighbourhoodbyCTmatrix = table(spatialGraph[,1],spatialGraph[,2])
+  neighbourhoodbyCTmatrix = as.data.frame.matrix(neighbourhoodbyCTmatrix)
+  neighbourhoodbyCTmatrix = neighbourhoodbyCTmatrix[names(cellTypes),]
+  
+  return(neighbourhoodbyCTmatrix)
 }
-  
-
-## #' ## ####################################################
-## #' #' This function computes a matrix where cells are rows and 
-## #' #' cell types are columns. The values in the matrix indicate the  
-## #' #' number of spatial neighbours of a given cell type a particular cell has. 
-## #' #' 
-## #' #' @param  spatialGraph - a spatial graph in neighbour list format.
-## #' #' @param cellTypes - named vector of cell types where names are each cell and
-## #' #' cell types are a factor.
-## #' #' @return a matrix of cells by cell types.
-## #' #' @export
-## #' #' @examples
-## #' 
-## #' computeCellByCTMatrix = function(spatialGraph, cellTypes){
-## #'   
-## #'   cellNames = names(cellTypes)
-## #'   cellByCt = matrix(nrow = 0, ncol = length(levels(cellTypes)))
-## #' 
-## #'   for (cell in cellNames){
-## #'     neighbours = 
-## #'       c(spatialGraph[,2][cell == spatialGraph[,1]],
-## #'         spatialGraph[,1][cell == spatialGraph[,2]])
-## #'     cellByCt = rbind(cellByCt,table(xenium.obj@active.ident[neighbours]))
-## #'   }
-## #'   
-## #'   return(cellByCt)
-## #' }
 
 
 ## ####################################################
@@ -363,37 +358,51 @@ reduceCombinatorialBalls = function(balls)
 #' @param nbhdByCellType - A matrix whose rows are neighbourhoods
 #' each denoted by the cell at their center, whose columns are
 #' cell types, and whose entries are counts.
-#' @param seurat_clusters - a named vector whose names are the cells
-#' and whose entries are their seurat_clusters.
+#' @param cellTypes - named vector of cell types where names are each cell and
+#' cell types are a factor
 #' @return A square matrix whose rownames and colnames are the
 #' seurat_clusters as character strings.  Each row corresponds
 #' to neighbourhoods around all cells of that type and the entries
 #' give the fractions of those neighbourhoods occupied by cells
 #' of each type.
+#' @import dplyr
 #' @export
-cellTypesPerCellTypeMatrix = function(nbhdByCellType,seurat_clusters)
+# cellTypesPerCellTypeMatrix = function(nbhdByCellType,seurat_clusters)
+# {
+#     clusters = unique(seurat_clusters)
+#     clusters = clusters[order(clusters)]
+#     N = length(clusters)
+#     M = matrix(0,nrow=N,ncol=N)
+#     Clusters = as.character(clusters)
+#     rownames(M) = Clusters
+#     colnames(M) = Clusters
+# 
+#     for(cell in rownames(nbhdByCellType))
+#     {
+#         type = as.character(seurat_clusters[cell])
+#         M[type,] = M[type,] + nbhdByCellType[cell,]
+#     }
+# 
+#     rowTotals = rowSums(M)
+#     MM = M
+#     for(i in 1:nrow(M))
+#         MM[i,] = MM[i,]  / rowTotals[i]
+# 
+#     return(MM)
+# }
+
+cellTypesPerCellTypeMatrix = function(nbhdByCellType,cellTypes)
 {
-    clusters = unique(seurat_clusters)
-    clusters = clusters[order(clusters)]
-    N = length(clusters)
-    M = matrix(0,nrow=N,ncol=N)
-    Clusters = as.character(clusters)
-    rownames(M) = Clusters
-    colnames(M) = Clusters
-
-    for(cell in rownames(nbhdByCellType))
-    {
-        type = as.character(seurat_clusters[cell])
-        M[type,] = M[type,] + nbhdByCellType[cell,]
-    }
-
-    rowTotals = rowSums(M)
-    MM = M
-    for(i in 1:nrow(M))
-        MM[i,] = MM[i,]  / rowTotals[i]
-
-    return(MM)
+  MM = aggregate(nbhdByCellType, list(cellTypes), sum)
+  rownames(MM) = MM$Group.1
+  MM = MM[,2:ncol(MM)]
+  MM = MM/rowSums(MM)
+  MM = as.matrix(MM)
+  return(MM)
 }
+
+
+
 
 ## ####################################################
 #' This function converts a matrix as found by
@@ -411,6 +420,10 @@ cellTypesPerCellTypeMatrix = function(nbhdByCellType,seurat_clusters)
 #' Defaults to 0, thus including all edges.
 #' @param edgeWeighting - a parameter used to thicken the edges
 #' in the display.  Defaults to 20.
+#' @param edgeCurved - a parameter to set curvature of the edges.
+#' Defaults to 0.2
+#' @param arrowSize - a parameter to set arrow size. Defaults to 4.
+#' @param arrowWidth - a parameter to set arrow width. Defaults to 4.
 #' @param plotGraph - a logical which determines whether to
 #' plot the graph.  Defaults to TRUE.
 #' @return This returns a directed igraph whose vertices are
@@ -426,6 +439,9 @@ cellTypesPerCellTypeGraphFromMatrix = function(M,
                                                selfEdges=FALSE,
                                                minWeight=0,
                                                edgeWeighting=20,
+                                               edgeCurved=0.2,
+                                               arrowSize=4,
+                                               arrowWidth=4,
                                                plotGraph=TRUE)
 {
     idx = M >= minWeight
@@ -447,11 +463,17 @@ cellTypesPerCellTypeGraphFromMatrix = function(M,
             plot(G,
                  layout=G$coords,
                  vertex.color=V(G)$color,
-                 edge.width=E(G)$width)
+                 edge.width=E(G)$width,
+                 edge.curved = edgeCurved,
+                 arrow.size = arrowSize,
+                 arrow.width = arrowWidth)
         else
             plot(G,
                  layout=G$coords,
-                 edge.width=E(G)$width)
+                 edge.width=E(G)$width,
+                 edge.curved = edgeCurved,
+                 arrow.size = arrowSize,
+                 arrow.width = arrowWidth)
     }
     return(G)    
 }
@@ -476,6 +498,10 @@ cellTypesPerCellTypeGraphFromMatrix = function(M,
 #' Defaults to 0, thus including all edges.
 #' @param edgeWeighting - a parameter used to thicken the edges
 #' in the display.  Defaults to 20.
+#' @param edgeCurved - a parameter to set curvature of the edges.
+#' Defaults to 0.2
+#' @param arrowSize - a parameter to set arrow size. Defaults to 4.
+#' @param arrowWidth - a parameter to set arrow width. Defaults to 4.
 #' @param plotGraph - a logical which determines whether to
 #' plot the graph.  Defaults to TRUE.
 #' @return This returns a directed igraph whose vertices are
@@ -492,6 +518,9 @@ cellTypesPerCellTypeGraph = function(nbhdByCellType,
                                      selfEdges=FALSE,
                                      minWeight=0,
                                      edgeWeighting=20,
+                                     edgeCurved=0.2,
+                                     arrowSize=4,
+                                     arrowWidth=4,
                                      plotGraph=TRUE)
 {
     M = cellTypesPerCellTypeMatrix(nbhdByCellType,seurat_clusters)
@@ -500,7 +529,10 @@ cellTypesPerCellTypeGraph = function(nbhdByCellType,
                                             selfEdges=selfEdges,
                                             minWeight=minWeight,
                                             edgeWeighting=edgeWeighting,
-                                            plotGraph=plotGraph)
+                                            plotGraph=plotGraph,
+                                            edgeCurved = edgeCurved,
+                                            arrowSize = arrowSize,
+                                            arrowWidth = arrowWidth)
 
     
     return(G)
