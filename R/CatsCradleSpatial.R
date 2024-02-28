@@ -33,9 +33,9 @@ computeNeighboursDelaunay = function(centroids){
     results[,1] = cellNames[as.numeric(results[,1])]
     results[,2] = cellNames[as.numeric(results[,2])]
 
-    ## This shouldn't be, but it is:
-    idx = results[,1] == results[,2]
-    results = results[!idx,]
+    ## ## This shouldn't be, but it is:
+    ## idx = results[,1] == results[,2]
+    ## results = results[!idx,]
     
     ## Convert to data.frame and name as nodeA, nodeB:
     results = as.data.frame(results)
