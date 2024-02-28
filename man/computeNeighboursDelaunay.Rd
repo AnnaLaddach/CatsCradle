@@ -22,3 +22,6 @@ columns nodeA and nodeB.
 This function computes a spatial graph where
 neighbors are identified based on Delaunay triangulation.
 }
+\examples{
+smallTriangulation = computeNeighboursDelaunay(smallCentroids)
+}

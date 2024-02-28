@@ -26,3 +26,6 @@ center and the names give the cells.
 This function takes a nearest neighbour graph and a radius
 and finds the combinatorial ball around each cell
 }
+\examples{
+smallCombNbhds = findCombinatorialNeighbourhoods(smallDelaunayTriangulation,2)
+}

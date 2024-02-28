@@ -22,3 +22,6 @@ neighbours.
 This function reduces combinatorial balls to an
 extended nearest neighbour graph
 }
+\examples{
+reduced = reduceCombinatorialBalls(smallCombNbhds)
+}

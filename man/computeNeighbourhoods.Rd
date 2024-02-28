@@ -33,3 +33,6 @@ cell's nearest neighbours.
 This function extracts neighbourhoods from a spatial graph in neighbour list
 format
 }
+\examples{
+smallNbhds = computeNeighbourhoods(smallDelaunayTriangulation,addSelf=TRUE)
+}

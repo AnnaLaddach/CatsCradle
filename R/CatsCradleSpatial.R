@@ -10,34 +10,38 @@
 #' @import geometry
 #' @import Rfast
 #' @export
-## #' @examples
+#' @examples
+#' smallTriangulation = computeNeighboursDelaunay(smallCentroids)
 computeNeighboursDelaunay = function(centroids){
   
-  ##get cell names
-  cellNames = rownames(centroids)
-  
-  ##compute delaunay triangulation
-  triangles = delaunayn(centroids)
-  
-  ##extract neighbours
-  results = rbind(triangles[,c(1,2)],triangles[,c(1,3)],triangles[,c(2,3)])
-  
-  ##sort rows
-  results = rowSort(results)
-  
-  ## remove duplicates
-  results = unique(results)
-  
-  ##convert indices to cell names
-  results[,1] = cellNames[as.numeric(results[,1])]
-  results[,2] = cellNames[as.numeric(results[,2])]
-  
-  
-  ## Convert to data.frame and name as nodeA, nodeB:
-  results = as.data.frame(results)
-  names(results) = c('nodeA','nodeB')
-  
-  return(results)
+    ##get cell names
+    cellNames = rownames(centroids)
+    
+    ##compute delaunay triangulation
+    triangles = delaunayn(centroids)
+    
+    ##extract neighbours
+    results = rbind(triangles[,c(1,2)],triangles[,c(1,3)],triangles[,c(2,3)])
+    
+    ##sort rows
+    results = rowSort(results)
+    
+    ## remove duplicates
+    results = unique(results)
+    
+    ##convert indices to cell names
+    results[,1] = cellNames[as.numeric(results[,1])]
+    results[,2] = cellNames[as.numeric(results[,2])]
+
+    ## This shouldn't be, but it is:
+    idx = results[,1] == results[,2]
+    results = results[!idx,]
+    
+    ## Convert to data.frame and name as nodeA, nodeB:
+    results = as.data.frame(results)
+    names(results) = c('nodeA','nodeB')
+    
+    return(results)
 }
 
 
@@ -111,9 +115,8 @@ extractCells = function(NN)
 #' @return a named list of neighbourhoods where a neighborhood is a set of a 
 #' cell's nearest neighbours. 
 #' @export
-## #' @examples
-#' 
-#' 
+#' @examples
+#' smallNbhds = computeNeighbourhoods(smallDelaunayTriangulation,addSelf=TRUE)
 computeNeighbourhoods = function(spatialGraph,
                                  cellNames=extractCells(spatialGraph),
                                  addSelf = F){
@@ -131,32 +134,6 @@ computeNeighbourhoods = function(spatialGraph,
 }
   
 
-#' ## ####################################################
-#' #' This function computes a matrix where neighbourhoods are rows and 
-#' #' cell types are columns. The values in the matrix indicate the  
-#' #' number of cells of a given type within a neighbourhood. 
-#' #' 
-#' #' @param neighbourhoods - a named list of neighbourhoods where a neighbourhood 
-#' #' is a set of cells. 
-#' #' @param cellTypes - named vector of cell types where names are each cell and
-#' #' cell types are a factor
-#' #' @return a matrix of neighbourhoods by cell types
-#' #' @export
-#' ## #' @examples
-#' 
-#' computeNeighbourhoodByCTMatrix = function(neighbourhoods, cellTypes){
-#'   
-#'     cellNames = names(cellTypes)
-#'     neighbourhoodByCT = matrix(nrow = 0, ncol = length(levels(cellTypes)))
-#'     
-#'     for (neighbourhood in neighbourhoods){
-#'         neighbourhoodByCT = rbind(neighbourhoodByCT,table(cellTypes[neighbourhood]))
-#'     }
-#'     rownames(neighbourhoodByCT) = names(neighbourhoods)
-#'     
-#'     return(neighbourhoodByCT)
-#' }
-  
 
 ## ####################################################
 #' This function computes a matrix where neighbourhoods are rows and
@@ -169,7 +146,8 @@ computeNeighbourhoods = function(spatialGraph,
 #' @return a matrix of neighbourhoods by cell types
 #' @export
 #' @examples
-
+#' smallNbhdMatrix = computeNeighbourhoodByCTMatrix(smallTriangulation,
+#'                                          smallXenium$seurat_clusters)
 computeNeighbourhoodByCTMatrix = function(spatialGraph, cellTypes){
   
   spatialGraphBA = spatialGraph[,c(2,1)]
@@ -198,8 +176,8 @@ computeNeighbourhoodByCTMatrix = function(spatialGraph, cellTypes){
 #' containing clusters and UMAP.
 #' @import Seurat
 #' @export
-## #' @examples
-
+#' @examples
+#' smallNbhdObj = computeNeighbourhoodByCTSeurat(smallNbhdMatrix)
 computeNeighbourhoodByCTSeurat= function(neighbourhoodByCT, resolution = 0.1, 
                                          npcs = 10, n.neighbors = 30L, 
                                          compute_UMAP = T, transpose = F){
@@ -239,8 +217,8 @@ computeNeighbourhoodByCTSeurat= function(neighbourhoodByCT, resolution = 0.1,
 #' @import Seurat  
 #' @import igraph
 #' @export
-## #' @examples
-
+#' @examples
+#' objWithEmbedding = computeGraphEmbedding(smallNbhdObj)
 computeGraphEmbedding = function(seuratObj, graph=defaultGraph(seuratObj)){
   graph = seuratObj@graphs[[graph]]
   igraphGraph = igraph::graph_from_adjacency_matrix(graph)
@@ -266,6 +244,8 @@ computeGraphEmbedding = function(seuratObj, graph=defaultGraph(seuratObj)){
 #'     named numeric.  The values give combinatorial distance from the
 #'     center and the names give the cells.
 #' @export
+#' @examples
+#' smallCombNbhds = findCombinatorialNeighbourhoods(smallDelaunayTriangulation,2)
 findCombinatorialNeighbourhoods = function(NN,radius)
 {
     combinatorialNbhdsImpl = function(edges,radius)
@@ -334,6 +314,8 @@ findCombinatorialNeighbourhoods = function(NN,radius)
 #'     in each combinatorial ball are now considered the center's
 #'     neighbours.
 #' @export
+#' @examples
+#' reduced = reduceCombinatorialBalls(smallCombNbhds)
 reduceCombinatorialBalls = function(balls)
 {
     nodeA = c()
@@ -346,6 +328,8 @@ reduceCombinatorialBalls = function(balls)
         nodeB = c(nodeB,newNeighbours)
     }
     NN = data.frame(nodeA,nodeB)
+    idx = NN$nodeA == NN$nodeB
+    NN = NN[!idx,]
 
     return(NN)
 }
@@ -367,29 +351,6 @@ reduceCombinatorialBalls = function(balls)
 #' of each type.
 #' @import dplyr
 #' @export
-# cellTypesPerCellTypeMatrix = function(nbhdByCellType,seurat_clusters)
-# {
-#     clusters = unique(seurat_clusters)
-#     clusters = clusters[order(clusters)]
-#     N = length(clusters)
-#     M = matrix(0,nrow=N,ncol=N)
-#     Clusters = as.character(clusters)
-#     rownames(M) = Clusters
-#     colnames(M) = Clusters
-# 
-#     for(cell in rownames(nbhdByCellType))
-#     {
-#         type = as.character(seurat_clusters[cell])
-#         M[type,] = M[type,] + nbhdByCellType[cell,]
-#     }
-# 
-#     rowTotals = rowSums(M)
-#     MM = M
-#     for(i in 1:nrow(M))
-#         MM[i,] = MM[i,]  / rowTotals[i]
-# 
-#     return(MM)
-# }
 
 cellTypesPerCellTypeMatrix = function(nbhdByCellType,cellTypes)
 {

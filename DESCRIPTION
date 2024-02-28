@@ -16,7 +16,7 @@ Description: The basic insight driving this package is the idea that by transpos
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 Imports: Seurat,
 	 ggplot2,
 	 networkD3,
@@ -26,7 +26,10 @@ Imports: Seurat,
 	 reshape2,
 	 rdist,
 	 igraph,
-	 interp
+	 interp,
+	 geometry,
+	 Rfast,
+	 dplyr
 Depends: 
     R (>= 4.0)
 LazyData: true

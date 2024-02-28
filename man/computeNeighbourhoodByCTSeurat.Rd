@@ -47,3 +47,6 @@ containing clusters and UMAP.
 This function creates a seurat object using a neighbourhood by cell type
 matrix
 }
+\examples{
+smallNbhdObj = computeNeighbourhoodByCTSeurat(smallNbhdMatrix)
+}
