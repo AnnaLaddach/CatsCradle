@@ -6,12 +6,11 @@
 cell types are columns. The values in the matrix indicate the
 number of cells of a given type within a neighbourhood.}
 \usage{
-computeNeighbourhoodByCTMatrix(neighbourhoods, cellTypes)
+computeNeighbourhoodByCTMatrix(spatialGraph, cellTypes)
 }
 \arguments{
-\item{neighbourhoods}{\itemize{
-\item a named list of neighbourhoods where a neighbourhood
-is a set of cells.
+\item{spatialGraph}{\itemize{
+\item a spatial graph in neighbour list format.
 }}
 
 \item{cellTypes}{\itemize{
@@ -26,4 +25,8 @@ a matrix of neighbourhoods by cell types
 This function computes a matrix where neighbourhoods are rows and
 cell types are columns. The values in the matrix indicate the
 number of cells of a given type within a neighbourhood.
+}
+\examples{
+smallNbhdMatrix = computeNeighbourhoodByCTMatrix(smallTriangulation,
+                                         smallXenium$seurat_clusters)
 }

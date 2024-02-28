@@ -6,7 +6,7 @@
 around cells of that type and discovers the fractions of those
 cells of each type.}
 \usage{
-cellTypesPerCellTypeMatrix(nbhdByCellType, seurat_clusters)
+cellTypesPerCellTypeMatrix(nbhdByCellType, cellTypes)
 }
 \arguments{
 \item{nbhdByCellType}{\itemize{
@@ -15,9 +15,9 @@ each denoted by the cell at their center, whose columns are
 cell types, and whose entries are counts.
 }}
 
-\item{seurat_clusters}{\itemize{
-\item a named vector whose names are the cells
-and whose entries are their seurat_clusters.
+\item{cellTypes}{\itemize{
+\item named vector of cell types where names are each cell and
+cell types are a factor
 }}
 }
 \value{

@@ -14,6 +14,9 @@ cellTypesPerCellTypeGraph(
   selfEdges = FALSE,
   minWeight = 0,
   edgeWeighting = 20,
+  edgeCurved = 0.2,
+  arrowSize = 4,
+  arrowWidth = 4,
   plotGraph = TRUE
 )
 }
@@ -48,6 +51,19 @@ Defaults to 0, thus including all edges.
 \item{edgeWeighting}{\itemize{
 \item a parameter used to thicken the edges
 in the display.  Defaults to 20.
+}}
+
+\item{edgeCurved}{\itemize{
+\item a parameter to set curvature of the edges.
+Defaults to 0.2
+}}
+
+\item{arrowSize}{\itemize{
+\item a parameter to set arrow size. Defaults to 4.
+}}
+
+\item{arrowWidth}{\itemize{
+\item a parameter to set arrow width. Defaults to 4.
 }}
 
 \item{plotGraph}{\itemize{
