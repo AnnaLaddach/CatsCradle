@@ -32,3 +32,7 @@ For each cell type, this function looks at the neighbourhoods
 around cells of that type and discovers the fractions of those
 cells of each type.
 }
+\examples{
+smallCellTypesPerCellType = cellTypesPerCellTypeMatrix(smallNbhdMatrix,
+                                                     smallXenium$seurat_clusters)
+}

@@ -10,8 +10,8 @@ computeNeighboursDelaunay(centroids)
 \arguments{
 \item{centroids}{\itemize{
 \item a dataframe containing centroids
-where rownames are cellnames and columns contain x
-and y coordinates respectively.
+where rownames are cellnames and the first two columns
+contain x and y coordinates respectively.
 }}
 }
 \value{
