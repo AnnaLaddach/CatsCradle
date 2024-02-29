@@ -3,8 +3,8 @@
 #' neighbors are identified based on Delaunay triangulation.
 #' 
 #' @param centroids - a dataframe containing centroids 
-#' where rownames are cellnames and columns contain x 
-#' and y coordinates respectively.
+#' where rownames are cellnames and the first two columns
+#' contain x and y coordinates respectively.
 #' @return a graph in neighbour format, i.e., a data frame with
 #'     columns nodeA and nodeB.
 #' @import geometry
@@ -13,6 +13,9 @@
 #' @examples
 #' smallTriangulation = computeNeighboursDelaunay(smallCentroids)
 computeNeighboursDelaunay = function(centroids){
+
+    ## This is confounded when centroids has extra columns:
+    centroids = centroids[,1:2]
   
     ##get cell names
     cellNames = rownames(centroids)
@@ -146,7 +149,7 @@ computeNeighbourhoods = function(spatialGraph,
 #' @return a matrix of neighbourhoods by cell types
 #' @export
 #' @examples
-#' smallNbhdMatrix = computeNeighbourhoodByCTMatrix(smallTriangulation,
+#' smallNbhdMatrix = computeNeighbourhoodByCTMatrix(smallDelaunayTriangulation,
 #'                                          smallXenium$seurat_clusters)
 computeNeighbourhoodByCTMatrix = function(spatialGraph, cellTypes){
   
@@ -351,7 +354,9 @@ reduceCombinatorialBalls = function(balls)
 #' of each type.
 #' @import dplyr
 #' @export
-
+#' @examples
+#' smallCellTypesPerCellType = cellTypesPerCellTypeMatrix(smallNbhdMatrix,
+#'                                                      smallXenium$seurat_clusters)
 cellTypesPerCellTypeMatrix = function(nbhdByCellType,cellTypes)
 {
   MM = aggregate(nbhdByCellType, list(cellTypes), sum)
@@ -371,7 +376,10 @@ cellTypesPerCellTypeMatrix = function(nbhdByCellType,cellTypes)
 #' whose vertices correspond to seurat_clusters and whose
 #' edge correspond to occupancy fraction.
 #'
-#' @param M - a matrix as found by cellTypesPerCellTypeMatrix
+#' @param M - a matrix as found by cellTypesPerCellTypeMatrix. Note,
+#' however, that this matrix may need to be reduced to a square matrix
+#' as the matrix produced from a subset object may be missing certain
+#' cell types as rows.
 #' @param colors - a named vector of colors used to color the
 #' vertices of the graph.  The names are the seurat_clusters
 #' as character strings.
@@ -395,6 +403,10 @@ cellTypesPerCellTypeMatrix = function(nbhdByCellType,cellTypes)
 #' these are found in V(G)$color.  Edge weights and widths are
 #' found in E(G)$weight and E(G)$width.
 #' @export
+#' @examples
+#' idx = colSums(smallCellTypesPerCellTypeMatrix) > 0
+#' M = smallCellTypesPerCellTypeMatrix[,idx]
+#' G = cellTypesPerCellTypeGraphFromMatrix(M,plotGraph=FALSE)
 cellTypesPerCellTypeGraphFromMatrix = function(M,
                                                colors=NULL,
                                                selfEdges=FALSE,

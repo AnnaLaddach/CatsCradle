@@ -27,6 +27,6 @@ cell types are columns. The values in the matrix indicate the
 number of cells of a given type within a neighbourhood.
 }
 \examples{
-smallNbhdMatrix = computeNeighbourhoodByCTMatrix(smallTriangulation,
+smallNbhdMatrix = computeNeighbourhoodByCTMatrix(smallDelaunayTriangulation,
                                          smallXenium$seurat_clusters)
 }

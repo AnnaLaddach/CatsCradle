@@ -21,7 +21,10 @@ cellTypesPerCellTypeGraphFromMatrix(
 }
 \arguments{
 \item{M}{\itemize{
-\item a matrix as found by cellTypesPerCellTypeMatrix
+\item a matrix as found by cellTypesPerCellTypeMatrix. Note,
+however, that this matrix may need to be reduced to a square matrix
+as the matrix produced from a subset object may be missing certain
+cell types as rows.
 }}
 
 \item{colors}{\itemize{
@@ -77,4 +80,9 @@ This function converts a matrix as found by
 cellTypesPerCellTypeMatrix into a directed igraph
 whose vertices correspond to seurat_clusters and whose
 edge correspond to occupancy fraction.
+}
+\examples{
+idx = colSums(smallCellTypesPerCellTypeMatrix) > 0
+M = smallCellTypesPerCellTypeMatrix[,idx]
+G = cellTypesPerCellTypeGraphFromMatrix(M,plotGraph=FALSE)
 }
