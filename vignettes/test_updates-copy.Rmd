@@ -1,0 +1,421 @@
+---
+title: "test updates"
+output: html_notebook
+---
+
+```{r}
+load("../data/centroids.rda")
+load("../data/smallDelaunayTriangulation.rda")
+```
+
+```{r}
+library(geometry)
+library(Rfast)
+```
+
+
+```{r}
+computeNeighboursDelaunayOrig = function(centroids){
+    
+    ##compute delaunay triangulation
+    delaunay = tri.mesh(centroids[,1], centroids[,2])
+    
+    ##extract triangles from results dataframe
+    triangles = delaunay$trlist
+    
+    results = matrix(nrow = 0, ncol = 2)
+    cellNames = rownames(centroids)
+    
+    ##convert triangle indices to cell names
+    triangles[,1] = cellNames[as.numeric(triangles[,1])]
+    triangles[,2] = cellNames[as.numeric(triangles[,2])]
+    triangles[,3] = cellNames[as.numeric(triangles[,3])]
+    
+    ##create neighbour list
+    for (i in 1:nrow(triangles)){
+        results = rbind(results,sort(c(triangles[i,1],triangles[i,2])))
+        results = rbind(results,sort(c(triangles[i,1],triangles[i,3])))
+        results = rbind(results,sort(c(triangles[i,2],triangles[i,3])))
+    }
+    
+    ##remove duplicate edges
+    results = unique(results)
+    
+    ## Convert to data.frame and name as nodeA, nodeB:
+    results = as.data.frame(results)
+    names(results) = c('nodeA','nodeB')
+    
+    return(results)
+}
+
+```
+
+```{r}
+delaunayNeighbours = computeNeighboursDelaunay(centroids)
+delaunayNeighboursOrig = computeNeighboursDelaunayOrig(centroids)
+```
+
+```{r}
+dim(centroids)[1] == length(unique(c(delaunayNeighbours$nodeA,delaunayNeighbours$nodeB)))
+```
+```{r}
+length(cells)
+```
+```{r}
+dim(centroids)[0]
+```
+
+
+```{r}
+dim(delaunayNeighbours)
+dim(delaunayNeighboursOrig)
+```
+
+```{r}
+head(delaunayNeighbours[order(delaunayNeighbours$nodeA,delaunayNeighbours$nodeB),], n = 100)
+```
+```{r}
+head(delaunayNeighboursOrig[order(delaunayNeighboursOrig$nodeA,delaunayNeighboursOrig$nodeB),], n = 100)
+```
+
+`
+
+```{r}
+delaunayNeighboursOrig[order(delaunayNeighboursOrig$nodeA,delaunayNeighboursOrig$nodeB),] == delaunayNeighbours[order(delaunayNeighbours$nodeA,delaunayNeighbours$nodeB),]
+```
+
+
+```{r}
+save(delaunayNeighboursOrig,file = "../data/delaunayNeighboursOrig.rda")
+```
+
+```{r}
+delaunayNeighboursOrigR = delaunayNeighboursOrig
+names(delaunayNeighboursOrigR) = c("nodeB","nodeA")
+delaunayNeighboursOrig = rbind(delaunayNeighboursOrig,delaunayNeighboursOrigR[,c(2,1)])
+```
+
+```{r}
+delaunayNeighboursR = delaunayNeighbours
+names(delaunayNeighboursR) = c("nodeB","nodeA")
+delaunayNeighbours = rbind(delaunayNeighbours,delaunayNeighboursR[,c(2,1)])
+```
+
+
+```{r}
+combined = paste0(delaunayNeighbours$nodeA, "_", delaunayNeighbours$nodeB)
+combined_orig = paste0(delaunayNeighboursOrig$nodeA, "_", delaunayNeighboursOrig$nodeB)
+```
+
+
+```{r}
+dim(delaunayNeighboursOrig)
+```
+
+```{r}
+dim(delaunayNeighbours)
+```
+
+```{r}
+unique(combined[!(combined %in% combined_orig)])
+```
+
+
+```{r}
+unique(combined_orig[!(combined_orig %in% combined)])
+```
+
+```{r}
+computeNeighbourhoodByCTMatrixOrig = function(neighbourhoods, cellTypes){
+
+     cellNames = names(cellTypes)
+     neighbourhoodByCT = matrix(nrow = 0, ncol = length(levels(cellTypes)))
+
+     for (neighbourhood in neighbourhoods){
+         neighbourhoodByCT = rbind(neighbourhoodByCT,table(cellTypes[neighbourhood]))
+     }
+     rownames(neighbourhoodByCT) = names(neighbourhoods)
+
+     return(neighbourhoodByCT)
+}
+```
+
+
+```{r}
+neighbourhoods = computeNeighbourhoods(delaunayNeighbours,
+names(clusters))
+
+neighbourhoodbyCTmatrixOrig = computeNeighbourhoodByCTMatrixOrig(neighbourhoods, 
+                                                         clusters)
+```
+
+```{r}
+neighbourhoodbyCTmatrix = computeNeighbourhoodByCTMatrix(delaunayNeighbours,clusters) 
+```
+
+```{r}
+sum(neighbourhoodbyCTmatrix == neighbourhoodbyCTmatrixOrig)
+```
+
+```{r}
+dim(neighbourhoodbyCTmatrix)
+```
+
+```{r}
+36553 * 24
+```
+
+```{r}
+cellTypesPerCellTypeMatrixOrig = function(nbhdByCellType,seurat_clusters)
+{
+    clusters = unique(seurat_clusters)
+    clusters = clusters[order(clusters)]
+    N = length(clusters)
+    M = matrix(0,nrow=N,ncol=N)
+    Clusters = as.character(clusters)
+    rownames(M) = Clusters
+    colnames(M) = Clusters
+
+    for(cell in rownames(nbhdByCellType))
+    {
+        type = as.character(seurat_clusters[cell])
+        M[type,] = M[type,] + nbhdByCellType[cell,]
+    }
+
+    rowTotals = rowSums(M)
+    MM = M
+    for(i in 1:nrow(M))
+        MM[i,] = MM[i,]  / rowTotals[i]
+
+    return(MM)
+}
+```
+
+
+```{r}
+cellTypeMatrixOrig = cellTypesPerCellTypeMatrixOrig(neighbourhoodbyCTmatrix,clusters)
+```
+
+```{r}
+cellTypeMatrix = cellTypesPerCellTypeMatrix(neighbourhoodbyCTmatrix,clusters)
+```
+
+```{r}
+dim(cellTypeMatrix)
+```
+```{r}
+cellTypesPerCellTypeGraphFromMatrix(cellTypeMatrix)
+```
+```{r}
+cellTypesPerCellTypeGraph(neighbourhoodbyCTmatrix, clusters)
+```
+```{r}
+library(data.table)
+```
+```{r}
+delaunayNeighbours2 = data.table(delaunayNeighbours)
+```
+
+
+```{r}
+spatialGraph = delaunayNeighbours
+```
+
+
+```{r}
+findCombinatorialNeighbourhoodsNew  = function(spatialGraph, n){
+  spatialGraph = data.table(spatialGraph)
+  
+  spatialGraphR = spatialGraph
+  names(spatialGraphR) = c("nodeB","nodeA")
+  spatialGraph = rbind(spatialGraph,spatialGraphR[,c(2,1)])
+  neighbours = list()
+  neighbours[[1]] = spatialGraph
+  
+  for (i in (2:n)){
+    print(i)
+    graph = merge(neighbours[[i-1]], neighbours[[1]], by.x = "nodeB", by.y = "nodeA", allow.cartesian = T)
+    graph = graph[,c("nodeA","nodeB.y")]
+    names(graph) = c("nodeA","nodeB")
+    graph = unique(graph)
+    orig = c(paste0(neighbours[[i-1]]$nodeB,"_",neighbours[[i-1]]$nodeA))#,paste0(neighbours[[i-1]]$nodeA,"_",neighbours[[i-1]]$nodeB))
+    if (i > 2){
+      orig = c(orig,paste0(neighbours[[i-2]]$nodeB,"_",neighbours[[i-2]]$nodeA))#, paste0(neighbours[[i-2]]$nodeA,"_",neighbours[[i-2]]$nodeB))
+    }
+    graph = graph[graph$nodeA != graph$nodeB,]
+    new = paste0(graph$nodeA,"_",graph$nodeB)
+    graph = graph[!(new %in% orig),]
+    #print(table(new %in% orig))
+   # print(dim(graph))
+    neighbours[[i]] = graph
+  }
+  return(neighbours)
+}
+```
+
+
+
+
+```{r}
+origCN = findCombinatorialNeighbourhoods(smallDelaunayTriangulation,4)
+```
+
+```{r}
+newCN = findCombinatorialNeighbourhoodsNew(smallDelaunayTriangulation,4)
+```
+```{r}
+CNBig = findCombinatorialNeighbourhoodsNew(delaunayNeighbours,4)
+```
+
+
+```{r}
+CNGraph = reduceCombinatorialBalls(origCN)
+```
+
+```{r}
+CNGraphNew = rbind(newCN[[1]],newCN[[2]],newCN[[3]],newCN[[4]])
+```
+
+```{r}
+CNGraphNew = CNGraphNew[CNGraphNew$nodeA != CNGraphNew$nodeB,] 
+```
+
+```{r}
+table(paste0(CNGraph$nodeA,"_",CNGraph$nodeB) %in% paste0(CNGraphNew$nodeA,"_",CNGraphNew$nodeB)) 
+```
+
+
+```{r}
+table(paste0(newCN[[1]]$nodeA,"_",newCN[[1]]$nodeB) %in% paste0(newCN[[2]]$nodeA,"_",newCN[[2]]$nodeB))
+```
+
+
+```{r}
+table(paste0(newCN[[2]]$nodeA,"_",newCN[[2]]$nodeB) %in% paste0(newCN[[3]]$nodeA,"_",newCN[[3]]$nodeB))
+```
+```{r}
+table(paste0(newCN[[3]]$nodeA,"_",newCN[[3]]$nodeB) %in% paste0(newCN[[4]]$nodeA,"_",newCN[[4]]$nodeB))
+```
+```{r}
+table(paste0(newCN[[1]]$nodeA,"_",newCN[[1]]$nodeB) %in% paste0(newCN[[4]]$nodeA,"_",newCN[[4]]$nodeB))
+```
+
+
+
+```{r}
+table(paste0(newCN[[1]]$nodeA,"_",newCN[[1]]$nodeB) %in% paste0(newCN[[3]]$nodeA,"_",newCN[[3]]$nodeB))
+```
+
+
+
+
+```{r}
+table(paste0(newCN[[2]]$nodeA,"_",newCN[[2]]$nodeB) %in% paste0(newCN[[4]]$nodeA,"_",newCN[[4]]$nodeB))
+```
+
+
+
+
+```{r}
+table(paste0(CNBig[[2]]$nodeA,"_",CNBig[[2]]$nodeB) %in% paste0(CNBig[[3]]$nodeA,"_",CNBig[[3]]$nodeB))
+```
+```{r}
+table(paste0(CNBig[[3]]$nodeA,"_",CNBig[[3]]$nodeB) %in% paste0(CNBig[[4]]$nodeA,"_",CNBig[[4]]$nodeB))
+```
+```{r}
+table(paste0(CNBig[[1]]$nodeA,"_",CNBig[[1]]$nodeB) %in% paste0(CNBig[[4]]$nodeA,"_",CNBig[[4]]$nodeB))
+```
+
+
+
+```{r}
+table(paste0(CNBig[[1]]$nodeA,"_",CNBig[[1]]$nodeB) %in% paste0(CNBig[[3]]$nodeA,"_",CNBig[[3]]$nodeB))
+```
+
+
+
+
+```{r}
+table(paste0(newCN[[2]]$nodeA,"_",newCN[[2]]$nodeB) %in% paste0(newCN[[4]]$nodeA,"_",newCN[[4]]$nodeB))
+```
+
+
+```{r}
+new = paste0(CNGraphNew$nodeA,"_",CNGraphNew$nodeB)
+orig = paste0(CNGraph$nodeB,"_",CNGraph$nodeA)
+```
+
+
+```{r}
+print(dim(CNGraphNew))
+print(dim(unique(CNGraphNew))) 
+```
+
+
+```{r}
+table(new %in% orig)
+```
+
+```{r}
+table(orig %in% new)
+```
+
+
+```{r}
+table(new %in% new)
+```
+```{r}unique
+?
+```
+
+
+```{r}
+neighbours = findCombinatorialNeighbourhoods(spatialGraph, 4)
+```
+
+```{r}
+largeCentroids = xenium.obj[["fov"]]@boundaries[["centroids"]]@coords
+```
+
+```{r}
+rm(xenium.obj)
+gc()
+```
+
+
+```{r}
+rownames(largeCentroids) = 1:length(largeCentroids[,1]) 
+spatialGraph = computeNeighboursDelaunay(largeCentroids)
+```
+
+```{r}
+neighbours = findCombinatorialNeighbourhoods(spatialGraph, 4)
+```
+
+
+
+```{r}
+dim(neighbours[[i]])
+```
+
+
+```{r}
+test = merge(delaunayNeighbours2, delaunayNeighbours2, by.x = "nodeB", by.y = "nodeA", all.x = T, allow.cartesian = T)
+```
+
+```{r}
+test2 = merge(test, delaunayNeighbours2, by.x = "nodeB.y", by.y = "nodeA", all.y = T,allow.cartesian = T)
+```
+
+```{r}
+second_neighbours = unique(test[,c("nodeA","nodeB.y")])
+```
+
+```{r}
+names(second_neighbours) = c("nodeA","nodeB")
+
+
+first_
+second_neighbours[!(second_neighbours %in% delaunayNeighbours2)]
+```
+
