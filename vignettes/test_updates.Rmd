@@ -3,6 +3,10 @@ title: "test updates"
 output: html_notebook
 ---
 
+```{r}
+centroids = load("../data/centroids.rda")
+```
+
 
 ```{r}
 computeNeighboursDelaunayOrig = function(centroids){
@@ -43,6 +47,16 @@ computeNeighboursDelaunayOrig = function(centroids){
 ```{r}
 delaunayNeighbours = computeNeighboursDelaunay(centroids)
 delaunayNeighboursOrig = computeNeighboursDelaunayOrig(centroids)
+```
+
+```{r}
+dim(centroids)[1] == length(unique(c(delaunayNeighbours$nodeA,delaunayNeighbours$nodeB)))
+```
+```{r}
+length(cells)
+```
+```{r}
+dim(centroids)[0]
 ```
 
 
@@ -188,5 +202,32 @@ cellTypesPerCellTypeGraphFromMatrix(cellTypeMatrix)
 ```
 ```{r}
 cellTypesPerCellTypeGraph(neighbourhoodbyCTmatrix, clusters)
+```
+```{r}
+library(data.table)
+```
+```{r}
+delaunayNeighbours2 = data.table(delaunayNeighbours)
+```
+
+
+```{r}
+test = merge(delaunayNeighbours2, delaunayNeighbours2, by.x = "nodeB", by.y = "nodeA", all.y = T, allow.cartesian = T)
+```
+
+```{r}
+test2 = merge(test, delaunayNeighbours2, by.x = "nodeB.y", by.y = "nodeA", all.y = T,allow.cartesian = T)
+```
+
+```{r}
+second_neighbours = unique(test[,c("nodeA","nodeB.y")])
+```
+
+```{r}
+names(second_neighbours) = c("nodeA","nodeB")
+
+
+first_
+second_neighbours[!(second_neighbours %in% delaunayNeighbours2)]
 ```
 
