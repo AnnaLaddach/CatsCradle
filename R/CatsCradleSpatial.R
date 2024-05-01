@@ -59,42 +59,56 @@ computeNeighboursDelaunay = function(centroids){
 #' @param threshold - a distance cut off to compute neighbours.
 #' @return a graph in neighbour format, i.e., a data frame with
 #'     columns nodeA and nodeB.
-#' @import rdist
+#' @import rdist 
+#' @import reshape2 
+#' @import Rfast
 #' @export
 ## #' @examples
+
 computeNeighboursEuclidean = function(centroids, threshold){
-    colnames(centroids) = c("x","y")
-    results = matrix(nrow = 0, ncol = 2)
-    
-    for (i in 1:nrow(centroids)){
-        cellX = centroids[i,1]
-        cellY = centroids[i,2]
-        cellName = rownames(centroids)[i]
-        
-        ##only calculate distances for cells that could be within distance threshold.
-        possibleNeighbours = centroids[(centroids[,"x"] < (cellX + threshold)) &
-                                       (centroids[,"x"] > (cellX - threshold)) &
-                                       (centroids[,"y"] < (cellY + threshold)) &
-                                       (centroids[,"y"] > (cellY - threshold)),,
-                                       drop = FALSE]
-        
-        neighbours = rownames(possibleNeighbours)[cdist(centroids[i,,drop=FALSE]
-                                                       ,possibleNeighbours,)[1,] < threshold]
-        
-        for (neighbour in neighbours){
-            if (cellName != neighbour){
-                results = rbind(results,sort(c(cellName,neighbour)))
-            }
-        }
+  colnames(centroids) = c("x","y")
+  maxX = max(centroids[,"x"])
+  minX = min(centroids[,"x"])
+  maxY = max(centroids[,"y"])
+  minY = min(centroids[,"y"])
+  XStep = (maxX - minX)/10
+  YStep = (maxY - minY)/10
+  results = list()
+  k = 1
+  
+  ##calculate distances for cells in overlapping windows  
+  for (i in 0:9){
+    for (j in 0:9){
+      x1 = i * XStep + minX 
+      x2 = x1 + 2*XStep
+      y1 = j * YStep + minY 
+      y2 = y1 + 2*YStep
+      selected = centroids[(centroids[,"x"] >= x1) & (centroids[,"x"] <= x2) & (centroids[,"y"] >= y1) & (centroids[,"y"] <= y2), ]
+      distances = pdist(selected) 
+      distances = reshape2::melt(distances)
+      
+      ##retain edges within distance threshold
+      distances = distances[distances$value < threshold,]
+      distances = distances[,c(1,2)]
+      
+      ##sort rows
+      distances =  rowSort(as.matrix(distances))
+      distances[,1] = rownames(selected)[distances[,1]]
+      distances[,2] = rownames(selected)[as.numeric(distances[,2])]
+      
+      results[[k]] = distances
+      k = k+1
     }
-    ##remove duplicate edges
-    results = unique(results)
-    
-    ## Convert to data.frame and name as nodeA, nodeB:
-    results = as.data.frame(results)
-    names(results) = c('nodeA','nodeB')
-    
-    return(results)
+  }
+  
+  results = do.call(rbind, results)
+  
+  ##remove duplicate edges
+  results = unique(results)
+  colnames(results) = c("nodeA", "nodeB")
+  results = results[results[,"nodeA"] != results[,"nodeB"],]
+  results = as.data.frame(results)
+  return(results)
 }
 
 ## ####################################################

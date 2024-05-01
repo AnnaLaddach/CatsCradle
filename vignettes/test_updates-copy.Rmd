@@ -419,3 +419,179 @@ first_
 second_neighbours[!(second_neighbours %in% delaunayNeighbours2)]
 ```
 
+
+```{r}
+computeNeighboursEuclidean = function(centroids, threshold){
+    colnames(centroids) = c("x","y")
+    #results = matrix(nrow = 0, ncol = 2)
+    results = list()
+    for (i in 1:nrow(centroids)){
+        cellX = centroids[i,1]
+        cellY = centroids[i,2]
+        cellName = rownames(centroids)[i]
+        
+        ##only calculate distances for cells that could be within distance threshold.
+        possibleNeighbours = centroids[(centroids[,"x"] < (cellX + threshold)) &
+                                       (centroids[,"x"] > (cellX - threshold)) &
+                                       (centroids[,"y"] < (cellY + threshold)) &
+                                       (centroids[,"y"] > (cellY - threshold)),,
+                                       drop = FALSE]
+        
+        neighbours = rownames(possibleNeighbours)[cdist(centroids[i,,drop=FALSE]
+                                                       ,possibleNeighbours,)[1,] < threshold]
+        results[[i]] = cbind(cellName, neighbours)
+        
+  
+    }
+    ##remove duplicate edges
+    results = unique(results)
+    
+    ## Convert to data.frame and name as nodeA, nodeB:
+    results = as.data.frame(results)
+    names(results) = c('nodeA','nodeB')
+    
+    return(results)
+}
+
+```
+
+```{r}
+computeNeighboursEuclidean = function(centroids, threshold){
+    colnames(centroids) = c("x","y")
+    #results = matrix(nrow = 0, ncol = 2)
+    results = list()
+    
+    calculateNeighbours = function()
+    for (i in 1:nrow(centroids)){
+        cellX = centroids[i,1]
+        cellY = centroids[i,2]
+        cellName = rownames(centroids)[i]
+        
+        ##only calculate distances for cells that could be within distance threshold.
+        possibleNeighbours = centroids[(centroids[,"x"] < (cellX + threshold)) &
+                                       (centroids[,"x"] > (cellX - threshold)) &
+                                       (centroids[,"y"] < (cellY + threshold)) &
+                                       (centroids[,"y"] > (cellY - threshold)),,
+                                       drop = FALSE]
+        
+        neighbours = rownames(possibleNeighbours)[cdist(centroids[i,,drop=FALSE]
+                                                       ,possibleNeighbours,)[1,] < threshold]
+        results[[i]] = cbind(cellName, neighbours)
+        
+  
+    }
+    ##remove duplicate edges
+    results = unique(results)
+    
+    ## Convert to data.frame and name as nodeA, nodeB:
+    results = as.data.frame(results)
+    names(results) = c('nodeA','nodeB')
+    
+    return(results)
+}
+
+```
+
+```{r}
+for (i in 1:nrow(centroids)){
+  a = 1
+}
+```
+
+```{r}
+d = pdist(centroids)
+```
+
+
+```{r}
+computeNeighboursEuclideanNew = function(centroids, threshold){
+  colnames(centroids) = c("x","y")
+  maxX = max(centroids[,"x"])
+  minX = min(centroids[,"x"])
+  maxY = max(centroids[,"y"])
+  minY = min(centroids[,"y"])
+  XStep = (maxX - minX)/10
+  YStep = (maxY - minY)/10
+  results = list()
+  k = 1
+  for (i in 0:9){
+    for (j in 0:9){
+      x1 = i * XStep + minX 
+      x2 = x1 + 2*XStep
+      y1 = j * YStep + minY 
+      y2 = y1 + 2*YStep
+      selected = centroids[(centroids[,"x"] >= x1) & (centroids[,"x"] <= x2) & (centroids[,"y"] >= y1) & (centroids[,"y"] <= y2), ]
+      distances = pdist(selected) 
+      distances = reshape2::melt(distances)
+      distances = distances[distances$value < threshold,]
+      distances = distances[,c(1,2)]
+      distances =  rowSort(as.matrix(distances))
+      distances[,1] = rownames(selected)[distances[,1]]
+      distances[,2] = rownames(selected)[as.numeric(distances[,2])]
+    
+      results[[k]] = distances
+      k = k+1
+    }
+  }
+  
+  results = do.call(rbind, results)
+  results = unique(results)
+  colnames(results) = c("nodeA", "nodeB")
+  results = results[results[,"nodeA"] != results[,"nodeB"],]
+  results = as.data.frame(results)
+  return(results)
+}
+```
+
+```{r}
+t1 = Sys.time()
+euclideanNew = computeNeighboursEuclideanNew(centroids, 20)
+t2 = Sys.time()
+print(t2-t1)
+```
+```{r}
+t1 = Sys.time()
+euclideanOrig = computeNeighboursEuclidean(centroids, 20)
+t2 = Sys.time()
+print(t2-t1)
+```
+
+
+```{r}
+head(euclideanNew)
+```
+
+
+
+```{r}
+head(euclideanOrig)
+```
+```{r}
+dim(euclideanOrig)
+```
+
+```{r}
+dim(euclideanNew)
+```
+```{r}
+orig = paste0(euclideanOrig$nodeA, "_", euclideanOrig$nodeB)
+new = paste0(euclideanNew[,"nodeA"], "_", euclideanNew[,"nodeB"])
+```
+
+```{r}
+table(orig %in% new)
+```
+
+```{r}
+table(new %in% orig)
+```
+```{r}
+orig[!(orig %in% new)]
+```
+```{r}
+new[!(new %in% orig)]
+```
+```{r}
+"7_4537" %in% new
+```
+
