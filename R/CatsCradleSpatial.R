@@ -66,6 +66,7 @@ computeNeighboursDelaunay = function(centroids){
 ## #' @examples
 
 computeNeighboursEuclidean = function(centroids, threshold){
+  centroids = centroids[,c(1,2)]
   colnames(centroids) = c("x","y")
   maxX = max(centroids[,"x"])
   minX = min(centroids[,"x"])
@@ -207,7 +208,8 @@ computeNeighbourhoodByCTSeurat= function(neighbourhoodByCT, resolution = 0.1,
                                  npcs = npcs)
     if (transpose){
         neighbourhoodSeurat = RunUMAP(neighbourhoodSeurat,assay='RNA',
-                                      n.neighbors = n.neighbors)
+                                      dims = 1:10, n.neighbors = n.neighbors)
+  
     } else{
         neighbourhoodSeurat = RunUMAP(neighbourhoodSeurat,assay='RNA',
                                       features=rownames(neighbourhoodSeurat), 
@@ -383,6 +385,7 @@ expandNeighbourhoods  = function(spatialGraph, n){
     orig = c(paste0(neighbours[[i-1]]$nodeB,"_",neighbours[[i-1]]$nodeA))
     if (i > 2){
       orig = c(orig,paste0(neighbours[[i-2]]$nodeB,"_",neighbours[[i-2]]$nodeA))
+    }
     graph = graph[graph$nodeA != graph$nodeB,]
     new = paste0(graph$nodeA,"_",graph$nodeB)
     graph = graph[!(new %in% orig),]
@@ -413,7 +416,7 @@ expandNeighbourhoods  = function(spatialGraph, n){
 #' @examples
 #' smallCellTypesPerCellType = cellTypesPerCellTypeMatrix(smallNbhdMatrix,
 #'                                                      smallXenium$seurat_clusters)
-cellTypesPerCellTypeMatrix = function(nbhdByCellType,cellTypes)
+computeCellTypesPerCellTypeMatrix = function(nbhdByCellType,cellTypes)
 {
   MM = aggregate(nbhdByCellType, list(cellTypes), sum)
   rownames(MM) = MM$Group.1
@@ -566,6 +569,56 @@ cellTypesPerCellTypeGraph = function(nbhdByCellType,
     
     return(G)
 }
+
+
+## ####################################################
+#' This function calculates P values for whether cell types are more frequently 
+#' neighbours than expected by chance. It does this by comparison to randomised
+#' neighbour graphs where edges are randomised but the degree of each node is 
+#' preserved. 
+#'
+#' @param spatialGraph - a spatial graph in neighbour list format.
+#' @param cellTypes - named vector of cell types where names are each cell and
+#' cell types are a factor.
+#' @param nSim - the number of randomised graphs to create for pvalue 
+#' calculation.
+#' @return A square matrix containing upper tail p values describing whether two 
+#' cell types are more frequently found together than expected by chance.
+#' @import abind
+#' @export
+#' @examples
+computeNeighbourEnrichment = function(spatialGraph, cellTypes, nSim = 1000){
+  results = list()
+  spatialGraphOrig = spatialGraph
+  neighbourhoodByCT = computeNeighbourhoodByCTMatrix(spatialGraphOrig,cellTypes) 
+  cellTypeMatrix = computeCellTypesPerCellTypeMatrix(neighbourhoodByCT, cellTypes) 
+  for (i in 1:nSim){ 
+    spatialGraph = spatialGraphOrig
+    spatialGraphBA = spatialGraph[,c(2,1)]
+    names(spatialGraphBA) = c("nodeA","nodeB")
+    spatialGraph = rbind(spatialGraph,spatialGraphBA)
+    spatialGraph = unique(spatialGraph)
+    spatialGraph[,2] = sample(spatialGraph[,2])
+    spatialGraph[,2] = cellTypes[spatialGraph[,2]]
+    neighbourhoodbyCTmatrix = table(spatialGraph[,1],spatialGraph[,2])
+    neighbourhoodbyCTmatrix = as.data.frame.matrix(neighbourhoodbyCTmatrix)
+    neighbourhoodbyCTmatrix = neighbourhoodbyCTmatrix[names(cellTypes),]
+    results[[i]] = computeCellTypesPerCellTypeMatrix(neighbourhoodbyCTmatrix,cellTypes)
+    if (i %% 10 == 0){
+      print(i)
+    }
+  }
+  results = lapply(results, function(x, y) y > x, y = cellTypeMatrix)
+  results = abind(results, along = 3L)
+  results = rowSums(results, dims = 2)
+  results = abs((results - nSim)/nSim) 
+  return(results)
+}
+
+
+
+
+
 
 ## ####################################################
 #' This function retrieves the Nichenetr ligand-
