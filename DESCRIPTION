@@ -29,7 +29,9 @@ Imports: Seurat,
 	 interp,
 	 geometry,
 	 Rfast,
-	 dplyr
+	 dplyr,
+	 data.table,
+	 abind
 Depends: 
     R (>= 4.0)
 LazyData: true
