@@ -33,6 +33,6 @@ around cells of that type and discovers the fractions of those
 cells of each type.
 }
 \examples{
-smallCellTypesPerCellType = cellTypesPerCellTypeMatrix(smallNbhdMatrix,
+smallCellTypesPerCellType = computeCellTypesPerCellTypeMatrix(smallNbhdMatrix,
                                                      smallXenium$seurat_clusters)
 }

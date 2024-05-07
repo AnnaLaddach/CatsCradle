@@ -414,7 +414,7 @@ expandNeighbourhoods  = function(spatialGraph, n){
 #' @import dplyr
 #' @export
 #' @examples
-#' smallCellTypesPerCellType = cellTypesPerCellTypeMatrix(smallNbhdMatrix,
+#' smallCellTypesPerCellType = computeCellTypesPerCellTypeMatrix(smallNbhdMatrix,
 #'                                                      smallXenium$seurat_clusters)
 computeCellTypesPerCellTypeMatrix = function(nbhdByCellType,cellTypes)
 {
