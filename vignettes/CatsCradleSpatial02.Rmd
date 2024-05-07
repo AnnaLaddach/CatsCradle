@@ -57,7 +57,9 @@ First load the spatial data:
 load("../data/smallXenium.rda")
 ```
 
-To illustrate this concept we use a subset of a xenium data set that profiles the mouse the mouse hippocampus available from 10x genomics (https://www.10xgenomics.com/datasets/fresh-frozen-mouse-brain-for-xenium-explorer-demo-1-standard)
+To illustrate this concept we use a subset of a xenium data set that
+profiles the mouse hippocampus available from 10x genomics
+(https://www.10xgenomics.com/datasets/fresh-frozen-mouse-brain-for-xenium-explorer-demo-1-standard)
 
 We will now visualise this dataset coloured by cell population (louvain cluster)
 
@@ -82,7 +84,7 @@ clusters = smallXenium@active.ident
 ### Nearest neighbour graphs:
 
 The centroids of the cells are given as points in the plane. Delaunay
-triangulation discovers and optimal way of connecting each of these
+triangulation discovers an optimal way of connecting each of these
 points to its neighbors.  For each cell in the spatial Seurat object
 the following discovers its neighbours based on this Delaunay
 triangulation:
@@ -145,7 +147,9 @@ neighbourhoodByCTMatrix = computeNeighbourhoodByCTMatrix(delaunayNeighbours,
 
 In the resulting matrix neighbourhoods are rows and cell types are columns. 
 The values in the matrix indicate the number of cells of a given type within a 
-neighbourhood.
+neighbourhood. Note that not all seurat_clusters of the full spatial
+Seurat object appear in the subset we are working with.  The resulting
+neighbourhoodByCTMatrix lists only those cell types that actually appear.
 
 Let's do the same for our expanded neighbourhoods.
 ```{r}
@@ -162,6 +166,11 @@ cellTypesPerCellTypeMatrix =
   computeCellTypesPerCellTypeMatrix(neighbourhoodByCTMatrix,clusters)
 ```
 
+Rows and columns both correspond to cell types, but they are playing
+different roles.  For a given row (say, cell type A) the entry in
+column B represents the fraction of cells in neighbourhoods of cells
+of type A that are of type B.
+
 We can then display this as a force directed graph. Here we choose only to 
 display contact based interactions that constitute at least 5% of a cell type's
 interactions. Of note, this graph is directed as, for example, 50% of cell type
@@ -173,6 +182,12 @@ names(colors) = levels(clusters)
 cellTypesPerCellTypeGraphFromMatrix(cellTypesPerCellTypeMatrix, 
                                     minWeight = 0.05, colors = colors)
 ```
+
+Here arrows are directed from rows to columns. Thus, we see an arrow from
+12 to 18 because neighbourhoods of cells of type 12 are composed on
+average of ~15% cells of type 18.  We do not see an arrow from 18 to
+12 because on average, neighbourhoods of cells of type 18 have only 3%
+cells of type 18, which falls below the chosen cutoff.
 
 ```{r}
 pheatmap(cellTypesPerCellTypeMatrix)
@@ -266,8 +281,13 @@ biological question at hand.
 
 ## Relating cell type clusters to neighbourhood clusters
 
-We can now ask how clusters defined transcriptomically (cell type) relate to those defined 
-based on neighbourhoods (cell niche). 
+We can now ask how clusters defined transcriptomically (cell type)
+relate to those defined based on neighbourhoods (cell niche).  Put
+differently, each cell has its (transcriptomic) cell type and sits at
+the center of a neighbourhood with a given neighbourhood type.  For
+each cell type A and each neighbourhood type B, we can ask what
+percentage of the time a cell of type A sits at the center of a
+neighbourhood of type B.
 
 ```{r}
 CTbyNeighbourhoodCluster = table(neighbourhoodSeurat$cellType,neighbourhoodSeurat@active.ident)
