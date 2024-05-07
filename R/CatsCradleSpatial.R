@@ -252,106 +252,106 @@ computeGraphEmbedding = function(seuratObj, graph=defaultGraph(seuratObj)){
 
 
 
-#' ## ####################################################
-#' #' This function takes a nearest neighbour graph and a radius
-#' #' and finds the combinatorial ball around each cell
-#' #'
-#' #' @param NN - a nearest neighbour graph
-#' #' @param radius - combinatorial radius
-#' #' @return This returns a named list.  In each case, the name is the
-#' #'     cell at the center of the ball.  Each item in the list is a
-#' #'     named numeric.  The values give combinatorial distance from the
-#' #'     center and the names give the cells.
-#' #' @export
-#' #' @examples
-#' #' smallCombNbhds = findCombinatorialNeighbourhoods(smallDelaunayTriangulation,2)
-#' findCombinatorialNeighbourhoods = function(NN,radius)
-#' {
-#'     combinatorialNbhdsImpl = function(edges,radius)
-#'     {
-#'         ## ####################################################
-#'         ## The base case:
-#'         if(radius == 0)
-#'         {
-#'             ball = list()
-#'             vertices = names(edges)
-#'             for(v in vertices)
-#'             {
-#'                 a = 0
-#'                 names(a) = v
-#'                 ball[[v]] = a
-#'             }
-#'             return(ball)
-#'         }
-#'         ## ####################################################
-#'         ## Recurse:
-#'         else
-#'         {
-#'             smaller = combinatorialNbhdsImpl(edges,radius-1)
-#'             for(v in names(smaller))
-#'             {
-#'                 frontier = smaller[[v]][smaller[[v]]==radius-1]
-#'                 proposed = c()
-#'                 for(frontierV in names(frontier))
-#'                     proposed = c(proposed,edges[[frontierV]])
-#'                 proposed = unique(proposed)
-#'                 idx = proposed %in% names(smaller[[v]])
-#'                 proposed = proposed[!idx]
-#'                 theNew = rep(radius,length(proposed))
-#'                 names(theNew) = proposed
-#'                 smaller[[v]] = c(smaller[[v]],theNew)
-#'             }
-#'             return(smaller)
-#'         }
-#'     } ## End of impl
-#' 
-#'     ## ####################################################    
-#'     ## Get the edges:
-#'     vertices = unique(c(NN$nodeA,NN$nodeB))
-#'     edges = list()
-#'     for(v in vertices)
-#'     {
-#'         idx = NN$nodeA == v
-#'         neighboursB = unique(NN$nodeB[idx])
-#'         idx = NN$nodeB == v
-#'         neighboursA = unique(NN$nodeA[idx])
-#'         
-#'         edges[[v]] = unique(c(neighboursA,neighboursB))
-#'     }
-#' 
-#'     return(combinatorialNbhdsImpl(edges,radius))
-#' }
-#' 
-#' 
-#' ## ####################################################
-#' #' This function reduces combinatorial balls to an
-#' #' extended nearest neighbour graph
-#' #'
-#' #' @param balls - A named list as produced by the function
-#' #'     findCombinatorialNeighbourhoods
-#' #' @return This returns a nearest neighbour data frame where the cells
-#' #'     in each combinatorial ball are now considered the center's
-#' #'     neighbours.
-#' #' @export
-#' #' @examples
-#' #' reduced = reduceCombinatorialBalls(smallCombNbhds)
-#' reduceCombinatorialBalls = function(balls)
-#' {
-#'     nodeA = c()
-#'     nodeB = c()
-#'     for(cell in names(balls))
-#'     {
-#'         newNeighbours = names(balls[[cell]])
-#'         N = length(newNeighbours)
-#'         nodeA = c(nodeA,rep(cell,N))
-#'         nodeB = c(nodeB,newNeighbours)
-#'     }
-#'     NN = data.frame(nodeA,nodeB)
-#'     idx = NN$nodeA == NN$nodeB
-#'     NN = NN[!idx,]
-#' 
-#'     return(NN)
-#' }
+## #' ## ####################################################
+## #' #' This function takes a nearest neighbour graph and a radius
+## #' #' and finds the combinatorial ball around each cell
+## #' #'
+## #' #' @param NN - a nearest neighbour graph
+## #' #' @param radius - combinatorial radius
+## #' #' @return This returns a named list.  In each case, the name is the
+## #' #'     cell at the center of the ball.  Each item in the list is a
+## #' #'     named numeric.  The values give combinatorial distance from the
+## #' #'     center and the names give the cells.
+## #' #' @export
+## #' #' @examples
+## #' #' smallCombNbhds = findCombinatorialNeighbourhoods(smallDelaunayTriangulation,2)
+## #' findCombinatorialNeighbourhoods = function(NN,radius)
+## #' {
+## #'     combinatorialNbhdsImpl = function(edges,radius)
+## #'     {
+## #'         ## ####################################################
+## #'         ## The base case:
+## #'         if(radius == 0)
+## #'         {
+## #'             ball = list()
+## #'             vertices = names(edges)
+## #'             for(v in vertices)
+## #'             {
+## #'                 a = 0
+## #'                 names(a) = v
+## #'                 ball[[v]] = a
+## #'             }
+## #'             return(ball)
+## #'         }
+## #'         ## ####################################################
+## #'         ## Recurse:
+## #'         else
+## #'         {
+## #'             smaller = combinatorialNbhdsImpl(edges,radius-1)
+## #'             for(v in names(smaller))
+## #'             {
+## #'                 frontier = smaller[[v]][smaller[[v]]==radius-1]
+## #'                 proposed = c()
+## #'                 for(frontierV in names(frontier))
+## #'                     proposed = c(proposed,edges[[frontierV]])
+## #'                 proposed = unique(proposed)
+## #'                 idx = proposed %in% names(smaller[[v]])
+## #'                 proposed = proposed[!idx]
+## #'                 theNew = rep(radius,length(proposed))
+## #'                 names(theNew) = proposed
+## #'                 smaller[[v]] = c(smaller[[v]],theNew)
+## #'             }
+## #'             return(smaller)
+## #'         }
+## #'     } ## End of impl
+## #' 
+## #'     ## ####################################################    
+## #'     ## Get the edges:
+## #'     vertices = unique(c(NN$nodeA,NN$nodeB))
+## #'     edges = list()
+## #'     for(v in vertices)
+## #'     {
+## #'         idx = NN$nodeA == v
+## #'         neighboursB = unique(NN$nodeB[idx])
+## #'         idx = NN$nodeB == v
+## #'         neighboursA = unique(NN$nodeA[idx])
+## #'         
+## #'         edges[[v]] = unique(c(neighboursA,neighboursB))
+## #'     }
+## #' 
+## #'     return(combinatorialNbhdsImpl(edges,radius))
+## #' }
+## #' 
+## #' 
+## #' ## ####################################################
+## #' #' This function reduces combinatorial balls to an
+## #' #' extended nearest neighbour graph
+## #' #'
+## #' #' @param balls - A named list as produced by the function
+## #' #'     findCombinatorialNeighbourhoods
+## #' #' @return This returns a nearest neighbour data frame where the cells
+## #' #'     in each combinatorial ball are now considered the center's
+## #' #'     neighbours.
+## #' #' @export
+## #' #' @examples
+## #' #' reduced = reduceCombinatorialBalls(smallCombNbhds)
+## #' reduceCombinatorialBalls = function(balls)
+## #' {
+## #'     nodeA = c()
+## #'     nodeB = c()
+## #'     for(cell in names(balls))
+## #'     {
+## #'         newNeighbours = names(balls[[cell]])
+## #'         N = length(newNeighbours)
+## #'         nodeA = c(nodeA,rep(cell,N))
+## #'         nodeB = c(nodeB,newNeighbours)
+## #'     }
+## #'     NN = data.frame(nodeA,nodeB)
+## #'     idx = NN$nodeA == NN$nodeB
+## #'     NN = NN[!idx,]
+## #' 
+## #'     return(NN)
+## #' }
 
 ## ####################################################
 #' This function takes a nearest neighbour graph and a radius
@@ -586,7 +586,7 @@ cellTypesPerCellTypeGraph = function(nbhdByCellType,
 #' cell types are more frequently found together than expected by chance.
 #' @import abind
 #' @export
-#' @examples
+## #' @examples
 computeNeighbourEnrichment = function(spatialGraph, cellTypes, nSim = 1000){
   results = list()
   spatialGraphOrig = spatialGraph
