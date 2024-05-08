@@ -1,7 +1,22 @@
 ---
 title: "Cats Cradle Spatial Vignette"
-output: html_notebook
+author: "Anna Laddach and Michael Shapiro"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+    %\VignetteIndexEntry{CatsCradleSpatial02}
+    %\VignetteEngine{knitr::rmarkdown}
+    %\VignetteEncoding{UTF-8}
 ---
+
+```{r setup, include = FALSE, warning = FALSE}
+knitr::opts_chunk$set(
+    collapse = TRUE,
+    fig.dim = c(6,6),
+    comment = "#>"
+)
+```
+
 
 ## Introduction
 
@@ -52,6 +67,7 @@ locations.
 
 First load the spatial data:
 ```{r}
+library(Seurat)
 #xenium.obj = read.rds("/path/to/xenium.obj.rds")
 
 load("../data/smallXenium.rda")
@@ -91,6 +107,7 @@ triangulation:
 
 Compute spatial neighbours based on Delaunay triangulation.
 ```{r}
+library(CatsCradle)
 delaunayNeighbours = computeNeighboursDelaunay(centroids)
 ```
 
@@ -190,6 +207,7 @@ average of ~15% cells of type 18.  We do not see an arrow from 18 to
 cells of type 18, which falls below the chosen cutoff.
 
 ```{r}
+library(pheatmap)
 pheatmap(cellTypesPerCellTypeMatrix)
 ```
 
@@ -240,7 +258,8 @@ neighbourhoodSeurat$cellType = as.character(clusters)
 
 Visualise neighbourhood clusters.
 ```{r}
-DimPlot(neighbourhoodSeurat, group.by = c("cellType", "seurat_clusters"), cols = "polychrome", reduction = "umap")
+DimPlot(neighbourhoodSeurat, group.by = c("cellType"), cols = "polychrome", reduction = "umap")
+DimPlot(neighbourhoodSeurat, group.by = c("seurat_clusters"), cols = "polychrome", reduction = "umap")
 ```
 
 
@@ -261,7 +280,8 @@ neighbourhoodSeuratExpanded$cellType = as.character(clusters)
 
 Visualise neighbourhood clusters.
 ```{r}
-DimPlot(neighbourhoodSeuratExpanded, group.by = c("cellType", "seurat_clusters"), cols = "polychrome", reduction = "umap")
+DimPlot(neighbourhoodSeuratExpanded, group.by = c("cellType"), cols = "polychrome", reduction = "umap")
+DimPlot(neighbourhoodSeuratExpanded, group.by = c("seurat_clusters"), cols = "polychrome", reduction = "umap")
 ```
 We can now add information on neighbourhood clusters to our original xenium object and visualise these on the tissue.
 ```{r}
