@@ -612,6 +612,7 @@ computeNeighbourEnrichment = function(spatialGraph, cellTypes, nSim = 1000){
   results = abind(results, along = 3L)
   results = rowSums(results, dims = 2)
   results = abs((results - nSim)/nSim) 
+  results = pmax(results,(1/nSim))
   return(results)
 }
 
@@ -686,15 +687,57 @@ getLigandReceptorPairsInPanel = function(obj,species,
     return(pairsFoundDF)
 }
 
+#' ## ####################################################
+#' #' This function takes a Seurat object, a set of ligand receptor
+#' #' pairs and a set of edges denoting neighbouring cells and
+#' #' annotates these with the ligand receptor interactions taking
+#' #' place on those edges in each direction.
+#' #'
+#' #' @param obj - a Seurat object
+#' #' @param pairDF - a data frame giving the ligand-receptor pairs
+#' #' @param delaunayNeighbours - a data frame of neighbouring
+#' #' cell pairs.  Note that each row is a directed edge (A,B) so
+#' #' that this data frame should have both the edge (A,B) and the
+#' #' edge (B,A)
+#' #' @return This returns a data frame whose first two columns give
+#' #' the neighbouring cells.  Each of the remaining columns is a logical
+#' #' corresponding to a ligand-receptor pair telling whether the ligand
+#' #' is expressed in the first cell and the receptor is expressed in the
+#' #' second cell.
+#' #' @export
+#' getInteractionsOnEdges = function(obj,pairDF,delaunayNeighbours)
+#' {
+#'     ## Discretize expression:
+#'     M = FetchData(obj,rownames(obj),layer='count')
+#'     M = data.matrix(t(M))
+#'     cutoff = 0
+#'     M = M > cutoff
+#' 
+#'     ## Find the interactions on the edges:
+#'     edges = delaunayNeighbours
+#' 
+#'     for(i in 1:nrow(pairDF))
+#'     {
+#'         tag = paste(pairDF$ligand[i],pairDF$receptor[i],sep='_')
+#'         edges[,tag] = (M[pairDF$ligand[i],edges$nodeA] &
+#'                    M[pairDF$receptor[i],edges$nodeB])
+#'     }
+#' 
+#'     return(edges)
+#' }
+
+
+
 ## ####################################################
-#' This function takes a Seurat object, a set of ligand receptor
+#' This function takes a binarised expression matrix, a set of ligand receptor
 #' pairs and a set of edges denoting neighbouring cells and
 #' annotates these with the ligand receptor interactions taking
 #' place on those edges in each direction.
 #'
-#' @param obj - a Seurat object
+#' @param M - a binarised expression matrix where rows are genes and columns
+#' are cells.
 #' @param pairDF - a data frame giving the ligand-receptor pairs
-#' @param delaunayNeighbours - a data frame of neighbouring
+#' @param spatialGraph - a data frame of neighbouring
 #' cell pairs.  Note that each row is a directed edge (A,B) so
 #' that this data frame should have both the edge (A,B) and the
 #' edge (B,A)
@@ -704,26 +747,53 @@ getLigandReceptorPairsInPanel = function(obj,species,
 #' is expressed in the first cell and the receptor is expressed in the
 #' second cell.
 #' @export
-getInteractionsOnEdges = function(obj,pairDF,delaunayNeighbours)
+getInteractionsOnEdges = function(M,pairDF,spatialGraph)
 {
-    ## Discretize expression:
-    M = FetchData(obj,rownames(obj),layer='count')
-    M = data.matrix(t(M))
-    cutoff = 0
-    M = M > cutoff
-
-    ## Find the interactions on the edges:
-    edges = delaunayNeighbours
-
-    for(i in 1:nrow(pairDF))
-    {
-        tag = paste(pairDF$ligand[i],pairDF$receptor[i],sep='_')
-        edges[,tag] = (M[pairDF$ligand[i],edges$nodeA] &
-                   M[pairDF$receptor[i],edges$nodeB])
-    }
-
-    return(edges)
+  ## Find the interactions on the edges:
+  edges = spatialGraph
+  
+  for(i in 1:nrow(pairDF))
+  {
+    tag = paste(pairDF$ligand[i],pairDF$receptor[i],sep='_')
+    edges[,tag] = (M[pairDF$ligand[i],edges$nodeA] &
+                     M[pairDF$receptor[i],edges$nodeB])
+  }
+  
+  return(edges)
 }
+
+## ####################################################
+#' This function permutes the rows of a matrix.
+#'
+#' @param M - a binarised expression matrix where rows are genes and columns
+#` are cells.
+#' @return This returns a matrix in which the values have been permuted within
+#' rows.
+permuteMatrix = function(M){
+  n = ncol(M)
+  for (i in 1:nrow(M)){
+    M[i,] = M[i,sample(n)]
+  }
+  return(M)
+}
+
+
+## ####################################################
+#' This functions retrieves an expression matrix from a seurat object and 
+#' binarises it.
+#'
+#' @param obj - a Seurat object
+#' @param cutoff - a cutoff for binarisation. Defaults to 0.
+#' @return A binarised expression matrix where rows are genes and columns are 
+#' cells.
+getBinarisedMatrix = function(obj, cutoff = 0){
+  M = FetchData(obj,rownames(obj),layer='count')
+  M = data.matrix(t(M))
+  cutoff = 0
+  M = M > cutoff
+  return(M)
+}
+
 
 ## ####################################################
 #' This function takes a listing of the neighbouring
@@ -795,5 +865,110 @@ annotateInteractionCounts = function(interactionCounts,obj,nbhdObj)
 
     return(annotated)
 }
+
+
+
+
+
+## ####################################################
+#' Given a seurat object, a spatial graph, clusters and species this function 
+#' identifies ligand-receptor interactions between neighbouring cells, 
+#' identifies ligand-receptor interactions within and between clusters and 
+#' calculates whether these are observed more frequently than expected by 
+#' chance.
+#'
+#' @param obj - a Seurat object
+#' @param spatialGraph - a data frame of neighbouring
+#' cell pairs. 
+#' @param clusters - named vector of clusters where names are each cell and
+#' clusters are a factor
+#' @param species - either 'human' or 'mouse'
+#' @param nSim - number of simulations to perform for p value calculation.
+#' @param lrn - a ligand-receptor network, i.e., a
+#' data frame with columns from and to.  By default, it
+#' retrieves the nichenetr ligand receptor network
+#' @return This returns a data frame whose first two columns give
+#' the neighbouring cells.  Each of the remaining columns is a logical
+#' corresponding to a ligand-receptor pair telling whether the ligand
+#' is expressed in the first cell and the receptor is expressed in the
+#' second cell.
+#' @export
+
+performInteractionAnalysis = function(obj, spatialGraph, species, clusters,
+                                      nSim = 1000, 
+                                      lrn = getLigandReceptorNetwork(species)){
+  
+  #symmetrise spatial graph
+  spatialGraphBA = spatialGraph[,c(2,1)]
+  names(spatialGraphBA) = c("nodeA","nodeB")
+  spatialGraph = rbind(spatialGraph,spatialGraphBA)
+  spatialGraph = unique(spatialGraph)
+  
+  #get ligand receptor pairs
+  lrPairs = getLigandReceptorPairsInPanel(obj, species)
+  
+  #get binarised expression matrix for ligand receptor pairs
+  M = getBinarisedMatrix(obj)
+  M = M[rownames(M) %in% c(lrPairs$ligand,lrPairs$receptor),]
+  
+  #get ligand receptor interactions between cells
+  interactionsOnEdges = getInteractionsOnEdges(M,lrPairs,spatialGraph)
+  
+  #annotate with clusters
+  interactionsOnEdges = cbind(clusters[interactionsOnEdges$nodeA],
+                              clusters[interactionsOnEdges$nodeB], 
+                              interactionsOnEdges)
+  names(interactionsOnEdges)[1:2] = c("clusterA","clusterB") 
+  
+  #get sum of interactions within and between clusters
+  pair = 
+    paste0(interactionsOnEdges$clusterA,  "_", interactionsOnEdges$clusterB) 
+  totalInteractionsByCluster = 
+    aggregate(interactionsOnEdges[,5:ncol(interactionsOnEdges)], list(pair), 
+              sum)
+  rownames(totalInteractionsByCluster) = totalInteractionsByCluster$Group.1
+  totalInteractionsByCluster = 
+    totalInteractionsByCluster[,2:ncol(totalInteractionsByCluster)]
+  
+  #get total edges per cluster pair
+  totalEdges = table(pair)
+  
+  totalInteractionsByCluster = cbind(totalEdges[rownames(totalInteractionsByCluster)],
+                                totalInteractionsByCluster)
+  colnames(totalInteractionsByCluster)[1:2] = c("clusterPair", "totalEdges")
+  
+  meanInteractionsByCluster = totalInteractionsByCluster[,3:ncol(totalInteractionsByCluster)]/totalInteractionsByCluster$totalEdges
+  meanInteractionsByCluster = cbind(totalInteractionsByCluster[,1:2], meanInteractionsByCluster)
+  
+  
+  
+  #perform simulations
+  results = list()
+  for (i in 1:nSim){
+    permuted = permuteMatrix(M)
+    sim = getInteractionsOnEdges(permuted,lrPairs,spatialGraph)
+    sim = aggregate(sim[,3:ncol(sim)], list(pair), sum)
+    rownames(sim) = sim$Group.1
+    results[[i]] = sim[,2:ncol(sim)]
+    if (i %% 10 == 0){
+      print(i)
+    }
+  }
+  
+  #calculate summary statistics for simulation results
+  results = lapply(results, function(x, y) y > x, y = 
+                     totalInteractionsByCluster[,3:ncol(totalInteractionsByCluster)])
+  results = abind(results, along = 3L)
+  simResults = rowSums(results, dims = 2)
+  rownames(simResults) = rownames(totalInteractionsByCluster)
+  pValues = abs((simResults - nSim)/nSim) 
+  pValues = pmax(pValues, (1/nSim))
+  return(list("interactionsOnEdges" = interactionsOnEdges, 
+              "totalInteractionsByCluster" = totalInteractionsByCluster,
+              "meanInteractionsByCluster" = meanInteractionsByCluster,
+              "simResults" = simResults,
+              "pValues" = pValues))
+}
+
     
 

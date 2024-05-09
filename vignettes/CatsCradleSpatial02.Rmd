@@ -438,19 +438,50 @@ sankeyFromMatrix(averageExpMatrix)
 
 ## Ligand receptor analysis
 
-Get LR pairs in panel
+We can perform an analysis of ligand receptor interactions in order to infer 
+communication between cells. 
+Here we calculate whether interactions between ligand receptor pairs occur on 
+edges of the spatial graph, i.e. between neighbouring cells, where cell A 
+expresses a ligand and cell B expresses a receptor. Note that the distance 
+between cell A and cell B will vary depending on how the graph has been 
+constructed, larger distances may be desired for analyses involving diffusable 
+ligands and receptors. We also analyse analyse the number of ligand receptor 
+interactions that occur between cells from the same cluster and between cells 
+from different clusters. Note that clusters may represent cell type, or another 
+property of the cells such as their neighbourhood type. We leave this for the 
+user to decide. We then calculate how frequently the number of ligand-receptor 
+interactions observed between/within clusters is higher than in simulated data,
+this allows us to assign a pvalue for the enrichment of these interactions.
+
+Perform interaction analysis:
+ 
 ```{r}
-lrPairs = getLigandReceptorPairsInPanel(smallXenium, "mouse")
+interactionResults = performInteractionAnalysis(smallXenium, delaunayNeighbours, 
+                                                "mouse", clusters)
 ```
 
+Look at interactions on edges:
 ```{r}
-interactions = getInteractionsOnEdges(smallXenium,lrPairs,delaunayNeighbours)
+interactionResults$interactionsOnEdges
 ```
 
+Look at total interactions between/within clusters:
 ```{r}
-nSource = countInteractionsPerCell(interactions, "source")  
+interactionResults$totalInteractionsByCluster
 ```
 
+Look at mean interactions per edge between/within clusters:
 ```{r}
-nTarget = countInteractionsPerCell(interactions, "target")  
+interactionResults$meanInteractionsByCluster
 ```
+
+Look at number of times observed interactions are more frequent than expected:
+```{r}
+interactionResults$simResults
+```
+
+Look at pvalues for the enrichment of interactions.
+```{r}
+interactionResults$pValues
+```
+
