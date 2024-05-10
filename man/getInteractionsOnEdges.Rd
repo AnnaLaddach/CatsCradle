@@ -2,23 +2,24 @@
 % Please edit documentation in R/CatsCradleSpatial.R
 \name{getInteractionsOnEdges}
 \alias{getInteractionsOnEdges}
-\title{This function takes a Seurat object, a set of ligand receptor
+\title{This function takes a binarised expression matrix, a set of ligand receptor
 pairs and a set of edges denoting neighbouring cells and
 annotates these with the ligand receptor interactions taking
 place on those edges in each direction.}
 \usage{
-getInteractionsOnEdges(obj, pairDF, delaunayNeighbours)
+getInteractionsOnEdges(M, pairDF, spatialGraph)
 }
 \arguments{
-\item{obj}{\itemize{
-\item a Seurat object
+\item{M}{\itemize{
+\item a binarised expression matrix where rows are genes and columns
+are cells.
 }}
 
 \item{pairDF}{\itemize{
 \item a data frame giving the ligand-receptor pairs
 }}
 
-\item{delaunayNeighbours}{\itemize{
+\item{spatialGraph}{\itemize{
 \item a data frame of neighbouring
 cell pairs.  Note that each row is a directed edge (A,B) so
 that this data frame should have both the edge (A,B) and the
@@ -33,7 +34,7 @@ is expressed in the first cell and the receptor is expressed in the
 second cell.
 }
 \description{
-This function takes a Seurat object, a set of ligand receptor
+This function takes a binarised expression matrix, a set of ligand receptor
 pairs and a set of edges denoting neighbouring cells and
 annotates these with the ligand receptor interactions taking
 place on those edges in each direction.

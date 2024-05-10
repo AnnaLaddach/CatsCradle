@@ -5,7 +5,12 @@
 \title{This computes average expression of each gene cluster in
 each cell cluster and returns the result as a matrix}
 \usage{
-getAverageExpressionMatrix(f, fPrime, v5 = F)
+getAverageExpressionMatrix(
+  f,
+  fPrime,
+  v5 = T,
+  clusteringName = "seurat_clusters"
+)
 }
 \arguments{
 \item{f}{\itemize{
@@ -18,8 +23,13 @@ getAverageExpressionMatrix(f, fPrime, v5 = F)
 
 \item{v5}{\itemize{
 \item A logical. Are we using Seurat v5? Defaults
-to FALSE
+to TRUE
 }}
+
+\item{clusteringName}{In many cases, this will be the cell
+clustering, i.e., seurat_clusters, which is the default, but
+for neighbourhood Seurat objects, this can be
+neighbourhood_clusters.}
 }
 \value{
 A matrix of the average expression where the rows
