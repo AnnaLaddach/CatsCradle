@@ -7,7 +7,12 @@ neighbours than expected by chance. It does this by comparison to randomised
 neighbour graphs where edges are randomised but the degree of each node is
 preserved.}
 \usage{
-computeNeighbourEnrichment(spatialGraph, cellTypes, nSim = 1000)
+computeNeighbourEnrichment(
+  spatialGraph,
+  cellTypes,
+  nSim = 1000,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{spatialGraph}{\itemize{
@@ -22,6 +27,10 @@ cell types are a factor.
 \item{nSim}{\itemize{
 \item the number of randomised graphs to create for pvalue
 calculation.
+}}
+
+\item{verbose}{\itemize{
+\item whether to print trace.  Defaults to TRUE
 }}
 }
 \value{

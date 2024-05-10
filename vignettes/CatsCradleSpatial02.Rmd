@@ -206,6 +206,13 @@ average of ~15% cells of type 18.  We do not see an arrow from 18 to
 12 because on average, neighbourhoods of cells of type 18 have only 3%
 cells of type 18, which falls below the chosen cutoff.
 
+It's worth pointing out the following. The number of edges from a cell of
+type A to a cell of type B is the same as the number of edges from a
+cell of type B to a cell of type A.  Thus the matrix of counts of
+these edges is symmetric.  However, numbers of cells of types A and B
+are not necessarily equal, and this accounts for the assymmetry in the
+fractions. 
+
 ```{r}
 library(pheatmap)
 pheatmap(cellTypesPerCellTypeMatrix)
@@ -238,6 +245,9 @@ cellTypesPerCellPValuesNegLog = -log10(cellTypesPerCellPValues + 1e-6)
 pheatmap(cellTypesPerCellPValuesNegLog)
 ```
 
+Recall that the entry in row A and column B represents the enrichement
+for cells of type B in the neighborhoods of cells of type A.
+
 
 
 ## Analysis of neighbourhoods based on cell type composition
@@ -259,7 +269,7 @@ neighbourhoodSeurat$cellType = as.character(clusters)
 Visualise neighbourhood clusters.
 ```{r}
 DimPlot(neighbourhoodSeurat, group.by = c("cellType"), cols = "polychrome", reduction = "umap")
-DimPlot(neighbourhoodSeurat, group.by = c("seurat_clusters"), cols = "polychrome", reduction = "umap")
+DimPlot(neighbourhoodSeurat, group.by = c("neighbourhood_clusters"), cols = "polychrome", reduction = "umap")
 ```
 
 
@@ -281,7 +291,7 @@ neighbourhoodSeuratExpanded$cellType = as.character(clusters)
 Visualise neighbourhood clusters.
 ```{r}
 DimPlot(neighbourhoodSeuratExpanded, group.by = c("cellType"), cols = "polychrome", reduction = "umap")
-DimPlot(neighbourhoodSeuratExpanded, group.by = c("seurat_clusters"), cols = "polychrome", reduction = "umap")
+DimPlot(neighbourhoodSeuratExpanded, group.by = c("neighbourhood_clusters"), cols = "polychrome", reduction = "umap")
 ```
 We can now add information on neighbourhood clusters to our original xenium object and visualise these on the tissue.
 ```{r}
@@ -422,7 +432,9 @@ neighbourhoodSeuratPrime$seurat_clusters = factor(CTclust)
 
 Let's investigate how neighbourhood clusters relate to cell type clusters.
 ```{r}
-averageExpMatrix = getAverageExpressionMatrix(neighbourhoodSeurat,neighbourhoodSeuratPrime)
+averageExpMatrix = getAverageExpressionMatrix(neighbourhoodSeurat,
+                            neighbourhoodSeuratPrime,
+			    clusteringName='neighbourhood_clusters')
 averageExpMatrix = tagRowAndColNames(averageExpMatrix,
                                      ccTag='neighbourhoodClusters_',
                                      gcTag='cellTypeClusters_')
@@ -457,31 +469,31 @@ Perform interaction analysis:
  
 ```{r}
 interactionResults = performInteractionAnalysis(smallXenium, delaunayNeighbours, 
-                                                "mouse", clusters)
+                                                "mouse", clusters,verbose=FALSE)
 ```
 
 Look at interactions on edges:
 ```{r}
-interactionResults$interactionsOnEdges
+head(interactionResults$interactionsOnEdges,10)
 ```
 
 Look at total interactions between/within clusters:
 ```{r}
-interactionResults$totalInteractionsByCluster
+head(interactionResults$totalInteractionsByCluster,10)
 ```
 
 Look at mean interactions per edge between/within clusters:
 ```{r}
-interactionResults$meanInteractionsByCluster
+head(interactionResults$meanInteractionsByCluster,10)
 ```
 
 Look at number of times observed interactions are more frequent than expected:
 ```{r}
-interactionResults$simResults
+head(interactionResults$simResults,10)
 ```
 
 Look at pvalues for the enrichment of interactions.
 ```{r}
-interactionResults$pValues
+head(interactionResults$pValues,10)
 ```
 

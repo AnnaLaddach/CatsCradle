@@ -44,48 +44,53 @@ transposeSeuratObject = function(f,active.assay='RNA',
 #' @param f - The Seurat object of cells
 #' @param fPrime - The Seurat object of genes
 #' @param v5 - A logical. Are we using Seurat v5? Defaults
-#' to FALSE
+#' to TRUE
+#' @param clusteringName In many cases, this will be the cell
+#'     clustering, i.e., seurat_clusters, which is the default, but
+#'     for neighbourhood Seurat objects, this can be
+#'     neighbourhood_clusters. 
 #' @return A matrix of the average expression where the rows
 #' correspond to cell clusters and the columns correspond to
 #' gene clusters.
 #' @export
 #' @examples
 #' M = getAverageExpressionMatrix(S,STranspose)
-getAverageExpressionMatrix = function(f,fPrime, v5 = F)
+getAverageExpressionMatrix = function(f,fPrime, v5 = T,
+                                      clusteringName='seurat_clusters')
 {
-  f$seurat_clusters = as.character(f$seurat_clusters)
-  cellCluster = unique(f$seurat_clusters)
-  cellCluster = cellCluster[order(as.numeric(cellCluster))]
-  
-  fPrime$seurat_clusters = as.character(fPrime$seurat_clusters)
-  geneCluster = unique(fPrime$seurat_clusters)
-  geneCluster = geneCluster[order(as.numeric(geneCluster))]
-  
-  ## Get assay data:
-  if (v5 == T){
-    X = GetAssayData(f,layer='scale.data')
-  } else {
-    X = GetAssayData(f,slot='scale')
-  }
-  ## Seems X can be smaller:
-  f = f[rownames(X),]
-  fPrime = fPrime[,rownames(X)]
-   
-  M = matrix(0,nrow=length(cellCluster),ncol=length(geneCluster))
-  rownames(M) = cellCluster
-  colnames(M) = geneCluster
-  
-  for(i in cellCluster)
-  {
-    for(j in geneCluster)
-    {
-      idxI = f$seurat_clusters == i
-      idxJ = fPrime$seurat_clusters == j
-      
-      M[i,j] = sum(X[idxJ,idxI]) / (sum(idxI) * sum(idxJ))
+    f$clustering = as.character(f@meta.data[,clusteringName])
+    cellCluster = unique(f$clustering)
+    cellCluster = cellCluster[order(as.numeric(cellCluster))]
+
+    fPrime$clustering = as.character(f@meta.data[,clusteringName])
+    geneCluster = unique(fPrime$clustering)
+    geneCluster = geneCluster[order(as.numeric(geneCluster))]
+    
+    ## Get assay data:
+    if (v5 == T){
+        X = GetAssayData(f,layer='scale.data')
+    } else {
+        X = GetAssayData(f,slot='scale')
     }
-  }
-  return(M)
+    ## Seems X can be smaller:
+    f = f[rownames(X),]
+    fPrime = fPrime[,rownames(X)]
+   
+    M = matrix(0,nrow=length(cellCluster),ncol=length(geneCluster))
+    rownames(M) = cellCluster
+    colnames(M) = geneCluster
+  
+    for(i in cellCluster)
+    {
+        for(j in geneCluster)
+        {
+            idxI = f$clustering == i
+            idxJ = fPrime$clustering == j
+            
+            M[i,j] = sum(X[idxJ,idxI]) / (sum(idxI) * sum(idxJ))
+        }
+    }
+    return(M)
 }
 
 ## ####################################################
@@ -495,6 +500,7 @@ getGeneNeighbors = function(gene,NN)
 #' print(dim(NNN))
 desymmetriseNN = function(NN)
 {
+    ## Use this to order the genes on each edge
     orderGenes = function(i)
     {
         if(order(c(NN$nodeA[i],NN$nodeB[i]))[1] == 2)
@@ -502,9 +508,11 @@ desymmetriseNN = function(NN)
         return(FALSE)
     }
 
+    ## Order the genes on each edge:
     idx = unlist(lapply(1:nrow(NN),orderGenes))
     NN[idx,1:2] = NN[idx,2:1]
-    
+
+    ## Delete the duplicates:
     tag = paste(NN$nodeA,NN$nodeB,sep='___')
     NN = NN[!duplicated(tag),]
 
@@ -607,7 +615,8 @@ symmetriseNN = function(NN)
         return(NN)
 
     ## If not, symmetrise:
-    NN2 = NN[,c(2,1,3)]
+    NN2 = NN
+    NN2[,1:2] = NN2[,2:1]
     NN = rbind(NN,NN2)
 
     tag = paste(NN$nodeA,NN$nodeB)
