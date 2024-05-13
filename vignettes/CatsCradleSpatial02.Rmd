@@ -141,14 +141,10 @@ This returns a list of neighbour graphs where the first item
 (expandedNeighbours[[1]]) is the graph of 1st degree neighbours, the second item
 the graph of 2nd degree neighbours e.t.c.
 
-To obtain a graph that contains the all neighbours up to and including degree 4 
-(for example) we can simply rbind the individual neighbour graphs.
+We can now collapse this to obtain a graph that contains the all neighbours up to and including degree 4 (for example).
 
 ```{r}
-expandedNeighboursFourth = as.data.frame(rbind(expandedNeighbours[[1]],
-                                 expandedNeighbours[[2]],
-                                 expandedNeighbours[[3]],
-                                 expandedNeighbours[[4]]))
+expandedNeighboursFourth = collapseNeighbourhoods(expandedNeighbours, n = 4)
 ```
 
 
@@ -495,5 +491,17 @@ head(interactionResults$simResults,10)
 Look at pvalues for the enrichment of interactions.
 ```{r}
 head(interactionResults$pValues,10)
+```
+
+
+Plot a heatmap showing -log10(pvalues) for the enrichment of ligand-receptor 
+interactions between pairs of clusters. 
+
+```{r}
+makeInteractionHeatmap(interactionResults, clusters, colors = colors, labelClusterPairs = F)
+```
+
+```{r}
+makeInteractionHeatmap(interactionResults, clusters, labelClusterPairs = F)
 ```
 

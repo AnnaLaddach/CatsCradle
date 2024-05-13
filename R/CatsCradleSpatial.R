@@ -402,6 +402,27 @@ expandNeighbourhoods  = function(spatialGraph, n){
 
 
 ## ####################################################
+#' This function takes expanded neighbourhoods and collapses them to a nearest 
+#' neighbourhood graph where all neighbours of degree <= n in the original graph 
+#' are considered first neighbours.
+#'
+#' @param expandedNeighbours - the results of expandNeighbourhoods()
+#' @param n - the maximum degree to connect neighbours. Defaults to the maximum 
+#' degree neighbourhoods were expanded to in the results of expandNeighbourhoods().
+#' @return a graph in neighbour format, i.e., a data frame with
+#'     columns nodeA and nodeB, where nodes that were originally of degree <= n 
+#'     are connected.
+#' @export
+collapseNeighbourhoods = function(expandedNeighbours, n = length(expandedNeighbours)){
+  
+  collapsedGraph = as.data.frame(do.call(rbind,expandedNeighbours[1:n]))
+
+  return(collapsedGraph)
+}
+
+
+
+## ####################################################
 #' For each cell type, this function looks at the neighbourhoods
 #' around cells of that type and discovers the fractions of those
 #' cells of each type.
@@ -980,4 +1001,46 @@ performInteractionAnalysis = function(obj, spatialGraph, species, clusters,
 }
 
     
+## ####################################################
+#' This function takes interactionResults and plots a heatmap of -log10(pvalues).
+#'
+#' @param interactionResults - as returned by performInteractionAnalysis()
+#' @param clusters - named vector of cell types where names are each cell and
+#' clusters are a factor
+#' @param colors - a named list of colors where names are clusters. If not 
+#' specified the default pheatmap color scheme will be used.
+#' @param  pValCutoffClusterPair - a cutoff for showing interactions between two
+#' clusters. A cluster pair must have at least one ligand-receptor interaction
+#' pvalue <  pValCutoffClusterPair. Defaults to 0.05.
+#' @param  pValCutoffLigRec  - a cutoff for showing interactions between a 
+#' ligand and receptor. At least one cluster pair must have 
+#' pvalue <  pValCutoffLigRec for ligand-receptor pair. Defaults to 0.05.
+#' @param  labelClusterPairs - show labels for cluster pairs. Defaults to TRUE.
+#' @import Rfast
+#' @import pheatmap
+#' @export
+makeInteractionHeatmap = function(interactionResults,
+                                  clusters,
+                                  colors = c(),
+                                  pValCutoffClusterPair = 0.05, 
+                                  pValCutoffLigRec = 0.05,
+                                  labelClusterPairs = T)
+{
+  selectedPValues = interactionResults$pValues[rowMins(interactionResults$pValues, value = T) < pValCutoffClusterPair,
+                                             colMins(interactionResults$pValues, value = T) < pValCutoffLigRec]
+  negLog10PValues = -log10(selectedPValues)
+  rowAnno = str_split_fixed(rownames(selectedPValues), pattern = "_", 2)
+  rowAnno = as.data.frame(rowAnno)
+  names(rowAnno) = c("sender","receiver")
+  rowAnno$sender = factor(rowAnno$sender, levels = levels(clusters))
+  rowAnno$receiver = factor(rowAnno$receiver, levels = levels(clusters))
+  rownames(rowAnno) = rownames(selectedPValues)
+  if (length(colors) > 0){
+  pheatmap(negLog10PValues, annotation_row = rowAnno, annotation_colors = list("sender" = colors, 
+                                                                    "receiver" = colors),
+           show_rownames = labelClusterPairs)
+  } else{
+    pheatmap(negLog10PValues, annotation_row = rowAnno, show_rownames = labelClusterPairs)
+  }
+}
 
