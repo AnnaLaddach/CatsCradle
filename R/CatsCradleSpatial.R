@@ -1044,3 +1044,47 @@ makeInteractionHeatmap = function(interactionResults,
   }
 }
 
+
+## ####################################################
+#' This function takes interactionResults and plots a heatmap of the total 
+#' number of ligand receptor interactions between clusters.
+#'
+#' @param interactionResults - as returned by performInteractionAnalysis()
+#' @param clusters - named vector of cell types where names are each cell and
+#' clusters are a factor
+#' @param type - "total" or "mean" to plot raw total interactions or mean interactions per edge.
+#' @param  logScale - plot heatmap using log scale (defaults to T)
+#' @import pheatmap
+#' @export
+makeSummedInteractionHeatmap = function(interactionResults, clusters, type, logScale = T){ 
+  if (type == "total"){
+    interactionsByCluster = interactionResults$totalInteractionsByCluster
+  } 
+  if (type == "mean"){
+    interactionsByCluster = interactionResults$meanInteractionsByCluster
+  } 
+  summedInteractionsByCluster = rowSums(interactionsByCluster[,3:ncol(interactionsByCluster)])
+  pair = str_split_fixed(names(summedInteractionsByCluster), pattern = "_", 2)
+  summedInteractionsByCluster = as.data.frame(cbind(pair,summedInteractionsByCluster))
+  colnames(summedInteractionsByCluster) = c("Sender", "Receiver", "nInteractions")
+  summedInteractionsByCluster$nInteractions = as.numeric(summedInteractionsByCluster$nInteractions)
+  clusterNames = levels(clusters)
+  nClusters = length(clusterNames)
+  summedInteractionsByClusterMatrix = matrix(0, ncol = nClusters, nrow = nClusters)
+  for (i in 1:nClusters){
+    for (j in 1:nClusters){
+      value = summedInteractionsByCluster$nInteractions[(summedInteractionsByCluster$Sender == clusterNames[i]) & (summedInteractionsByCluster$Receiver == clusterNames[j])]
+      if (length(value) > 0){
+        summedInteractionsByClusterMatrix[i,j] = value
+      } 
+    }  
+  }
+  
+  colnames(summedInteractionsByClusterMatrix) = clusterNames
+  rownames(summedInteractionsByClusterMatrix) = clusterNames
+  if (logScale){
+    pheatmap(log(summedInteractionsByClusterMatrix +1))
+  } else{
+    pheatmap((summedInteractionsByClusterMatrix))
+  }
+}
