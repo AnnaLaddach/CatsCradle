@@ -504,4 +504,14 @@ makeInteractionHeatmap(interactionResults, clusters, colors = colors, labelClust
 ```{r}
 makeInteractionHeatmap(interactionResults, clusters, labelClusterPairs = F)
 ```
+```{r}
+interactionResults$totalInteractionsByCluster
+```
 
+
+```{r}
+makeSummedInteractionHeatmap(interactionResults, clusters, "total")
+```
+```{r}
+makeSummedInteractionHeatmap(interactionResults, clusters, "mean", logScale = F)
+```
