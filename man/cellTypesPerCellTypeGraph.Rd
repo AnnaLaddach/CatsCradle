@@ -9,7 +9,7 @@ around cells of each type.}
 \usage{
 cellTypesPerCellTypeGraph(
   nbhdByCellType,
-  seurat_clusters,
+  clusters,
   colors = NULL,
   selfEdges = FALSE,
   minWeight = 0,
@@ -27,7 +27,7 @@ each denoted by the cell at their center, whose columns are
 cell types, and whose entries are counts.
 }}
 
-\item{seurat_clusters}{\itemize{
+\item{clusters}{\itemize{
 \item a named vector whose names are the cells
 and whose entries are their seurat_clusters.
 }}

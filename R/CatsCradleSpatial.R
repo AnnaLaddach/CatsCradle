@@ -545,7 +545,7 @@ cellTypesPerCellTypeGraphFromMatrix = function(M,
 #' @param nbhdByCellType - A matrix whose rows are neighbourhoods
 #' each denoted by the cell at their center, whose columns are
 #' cell types, and whose entries are counts.
-#' @param seurat_clusters - a named vector whose names are the cells
+#' @param clusters - a named vector whose names are the cells
 #' and whose entries are their seurat_clusters.
 #' @param colors - a named vector of colors used to color the
 #' vertices of the graph.  The names are the seurat_clusters
@@ -571,7 +571,7 @@ cellTypesPerCellTypeGraphFromMatrix = function(M,
 #' found in E(G)$weight and E(G)$width. 
 #' @export
 cellTypesPerCellTypeGraph = function(nbhdByCellType,
-                                     seurat_clusters,
+                                     clusters,
                                      colors=NULL,
                                      selfEdges=FALSE,
                                      minWeight=0,
@@ -581,7 +581,7 @@ cellTypesPerCellTypeGraph = function(nbhdByCellType,
                                      arrowWidth=4,
                                      plotGraph=TRUE)
 {
-    M = cellTypesPerCellTypeMatrix(nbhdByCellType,seurat_clusters)
+    M = cellTypesPerCellTypeMatrix(nbhdByCellType,clusters)
     G = cellTypesPerCellTypeGraphFromMatrix(M,
                                             colors=colors,
                                             selfEdges=selfEdges,
@@ -1087,4 +1087,83 @@ makeSummedInteractionHeatmap = function(interactionResults, clusters, type, logS
   } else{
     pheatmap((summedInteractionsByClusterMatrix))
   }
+}
+
+## ####################################################
+#' nbhdsAsEdgesToNbhdsAsList
+#'
+#' This function takes a set of neighbourhoods given
+#' by edges and turns it into a named list giving the
+#' memberships of each neighbourhood
+#'
+#' @param cells - The cells whose neighbourhoods to
+#' extract.  Defaults to neighbourhoods$nodeA
+#' @param neighbourhoods - neighbourhoods given as a
+#' data frame with columns nodeA and nodeB, for example
+#' the output of collapseNeighbourhoods
+#' @return a named list with memberships of the neighbourhoods
+#' of cells
+#' @export
+nbhdsAsEdgesToNbhdsAsList = function(cells=unique(neighbourhoods$nodeA),
+                                     neighbourhoods)
+{
+    nbhdList = list()
+    for(cell in cells)
+    {
+        nbhdList[[cell]] = c(cell,
+                             neighbourhoods$nodeB[neighbourhoods$nodeA == cell])
+    }
+
+    return(nbhdList)
+}
+
+## ####################################################
+#' This function takes a Seurat object and a list of
+#' neighbourhoods and creates a Seurat object where the
+#' columns are the neighbourhoods, the rows are are the
+#' genes and the values are gene expression totals for
+#' the cells in each neighbourhood
+#'
+#' @param f - a Seurat object with layer counts
+#' @param neighbourhoods - Neighbourhoods as given by a
+#' collapsed expanded edge graph, as produced by
+#' collapseNeighbourhoods. In particular, each cell should
+#' appear as nodeA.
+#' @return a Seurat object giving total gene expression
+#' in each neighbourhood.
+#' @export
+aggragateGeneExpression = function(f,neighbourhoods)
+{
+    cells = colnames(f)
+    nbhds = unique(neighbourhoods$nodeA)
+
+    ## Sanity check:
+    stopifnot(identical(cells[order(cells)],
+                        nbhds[order(nbhds)]))
+
+    genes = rownames(f)
+    counts = FetchData(f,genes,layer='counts')
+    counts = t(counts)
+    counts = data.matrix(counts)
+
+    C = matrix(0,nrow=length(genes),ncol=length(cells))
+    rownames(C) = genes
+    colnames(C) = cells
+
+    nbhdList =nbhdsAsEdgesToNbhdsAsList(cells,
+                                        neighbourhoods)
+
+    for(cell in cells)
+        C[,cell] = rowSums(counts[,nbhdList[[cell]]])
+
+    nbhdObj = CreateSeuratObject(counts=C)
+    nbhdObj = NormalizeData(nbhdObj)
+    nbhdObj = ScaleData(nbhdObj)
+    nbhdObj = FindVariableFeatures(nbhdObj)
+    nbhdObj = RunPCA(nbhdObj)
+    nbhdObj = RunUMAP(nbhdObj,dims=1:20)
+    nbhdObj = FindNeighbors(nbhdObj)
+    nbhdObj = FindClusters(nbhdObj)
+    
+    return(nbhdObj)
 }
