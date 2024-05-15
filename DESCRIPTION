@@ -31,7 +31,8 @@ Imports: Seurat,
 	 Rfast,
 	 dplyr,
 	 data.table,
-	 abind
+	 abind,
+	 pheatmap
 Depends: 
     R (>= 4.0)
 LazyData: true
