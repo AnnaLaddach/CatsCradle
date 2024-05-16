@@ -241,9 +241,8 @@ cellTypesPerCellPValuesNegLog = -log10(cellTypesPerCellPValues + 1e-6)
 pheatmap(cellTypesPerCellPValuesNegLog)
 ```
 
-Recall that the entry in row A and column B represents the enrichement
+Recall that the entry in row A and column B represents the enrichment
 for cells of type B in the neighborhoods of cells of type A.
-
 
 
 ## Analysis of neighbourhoods based on cell type composition
@@ -444,6 +443,37 @@ pheatmap(averageExpMatrix,
 sankeyFromMatrix(averageExpMatrix)
 ```
 
+## Detection of genes with spatially variable expression.
+
+Given a neighbour graph describing the spatial relationships between cells, 
+we can compute spatial autocorrelation (here we use Moran's I). This describes
+how clustered gene expression values are in space. We derive an upper tail p 
+value based on simulations where expression values for genes are permuted. N.B 
+in this implementation equal weights are given to all neighbours of a cell.
+
+```{r}
+moransI = runMoransI(smallXenium, delaunayNeighbours, assay = "SCT", 
+                     layer = "data", nSim = 100)
+```
+Look at most spatially autocorrelated genes.
+```{r}
+head(moransI)
+```
+
+Look at least spatially autocorrelated genes.
+```{r}
+tail(moransI)
+```
+
+Visualise most spatially autocorrelated gene.
+```{r}
+ImageFeaturePlot(smallXenium, "Nwd2")
+```
+Visualise least spatially autocorrelated gene.
+```{r}
+ImageFeaturePlot(smallXenium, "Trbc2")
+```
+
 ## Ligand receptor analysis
 
 We can perform an analysis of ligand receptor interactions in order to infer 
@@ -513,5 +543,17 @@ interactionResults$totalInteractionsByCluster
 makeSummedInteractionHeatmap(interactionResults, clusters, "total")
 ```
 ```{r}
-makeSummedInteractionHeatmap(interactionResults, clusters, "mean", logScale = F)
+makeSummedInteractionHeatmap(interactionResults, clusters, "mean", logScale = T)
+```
+
+
+
+
+```{r}
+edgeSeurat = computeEdgeSeurat(interactionResults, centroids)
+```
+
+
+```{r}
+ImageFeaturePlot(edgeSeurat, features = "Penk-Htr1f")
 ```
