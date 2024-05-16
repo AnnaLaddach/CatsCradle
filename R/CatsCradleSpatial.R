@@ -123,6 +123,42 @@ extractCells = function(NN)
 
 
 ## ####################################################
+#' neighbourhoodDiameter
+#'
+#' This function takes a list of neighbourhoods and and the
+#' centroids of the cells and finds their diameters, i.e.,
+#' for each neighbourhood, the maximum distance between.
+#'
+#' @param neighbourhoods - a list of neighbourhoods as
+#' returned by nbhdsAsEdgesToNbhdsAsList
+#' @param centroids - the centroids of the cells
+#' @import pracma
+#' @return a named numeric.  The names are the names
+#' of the list neighbourhoods and the values are the
+#' maximum distance within each neighbourhood
+#' @export
+neighbourhoodDiameter = function(neighbourhoods,centroids)
+{
+  rownames(centroids) = centroids$cell
+  nbhds = names(neighbourhoods)
+  diameters = c()
+  for(nbhd in nbhds)
+  {
+    theseCells = neighbourhoods[[nbhd]]
+    N = length(theseCells)
+    M = matrix(0,nrow=N,ncol=2)
+    M[1:N,1:2] = as.matrix(centroids[theseCells,1:2])
+    D = distmat(M,M)
+    
+    diameters[nbhd] = max(D)
+  }
+  
+  return(diameters)
+}
+
+
+
+## ####################################################
 #' This function extracts neighbourhoods from a spatial graph in neighbour list
 #' format
 #' 
@@ -1090,6 +1126,58 @@ makeSummedInteractionHeatmap = function(interactionResults, clusters, type, logS
 }
 
 ## ####################################################
+#' This function takes interactionResults and creates a seurat object where 
+#' each point represents an edge between cells, and spatial coordinates are the 
+#' centroids of edges between cells. The "expression matrix" is the 
+#' binarised presence/absence of an interaction (ligand receptor pair) on an edge. 
+#'
+#' @param interactionResults - as returned by performInteractionAnalysis()
+#' @param centroids - a dataframe containing centroids 
+#' where rownames are cellnames and the first two columns
+#' contain x and y coordinates respectively.
+#' @param npcs - number of pcs used for PCA, defaults to 10
+#' @import Seurat
+#' @return This returns a seurat object where 
+#' each point represents an edge between cells, and spatial coordinates are the 
+#' centroids of edges between cells. The "expression matrix" is the 
+#' binarised presence/absence of an interaction (ligand receptor pair) on an edge. 
+#' @export
+
+computeEdgeSeurat = function(interactionResults, centroids, npcs = 10){
+  interactionsOnEdges = interactionResults$interactionsOnEdges
+  rownames(interactionsOnEdges) = paste0(interactionsOnEdges$nodeA, "_", interactionsOnEdges$nodeB)
+  interactionsOnEdgesMat = as.matrix(interactionsOnEdges[,5:ncol(interactionsOnEdges)])
+  interactionsOnEdgesMat= 1 * interactionsOnEdgesMat
+  edgeSeurat = CreateSeuratObject(t(interactionsOnEdgesMat), meta = interactionsOnEdges[,1:5])
+  edgeCoords = cbind(centroids[interactionsOnEdges$nodeA, 1:2], centroids[interactionsOnEdges$nodeB, 1:2])
+  
+  edgeCoords$edgeX = 0.6 * edgeCoords[,1] + 0.4 * edgeCoords[,3] 
+  edgeCoords$edgeY = 0.6 * edgeCoords[,2] + 0.4 * edgeCoords[,4] 
+  
+  
+  edgeCentroidDF = data.frame(
+    x = edgeCoords$edgeX,
+    y = edgeCoords$edgeY,
+    cell = colnames(edgeSeurat),
+    stringsAsFactors = FALSE
+  )
+  
+  centroidData <- list(
+    "centroids" = CreateCentroids(edgeCentroidDF)
+  )
+  coords = CreateFOV(
+    coords = centroidData,
+    type = c("centroids"),
+    assay = "RNA"
+  )
+  
+  edgeSeurat[["global"]] = coords
+  return(edgeSeurat)
+}
+
+
+
+## ####################################################
 #' nbhdsAsEdgesToNbhdsAsList
 #'
 #' This function takes a set of neighbourhoods given
@@ -1129,10 +1217,11 @@ nbhdsAsEdgesToNbhdsAsList = function(cells=unique(neighbourhoods$nodeA),
 #' collapsed expanded edge graph, as produced by
 #' collapseNeighbourhoods. In particular, each cell should
 #' appear as nodeA.
+#' @import Seurat
 #' @return a Seurat object giving total gene expression
 #' in each neighbourhood.
 #' @export
-aggragateGeneExpression = function(f,neighbourhoods)
+aggregateGeneExpression = function(f,neighbourhoods)
 {
     cells = colnames(f)
     nbhds = unique(neighbourhoods$nodeA)
@@ -1146,15 +1235,10 @@ aggragateGeneExpression = function(f,neighbourhoods)
     counts = t(counts)
     counts = data.matrix(counts)
 
-    C = matrix(0,nrow=length(genes),ncol=length(cells))
-    rownames(C) = genes
-    colnames(C) = cells
-
     nbhdList =nbhdsAsEdgesToNbhdsAsList(cells,
                                         neighbourhoods)
-
-    for(cell in cells)
-        C[,cell] = rowSums(counts[,nbhdList[[cell]]])
+    
+    C = aggregateFeature(counts, nbhdList, rowsums)
 
     nbhdObj = CreateSeuratObject(counts=C)
     nbhdObj = NormalizeData(nbhdObj)
@@ -1166,4 +1250,99 @@ aggragateGeneExpression = function(f,neighbourhoods)
     nbhdObj = FindClusters(nbhdObj)
     
     return(nbhdObj)
+}
+
+
+
+## ####################################################
+#' This function takes a matrix where rows are features and columns are cells,
+#' and a neighbourhood list, and creates an matrix where columns are the 
+#' neighbourhoods, the rows are are the features and the values are aggregated 
+#' expression values for cells in each neighbourhood.
+#'
+#' @param M - a matrix where column names are cells and row names are 
+#' features.
+#' @param nbhdList - a named list with memberships of the neighbourhoods
+#' of cells
+#' @param aggregateFunction - a function to aggregate expression (e.g. rowSums,
+#' rowMeans)
+#' @return a matrix giving aggregated gene expression for a cell's neighbourhood.
+#' @export
+aggregateFeature = function(M, nbhdList, aggregateFunction)
+{
+    cells = colnames(M)
+    res = lapply(cells, function(x, M, nbhdList) aggregateFunction(M[,nbhdList[[x]], drop = F]), 
+                 M = M, nbhdList = nbhdList)
+    
+    aggrM = do.call(cbind, res)
+    colnames(aggrM ) = cells
+
+    return(aggrM)
+}
+
+
+## ####################################################
+#' This function takes a matrix where rows are features and columns are cells,
+#' and a neighbourhood list, and computes Moran's I. 
+#'
+#' @param M - a matrix where column names are cells and row names are features.
+#' @param nbhdList - a named list with memberships of the neighbourhoods
+#' of cells
+#' @param aggregateFunction - a function to aggregate expression (e.g. rowSums,
+#' rowMeans)
+
+#' @return a matrix giving aggregated gene expression for a cell's neighbourhood.
+#' @export
+computeMoransI = function(M,nbhdList){
+  aggrM = aggregateFeature(M,nbhdList, rowMeans)
+  means = rowmeans(M)
+  zi = M - means
+  zj = aggrM - means
+  moransI = rowSums(zi*zj)/rowSums((zi^2))
+  return(moransI)
+}
+
+
+## ####################################################
+#' This function takes a matrix where rows are features and columns are cells,
+#' and a neighbourhood list, and computes Moran's I. 
+#'
+#' @param obj - a Seurat object
+#' @param spatialGraph - a data frame of neighbouring
+#' cell pairs. 
+#' @param assay - assay to pull data from, defaults to RNA.
+#' @param layer - layer to pull data from, defaults to data.
+#' @param nSim - number of simulations to perform for p value calculation. 
+#' Defaults to 100.
+#' @param verbose - whether to print trace, defaults to TRUE
+#' @import Seurat
+#' @return a dataframe containing Moran's I and p values for each feature.
+#' @export
+
+runMoransI = function(obj, spatialGraph, assay = "RNA", layer = "data",
+                      nSim = 100, verbose = T){
+  spatialGraph = symmetriseNN(spatialGraph)
+  
+  M = as.matrix(LayerData(obj, assay = assay, layer = layer))
+  nbhdList = nbhdsAsEdgesToNbhdsAsList(colnames(M),
+                                       neighbourhoods)
+  
+  moransI = computeMoransI(M,nbhdList)
+  results = list()
+  for (i in 1:nSim){
+    permuted = permuteMatrix(M)
+    results[[i]] = computeMoransI(permuted,nbhdList)
+    if (i %% 10 == 0 & verbose){
+      writeLines(as.character(i))
+    }
+  }
+  
+  results = do.call(cbind, results)
+  simResults = rowSums(moransI > results) 
+  pValues = abs((simResults - nSim)/nSim) 
+  pValues = pmax(pValues, (1/nSim))
+  results = cbind(moransI, pValues)
+  results = results[order(moransI, decreasing = T),]
+  results = data.frame(results)
+  return(results)
 }
