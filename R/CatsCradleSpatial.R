@@ -1325,7 +1325,7 @@ runMoransI = function(obj, spatialGraph, assay = "RNA", layer = "data",
   
   M = as.matrix(LayerData(obj, assay = assay, layer = layer))
   nbhdList = nbhdsAsEdgesToNbhdsAsList(colnames(M),
-                                       neighbourhoods)
+                                       spatialGraph)
   
   moransI = computeMoransI(M,nbhdList)
   results = list()
