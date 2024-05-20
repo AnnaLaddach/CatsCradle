@@ -3,15 +3,13 @@
 \docType{data}
 \name{smallXenium}
 \alias{smallXenium}
-\title{samllXenium}
+\title{smallXenium}
 \format{
 A Seurat object
 
 \describe{
 A spatial Seurat object subset from the Xenium object used in
-https://satijalab.org/seurat/articles/seurat5_spatial_vignette_2
-Other data objects whose names begin with small are derived from
-this object using CatsCradle.
+https://satijalab.org/seurat/articles/seurat5_spatial_vignette_2.
 }
 }
 \source{

@@ -14,7 +14,7 @@ mouse brain spatial data.
 }
 }
 \source{
-tiny subset from
+subset of tiny subset from
 https://www.10xgenomics.com/resources/datasets/fresh-frozen-mouse-brain-for-xenium-explorer-demo-1-standard
 }
 \usage{

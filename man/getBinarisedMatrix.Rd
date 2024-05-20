@@ -5,7 +5,7 @@
 \title{This functions retrieves an expression matrix from a seurat object and
 binarises it.}
 \usage{
-getBinarisedMatrix(obj, cutoff = 0)
+getBinarisedMatrix(obj, cutoff = 0, layer = "count")
 }
 \arguments{
 \item{obj}{\itemize{
@@ -14,6 +14,10 @@ getBinarisedMatrix(obj, cutoff = 0)
 
 \item{cutoff}{\itemize{
 \item a cutoff for binarisation. Defaults to 0.
+}}
+
+\item{layer}{\itemize{
+\item layer to fetch data from. Defaults to count.
 }}
 }
 \value{

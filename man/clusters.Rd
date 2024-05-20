@@ -13,7 +13,7 @@ a Seurat analysis.
 }
 }
 \source{
-clusters from Seurat analysis of
+clusters from Seurat analysis of subset of
 https://www.10xgenomics.com/resources/datasets/fresh-frozen-mouse-brain-for-xenium-explorer-demo-1-standard
 }
 \usage{

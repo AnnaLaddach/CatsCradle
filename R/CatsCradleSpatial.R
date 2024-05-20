@@ -11,7 +11,7 @@
 #' @import Rfast
 #' @export
 #' @examples
-#' smallTriangulation = computeNeighboursDelaunay(smallCentroids)
+#' delaunayNeighbours = computeNeighboursDelaunay(centroids)
 computeNeighboursDelaunay = function(centroids){
 
     ## This is confounded when centroids has extra columns:
@@ -63,7 +63,8 @@ computeNeighboursDelaunay = function(centroids){
 #' @import reshape2 
 #' @import Rfast
 #' @export
-## #' @examples
+#' @examples
+#' euclideanNeighbours = computeNeighboursEuclidean(centroids)
 
 computeNeighboursEuclidean = function(centroids, threshold){
   centroids = centroids[,c(1,2)]
@@ -157,38 +158,6 @@ neighbourhoodDiameter = function(neighbourhoods,centroids)
 }
 
 
-
-## ####################################################
-#' This function extracts neighbourhoods from a spatial graph in neighbour list
-#' format
-#' 
-#' @param  spatialGraph - a spatial graph in neighbour list format.
-#' @param cellNames - defaults to the names in the spatial graph
-#' @param addSelf - logical determining whether to include the cell at
-#' the center of the neighbourhood.  Defaults to FALSE
-#' @return a named list of neighbourhoods where a neighborhood is a set of a 
-#' cell's nearest neighbours. 
-#' @export
-#' @examples
-#' smallNbhds = computeNeighbourhoods(smallDelaunayTriangulation,addSelf=TRUE)
-computeNeighbourhoods = function(spatialGraph,
-                                 cellNames=extractCells(spatialGraph),
-                                 addSelf = F){
-  neighbourhoods = list()
-  for (cell in cellNames){
-    neighbours = 
-      c(spatialGraph[,2][cell == spatialGraph[,1]],
-        spatialGraph[,1][cell == spatialGraph[,2]])
-    neighbourhoods[[cell]] = neighbours
-    if (addSelf){
-      neighbourhoods[[cell]] = c(neighbourhoods[[cell]], cell)
-    }
-  }
- return(neighbourhoods) 
-}
-  
-
-
 ## ####################################################
 #' This function computes a matrix where neighbourhoods are rows and
 #' cell types are columns. The values in the matrix indicate the
@@ -200,19 +169,19 @@ computeNeighbourhoods = function(spatialGraph,
 #' @return a matrix of neighbourhoods by cell types
 #' @export
 #' @examples
-#' smallNbhdMatrix = computeNeighbourhoodByCTMatrix(smallDelaunayTriangulation,
-#'                                          smallXenium$seurat_clusters)
-computeNeighbourhoodByCTMatrix = function(spatialGraph, cellTypes){
+#' NBHDByCTMatrix = computeNBHDByCTMatrix(delaunayNeighbours,
+#'                                          clusters)
+computeNBHDByCTMatrix = function(spatialGraph, cellTypes){
   
   spatialGraphBA = spatialGraph[,c(2,1)]
   names(spatialGraphBA) = c("nodeA","nodeB")
   spatialGraph = rbind(spatialGraph,spatialGraphBA)
   spatialGraph[,2] = cellTypes[spatialGraph[,2]]
-  neighbourhoodbyCTmatrix = table(spatialGraph[,1],spatialGraph[,2])
-  neighbourhoodbyCTmatrix = as.data.frame.matrix(neighbourhoodbyCTmatrix)
-  neighbourhoodbyCTmatrix = neighbourhoodbyCTmatrix[names(cellTypes),]
+  NBHDByCTMatrix = table(spatialGraph[,1],spatialGraph[,2])
+  NBHDByCTMatrix  = as.data.frame.matrix(NBHDByCTMatrix)
+  NBHDByCTMatrix  =   NBHDByCTMatrix[names(cellTypes),]
   
-  return(neighbourhoodbyCTmatrix)
+  return(NBHDByCTMatrix)
 }
 
 
@@ -220,51 +189,51 @@ computeNeighbourhoodByCTMatrix = function(spatialGraph, cellTypes){
 #' This function creates a seurat object using a neighbourhood by cell type 
 #' matrix
 #' 
-#' @param neighbourhoodByCT - a matrix of neighbourhoods by cell types
-#' @param resolution - resolution for clustering (default 0.1)
-#' @param npcs - number of pcs used for PCA, defaults to 10
-#' @param n.neighbors - number of neighbors used by UMAP, defaults to 30
-#' @param compute_UMAP - defaults to TRUE
-#' @param transpose - defaults to FALSE
-#' @return a seurat object based on a neighbourhood by cell type matrix,
-#' containing clusters and UMAP.
+#' @param dataMatrix - a matrix of neighbourhoods by cell types or its 
+#' transpose.
+#' @param resolution - resolution for clustering (default 0.1).
+#' @param npcs - number of pcs used for PCA, defaults to 10.
+#' @param n.neighbors - number of neighbors used by UMAP, defaults to 30.
+#' @param transpose - defaults to FALSE.
+#' @return a seurat object based on a neighbourhood by cell type matrix or its 
+#' transpose, containing clusters and UMAP.
 #' @import Seurat
 #' @export
 #' @examples
-#' smallNbhdObj = computeNeighbourhoodByCTSeurat(smallNbhdMatrix)
-computeNeighbourhoodByCTSeurat= function(neighbourhoodByCT, resolution = 0.1, 
+#' NBHDByCTSeurat = computeNBHDVsCTSeurat(NBHDByCTMatrix)
+computeNBHDVsCTSeurat= function(dataMatrix, resolution = 0.1, 
                                          npcs = 10, n.neighbors = 30L, 
-                                         compute_UMAP = T, transpose = F){
-    dataMatrix = t(neighbourhoodByCT)
-    neighbourhoodSeurat = CreateSeuratObject(dataMatrix)
-    neighbourhoodSeurat[['RNA']]$data = dataMatrix
-    neighbourhoodSeurat = ScaleData(neighbourhoodSeurat)
-    neighbourhoodSeurat = RunPCA(neighbourhoodSeurat, assay = "RNA", 
-                                 features = rownames(neighbourhoodSeurat), 
+                                         transpose = F){
+    dataMatrix = t(dataMatrix)
+    NBHDSeurat = CreateSeuratObject(dataMatrix)
+    NBHDSeurat[['RNA']]$data = NBHDSeurat[['RNA']]$counts
+    NBHDSeurat = ScaleData(NBHDSeurat)
+    NBHDSeurat = RunPCA(NBHDSeurat, assay = "RNA", 
+                                 features = rownames(NBHDSeurat), 
                                  npcs = npcs)
     if (transpose){
-        neighbourhoodSeurat = RunUMAP(neighbourhoodSeurat,assay='RNA',
-                                      dims = 1:10, n.neighbors = n.neighbors)
+      NBHDSeurat = RunUMAP(NBHDSeurat,assay='RNA',
+                                      dims = 1:npcs, n.neighbors = n.neighbors)
   
     } else{
-        neighbourhoodSeurat = RunUMAP(neighbourhoodSeurat,assay='RNA',
-                                      features=rownames(neighbourhoodSeurat), 
+      NBHDSeurat = RunUMAP(NBHDSeurat,assay='RNA',
+                                      features=rownames(NBHDSeurat), 
                                       n.neighbors = n.neighbors)
     }
     if (transpose){
-        neighbourhoodSeurat = FindNeighbors(neighbourhoodSeurat, dims = 1:npcs)
+      NBHDSeurat = FindNeighbors(NBHDSeurat, dims = 1:npcs)
     } else{
-        neighbourhoodSeurat = FindNeighbors(neighbourhoodSeurat, 
-                                            features=rownames(neighbourhoodSeurat))
+      NBHDSeurat = FindNeighbors(NBHDSeurat, 
+                                            features=rownames(NBHDSeurat))
     }
-    neighbourhoodSeurat = FindClusters(neighbourhoodSeurat,
+    NBHDSeurat = FindClusters(NBHDSeurat,
                                        resolution=resolution)
 
     ## Rename seurat_clusters to neighbourhood_clusters
-    idx = names(neighbourhoodSeurat@meta.data) == 'seurat_clusters'
-    names(neighbourhoodSeurat@meta.data)[idx] = 'neighbourhood_clusters'
+    idx = names(NBHDSeurat@meta.data) == 'seurat_clusters'
+    names(NBHDSeurat@meta.data)[idx] = 'neighbourhood_clusters'
     
-    return(neighbourhoodSeurat)
+    return(NBHDSeurat)
 }
 
 ## ####################################################
@@ -293,110 +262,9 @@ computeGraphEmbedding = function(seuratObj, graph=defaultGraph(seuratObj)){
 
 
 
-## #' ## ####################################################
-## #' #' This function takes a nearest neighbour graph and a radius
-## #' #' and finds the combinatorial ball around each cell
-## #' #'
-## #' #' @param NN - a nearest neighbour graph
-## #' #' @param radius - combinatorial radius
-## #' #' @return This returns a named list.  In each case, the name is the
-## #' #'     cell at the center of the ball.  Each item in the list is a
-## #' #'     named numeric.  The values give combinatorial distance from the
-## #' #'     center and the names give the cells.
-## #' #' @export
-## #' #' @examples
-## #' #' smallCombNbhds = findCombinatorialNeighbourhoods(smallDelaunayTriangulation,2)
-## #' findCombinatorialNeighbourhoods = function(NN,radius)
-## #' {
-## #'     combinatorialNbhdsImpl = function(edges,radius)
-## #'     {
-## #'         ## ####################################################
-## #'         ## The base case:
-## #'         if(radius == 0)
-## #'         {
-## #'             ball = list()
-## #'             vertices = names(edges)
-## #'             for(v in vertices)
-## #'             {
-## #'                 a = 0
-## #'                 names(a) = v
-## #'                 ball[[v]] = a
-## #'             }
-## #'             return(ball)
-## #'         }
-## #'         ## ####################################################
-## #'         ## Recurse:
-## #'         else
-## #'         {
-## #'             smaller = combinatorialNbhdsImpl(edges,radius-1)
-## #'             for(v in names(smaller))
-## #'             {
-## #'                 frontier = smaller[[v]][smaller[[v]]==radius-1]
-## #'                 proposed = c()
-## #'                 for(frontierV in names(frontier))
-## #'                     proposed = c(proposed,edges[[frontierV]])
-## #'                 proposed = unique(proposed)
-## #'                 idx = proposed %in% names(smaller[[v]])
-## #'                 proposed = proposed[!idx]
-## #'                 theNew = rep(radius,length(proposed))
-## #'                 names(theNew) = proposed
-## #'                 smaller[[v]] = c(smaller[[v]],theNew)
-## #'             }
-## #'             return(smaller)
-## #'         }
-## #'     } ## End of impl
-## #' 
-## #'     ## ####################################################    
-## #'     ## Get the edges:
-## #'     vertices = unique(c(NN$nodeA,NN$nodeB))
-## #'     edges = list()
-## #'     for(v in vertices)
-## #'     {
-## #'         idx = NN$nodeA == v
-## #'         neighboursB = unique(NN$nodeB[idx])
-## #'         idx = NN$nodeB == v
-## #'         neighboursA = unique(NN$nodeA[idx])
-## #'         
-## #'         edges[[v]] = unique(c(neighboursA,neighboursB))
-## #'     }
-## #' 
-## #'     return(combinatorialNbhdsImpl(edges,radius))
-## #' }
-## #' 
-## #' 
-## #' ## ####################################################
-## #' #' This function reduces combinatorial balls to an
-## #' #' extended nearest neighbour graph
-## #' #'
-## #' #' @param balls - A named list as produced by the function
-## #' #'     findCombinatorialNeighbourhoods
-## #' #' @return This returns a nearest neighbour data frame where the cells
-## #' #'     in each combinatorial ball are now considered the center's
-## #' #'     neighbours.
-## #' #' @export
-## #' #' @examples
-## #' #' reduced = reduceCombinatorialBalls(smallCombNbhds)
-## #' reduceCombinatorialBalls = function(balls)
-## #' {
-## #'     nodeA = c()
-## #'     nodeB = c()
-## #'     for(cell in names(balls))
-## #'     {
-## #'         newNeighbours = names(balls[[cell]])
-## #'         N = length(newNeighbours)
-## #'         nodeA = c(nodeA,rep(cell,N))
-## #'         nodeB = c(nodeB,newNeighbours)
-## #'     }
-## #'     NN = data.frame(nodeA,nodeB)
-## #'     idx = NN$nodeA == NN$nodeB
-## #'     NN = NN[!idx,]
-## #' 
-## #'     return(NN)
-## #' }
-
 ## ####################################################
 #' This function takes a nearest neighbour graph and a radius
-#' and calculates nth neighbour graphs where max(n) == radius
+#' and calculates nth degree neighbour graphs where max(n) == radius
 #'
 #' @param spatialGraph - a nearest neighbour graph
 #' @param n - the maximum degree to calculate a neighbour graph with edges 
@@ -406,8 +274,8 @@ computeGraphEmbedding = function(seuratObj, graph=defaultGraph(seuratObj)){
 #' @import data.table
 #' @export
 #' @examples
-#' smallNbhds = expandNeighbourhoods(smallDelaunayTriangulation,4)
-expandNeighbourhoods  = function(spatialGraph, n){
+#' extendedNeighboursList = getExtendedNBHDs(delaunayNeighbours, 4)
+getExtendedNBHDs = function(spatialGraph, n){
   spatialGraph = data.table(spatialGraph)
   
   spatialGraphR = spatialGraph
@@ -438,20 +306,22 @@ expandNeighbourhoods  = function(spatialGraph, n){
 
 
 ## ####################################################
-#' This function takes expanded neighbourhoods and collapses them to a nearest 
-#' neighbourhood graph where all neighbours of degree <= n in the original graph 
-#' are considered first neighbours.
+#' This function takes an expanded neighbourhood list and collapses it to a 
+#' nearest neighbourhood graph where all neighbours of degree <= n in the 
+#' original graph are considered first neighbours.
 #'
-#' @param expandedNeighbours - the results of expandNeighbourhoods()
+#' @param extendedNeighboursList - the results of getExtendedNBHDs()
 #' @param n - the maximum degree to connect neighbours. Defaults to the maximum 
-#' degree neighbourhoods were expanded to in the results of expandNeighbourhoods().
+#' degree neighbourhoods were expanded to in the results of getExtendedNBHDs().
 #' @return a graph in neighbour format, i.e., a data frame with
 #'     columns nodeA and nodeB, where nodes that were originally of degree <= n 
 #'     are connected.
 #' @export
-collapseNeighbourhoods = function(expandedNeighbours, n = length(expandedNeighbours)){
+#' @examples
+#' extendedNeighbours = collapseExtendedNBHDs(extendedNeighboursList, 4)
+collapseExtendedNBHDs = function(extendedNeighboursList, n = length(extendedNeighboursList)){
   
-  collapsedGraph = as.data.frame(do.call(rbind,expandedNeighbours[1:n]))
+  collapsedGraph = as.data.frame(do.call(rbind,extendedNeighboursList[1:n]))
 
   return(collapsedGraph)
 }
@@ -525,11 +395,10 @@ computeCellTypesPerCellTypeMatrix = function(nbhdByCellType,cellTypes)
 #' found in E(G)$weight and E(G)$width.
 #' @export
 #' @examples
-#' idx = colSums(smallCellTypesPerCellTypeMatrix) > 0
-#' M = smallCellTypesPerCellTypeMatrix[,idx]
-#' G = cellTypesPerCellTypeGraphFromMatrix(M,plotGraph=FALSE)
-cellTypesPerCellTypeGraphFromMatrix = function(M,
-                                               colors=NULL,
+#' G = cellTypesPerCellTypeGraphFromCellMatrix(cellTypesPerCellTypeMatrix, 
+#' minWeight = 0.05, colours = colours)
+cellTypesPerCellTypeGraphFromCellMatrix = function(M,
+                                               colours=NULL,
                                                selfEdges=FALSE,
                                                minWeight=0,
                                                edgeWeighting=20,
@@ -546,17 +415,17 @@ cellTypesPerCellTypeGraphFromMatrix = function(M,
                                     weighted=TRUE,
                                     diag=selfEdges)
 
-    if(! is.null(colors))    
-        V(G)$color = colors[names(V(G))]
+    if(! is.null(colours))    
+        V(G)$colour = colours[names(V(G))]
     G$coords = layout_with_fr(G)
     E(G)$width = edgeWeighting * E(G)$weight
 
     if(plotGraph)
     {
-        if(! is.null(colors))
+        if(! is.null(colours))
             plot(G,
                  layout=G$coords,
-                 vertex.color=V(G)$color,
+                 vertex.color=V(G)$colour,
                  edge.width=E(G)$width,
                  edge.curved = edgeCurved,
                  arrow.size = arrowSize,
@@ -606,9 +475,9 @@ cellTypesPerCellTypeGraphFromMatrix = function(M,
 #' these are found in V(G)$color.  Edge weights and widths are
 #' found in E(G)$weight and E(G)$width. 
 #' @export
-cellTypesPerCellTypeGraph = function(nbhdByCellType,
+cellTypesPerCellTypeGraphFromNbhdMatrix = function(nbhdByCellType,
                                      clusters,
-                                     colors=NULL,
+                                     colours=NULL,
                                      selfEdges=FALSE,
                                      minWeight=0,
                                      edgeWeighting=20,
@@ -618,8 +487,8 @@ cellTypesPerCellTypeGraph = function(nbhdByCellType,
                                      plotGraph=TRUE)
 {
     M = cellTypesPerCellTypeMatrix(nbhdByCellType,clusters)
-    G = cellTypesPerCellTypeGraphFromMatrix(M,
-                                            colors=colors,
+    G = cellTypesPerCellTypeGraphFromCellMatrix(M,
+                                            colours=colours,
                                             selfEdges=selfEdges,
                                             minWeight=minWeight,
                                             edgeWeighting=edgeWeighting,
@@ -654,8 +523,8 @@ computeNeighbourEnrichment = function(spatialGraph, cellTypes, nSim = 1000,
                                       verbose=TRUE){
   results = list()
   spatialGraphOrig = spatialGraph
-  neighbourhoodByCT = computeNeighbourhoodByCTMatrix(spatialGraphOrig,cellTypes) 
-  cellTypeMatrix = computeCellTypesPerCellTypeMatrix(neighbourhoodByCT, cellTypes) 
+  NBHDByCT = computeNBHDByCTMatrix(spatialGraphOrig,cellTypes) 
+  cellTypeMatrix = computeCellTypesPerCellTypeMatrix(NBHDByCT, cellTypes) 
   for (i in 1:nSim){ 
     spatialGraph = spatialGraphOrig
     spatialGraphBA = spatialGraph[,c(2,1)]
@@ -664,10 +533,10 @@ computeNeighbourEnrichment = function(spatialGraph, cellTypes, nSim = 1000,
     spatialGraph = unique(spatialGraph)
     spatialGraph[,2] = sample(spatialGraph[,2])
     spatialGraph[,2] = cellTypes[spatialGraph[,2]]
-    neighbourhoodbyCTmatrix = table(spatialGraph[,1],spatialGraph[,2])
-    neighbourhoodbyCTmatrix = as.data.frame.matrix(neighbourhoodbyCTmatrix)
-    neighbourhoodbyCTmatrix = neighbourhoodbyCTmatrix[names(cellTypes),]
-    results[[i]] = computeCellTypesPerCellTypeMatrix(neighbourhoodbyCTmatrix,cellTypes)
+    NBHDByCTmatrix = table(spatialGraph[,1],spatialGraph[,2])
+    NBHDByCTmatrix = as.data.frame.matrix(NBHDByCTmatrix)
+    NBHDByCTmatrix = NBHDByCTmatrix[names(cellTypes),]
+    results[[i]] = computeCellTypesPerCellTypeMatrix(NBHDByCTmatrix,cellTypes)
     if (i %% 10 == 0 & verbose){
       writeLines(as.character(i))
     }
@@ -731,7 +600,7 @@ getLigandReceptorPairsInPanel = function(obj,species,
     panel = rownames(obj)
 
     ## Ligands and receptors:
-    pairs = paste(lrn$from,lrn$to,sep='_')
+    pairs = paste(lrn$from,lrn$to,sep='-')
     ligands = unique(lrn$from)
     receptors = unique(lrn$to)
     ligandsFound = intersect(ligands,panel)
@@ -740,56 +609,16 @@ getLigandReceptorPairsInPanel = function(obj,species,
     panelPairs = c()
     for(a in ligandsFound)
         for(b in receptorsFound)
-            panelPairs = c(panelPairs,paste(a,b,sep='_'))
+            panelPairs = c(panelPairs,paste(a,b,sep='-'))
     idx = panelPairs %in% pairs
     pairsFound = panelPairs[idx]
 
-    a = str_split(pairsFound,'_')
+    a = str_split(pairsFound,'-')
     pairsFoundDF = data.frame(ligand=unlist(lapply(a,function(x) return(x[1]))),
                               receptor=unlist(lapply(a,function(x) return(x[2]))))
 
     return(pairsFoundDF)
 }
-
-## #' ## ####################################################
-## #' #' This function takes a Seurat object, a set of ligand receptor
-## #' #' pairs and a set of edges denoting neighbouring cells and
-## #' #' annotates these with the ligand receptor interactions taking
-## #' #' place on those edges in each direction.
-## #' #'
-## #' #' @param obj - a Seurat object
-## #' #' @param pairDF - a data frame giving the ligand-receptor pairs
-## #' #' @param delaunayNeighbours - a data frame of neighbouring
-## #' #' cell pairs.  Note that each row is a directed edge (A,B) so
-## #' #' that this data frame should have both the edge (A,B) and the
-## #' #' edge (B,A)
-## #' #' @return This returns a data frame whose first two columns give
-## #' #' the neighbouring cells.  Each of the remaining columns is a logical
-## #' #' corresponding to a ligand-receptor pair telling whether the ligand
-## #' #' is expressed in the first cell and the receptor is expressed in the
-## #' #' second cell.
-## #' #' @export
-## #' getInteractionsOnEdges = function(obj,pairDF,delaunayNeighbours)
-## #' {
-## #'     ## Discretize expression:
-## #'     M = FetchData(obj,rownames(obj),layer='count')
-## #'     M = data.matrix(t(M))
-## #'     cutoff = 0
-## #'     M = M > cutoff
-## #' 
-## #'     ## Find the interactions on the edges:
-## #'     edges = delaunayNeighbours
-## #' 
-## #'     for(i in 1:nrow(pairDF))
-## #'     {
-## #'         tag = paste(pairDF$ligand[i],pairDF$receptor[i],sep='_')
-## #'         edges[,tag] = (M[pairDF$ligand[i],edges$nodeA] &
-## #'                    M[pairDF$receptor[i],edges$nodeB])
-## #'     }
-## #' 
-## #'     return(edges)
-## #' }
-
 
 
 ## ####################################################
@@ -818,7 +647,7 @@ getInteractionsOnEdges = function(M,pairDF,spatialGraph)
   
   for(i in 1:nrow(pairDF))
   {
-    tag = paste(pairDF$ligand[i],pairDF$receptor[i],sep='_')
+    tag = paste(pairDF$ligand[i],pairDF$receptor[i],sep='-')
     edges[,tag] = (M[pairDF$ligand[i],edges$nodeA] &
                      M[pairDF$receptor[i],edges$nodeB])
   }
@@ -848,9 +677,10 @@ permuteMatrix = function(M){
 #'
 #' @param obj - a Seurat object
 #' @param cutoff - a cutoff for binarisation. Defaults to 0.
+#' @param layer - layer to fetch data from. Defaults to count.
 #' @return A binarised expression matrix where rows are genes and columns are 
 #' cells.
-getBinarisedMatrix = function(obj, cutoff = 0){
+getBinarisedMatrix = function(obj, cutoff = 0, layer = 'count'){
   M = FetchData(obj,rownames(obj),layer='count')
   M = data.matrix(t(M))
   cutoff = 0
@@ -876,7 +706,7 @@ getBinarisedMatrix = function(obj, cutoff = 0){
 #' other columns giving the counts of interactions that it
 #' has with its neighbours.
 #' @export
-countInteractionsPerCell = function(edges,sourceOrTarget)
+countLRInteractionsPerCell = function(edges,sourceOrTarget)
 {
     stopifnot(sourceOrTarget %in% c('source','target'))
     
@@ -899,18 +729,18 @@ countInteractionsPerCell = function(edges,sourceOrTarget)
 
 ## ####################################################
 #' This takes a data frame of interaction counts as found
-#' by countInteractionsPerCell(), the underlying Seurat object
+#' by countLRInteractionsPerCell(), the underlying Seurat object
 #' and the neighbourhood Seurat object and annotates the counts
 #' with the cell type and the neighbourhood type corresponding
 #' to the cells of the interaction counts.
 #'
-#' @param interactionCounts - as found by countInteractionsPerCell()
+#' @param interactionCounts - as found by countLRInteractionsPerCell()
 #' @param obj - a Seurat object
 #' @param nbhdObj - a neighbourhood x cell type Seurat object
 #' @return This returns the interaction counts annotated with the
 #' cell type and neighbourhood type of each cell.
 #' @export
-annotateInteractionCounts = function(interactionCounts,obj,nbhdObj)
+annotateLRInteractionCounts = function(interactionCounts,obj,nbhdObj)
 {
     ## Get nbhd and cell types:
     annotated = data.frame(cell=colnames(obj),
@@ -952,14 +782,36 @@ annotateInteractionCounts = function(interactionCounts,obj,nbhdObj)
 #' data frame with columns from and to.  By default, it
 #' retrieves the nichenetr ligand receptor network
 #' @param verbose - whether to print trace, defaults to TRUE
-#' @return This returns a data frame whose first two columns give
-#' the neighbouring cells.  Each of the remaining columns is a logical
+#' @return A list containing:
+#' interactionsOnEdges - a data frame whose first two columns give
+#' the neighbouring cells and next two columns give their corresponding 
+#' clusters. Each of the remaining columns is a logical
 #' corresponding to a ligand-receptor pair telling whether the ligand
 #' is expressed in the first cell and the receptor is expressed in the
 #' second cell.
+#' totalInteractionsByCluster - a dataframe where the first column gives a 
+#' directed (sender-receiver) pair of clusters. The second column gives the 
+#' total number of edges between those clusters. The remaining columns give the 
+#' total numbers of edges on which particular ligand receptor interactions are 
+#' present.
+#' meanInteractionsByCluster - a dataframe where the first column gives a 
+#' directed (sender-receiver) pair of clusters. The second column gives the 
+#' total number of edges between those clusters. The remaining columns give the 
+#' total numbers of edges on which particular ligand receptor interactions are 
+#' present (for that cluster pair) divided by the total number of edges between 
+#' those clusters.
+#' simResults - a dataframe where the rownames are sender-receiver cluster pairs 
+#' and column names are ligand receptor pairs. Values give the number of 
+#' simulations for which observed values are greater than simulated values.
+#' pValues - a dataframe where the rownames are sender-receiver cluster pairs 
+#' and column names are ligand receptor pairs. Entries are uppertail pvalues 
+#' describing whether a particular ligand receptor interaction is observed more 
+#' frequently between 2 clusters than expected.
 #' @export
+#' @examples performLigandReceptorAnalysis(smallXenium, delaunayNeighbours, 
+#' "mouse", clusters,verbose=FALSE)
 
-performInteractionAnalysis = function(obj, spatialGraph, species, clusters,
+performLigandReceptorAnalysis = function(obj, spatialGraph, species, clusters,
                                       nSim = 1000, 
                                       lrn = getLigandReceptorNetwork(species),
                                       verbose=TRUE){
@@ -988,7 +840,7 @@ performInteractionAnalysis = function(obj, spatialGraph, species, clusters,
   
   #get sum of interactions within and between clusters
   pair = 
-    paste0(interactionsOnEdges$clusterA,  "_", interactionsOnEdges$clusterB) 
+    paste0(interactionsOnEdges$clusterA,  "-", interactionsOnEdges$clusterB) 
   totalInteractionsByCluster = 
     aggregate(interactionsOnEdges[,5:ncol(interactionsOnEdges)], list(pair), 
               sum)
@@ -1032,15 +884,15 @@ performInteractionAnalysis = function(obj, spatialGraph, species, clusters,
   return(list("interactionsOnEdges" = interactionsOnEdges, 
               "totalInteractionsByCluster" = totalInteractionsByCluster,
               "meanInteractionsByCluster" = meanInteractionsByCluster,
-              "simResults" = simResults,
-              "pValues" = pValues))
+              "simResults" = as.data.frame(simResults),
+              "pValues" = as.data.frame(pValues)))
 }
 
     
 ## ####################################################
-#' This function takes interactionResults and plots a heatmap of -log10(pvalues).
+#' This function takes ligandReceptorResults and plots a heatmap of -log10(pvalues).
 #'
-#' @param interactionResults - as returned by performInteractionAnalysis()
+#' @param ligandReceptorResults - as returned by performLigandReceptorAnalysis()
 #' @param clusters - named vector of cell types where names are each cell and
 #' clusters are a factor
 #' @param colors - a named list of colors where names are clusters. If not 
@@ -1054,53 +906,57 @@ performInteractionAnalysis = function(obj, spatialGraph, species, clusters,
 #' @param  labelClusterPairs - show labels for cluster pairs. Defaults to TRUE.
 #' @import Rfast
 #' @import pheatmap
+#' @return matrix of -log10(pvalues) that underlies the heatmap.
 #' @export
-makeInteractionHeatmap = function(interactionResults,
+makeLRInteractionHeatmap = function(ligandReceptorResults,
                                   clusters,
-                                  colors = c(),
+                                  colours = c(),
                                   pValCutoffClusterPair = 0.05, 
                                   pValCutoffLigRec = 0.05,
                                   labelClusterPairs = T)
 {
-  selectedPValues = interactionResults$pValues[rowMins(interactionResults$pValues, value = T) < pValCutoffClusterPair,
-                                             colMins(interactionResults$pValues, value = T) < pValCutoffLigRec]
+  pValues = as.matrix(ligandReceptorResults$pValues)
+  selectedPValues = pValues[rowMins(pValues, value = T) < pValCutoffClusterPair,
+                                             colMins(pValues, value = T) < pValCutoffLigRec]
   negLog10PValues = -log10(selectedPValues)
-  rowAnno = str_split_fixed(rownames(selectedPValues), pattern = "_", 2)
+  rowAnno = str_split_fixed(rownames(selectedPValues), pattern = "-", 2)
   rowAnno = as.data.frame(rowAnno)
   names(rowAnno) = c("sender","receiver")
   rowAnno$sender = factor(rowAnno$sender, levels = levels(clusters))
   rowAnno$receiver = factor(rowAnno$receiver, levels = levels(clusters))
   rownames(rowAnno) = rownames(selectedPValues)
-  if (length(colors) > 0){
-  pheatmap(negLog10PValues, annotation_row = rowAnno, annotation_colors = list("sender" = colors, 
-                                                                    "receiver" = colors),
+  if (length(colours) > 0){
+  pheatmap(negLog10PValues, annotation_row = rowAnno, annotation_colors = list("sender" = colours, 
+                                                                    "receiver" = colours),
            show_rownames = labelClusterPairs)
   } else{
     pheatmap(negLog10PValues, annotation_row = rowAnno, show_rownames = labelClusterPairs)
   }
+  return(negLog10PValues)
 }
 
 
 ## ####################################################
-#' This function takes interactionResults and plots a heatmap of the total 
+#' This function takes ligandReceptorResults and plots a heatmap of the total 
 #' number of ligand receptor interactions between clusters.
 #'
-#' @param interactionResults - as returned by performInteractionAnalysis()
+#' @param ligandReceptorResults - as returned by performLigandReceptorAnalysis()
 #' @param clusters - named vector of cell types where names are each cell and
 #' clusters are a factor
 #' @param type - "total" or "mean" to plot raw total interactions or mean interactions per edge.
 #' @param  logScale - plot heatmap using log scale (defaults to T)
 #' @import pheatmap
+#' @return matrix of total ligand receptor interactions that underlies the heatmap.
 #' @export
-makeSummedInteractionHeatmap = function(interactionResults, clusters, type, logScale = T){ 
+makeSummedLRInteractionHeatmap = function(ligandReceptorResults, clusters, type, logScale = T){ 
   if (type == "total"){
-    interactionsByCluster = interactionResults$totalInteractionsByCluster
+    interactionsByCluster = ligandReceptorResults$totalInteractionsByCluster
   } 
   if (type == "mean"){
-    interactionsByCluster = interactionResults$meanInteractionsByCluster
+    interactionsByCluster = ligandReceptorResults$meanInteractionsByCluster
   } 
   summedInteractionsByCluster = rowSums(interactionsByCluster[,3:ncol(interactionsByCluster)])
-  pair = str_split_fixed(names(summedInteractionsByCluster), pattern = "_", 2)
+  pair = str_split_fixed(names(summedInteractionsByCluster), pattern = "-", 2)
   summedInteractionsByCluster = as.data.frame(cbind(pair,summedInteractionsByCluster))
   colnames(summedInteractionsByCluster) = c("Sender", "Receiver", "nInteractions")
   summedInteractionsByCluster$nInteractions = as.numeric(summedInteractionsByCluster$nInteractions)
@@ -1120,8 +976,10 @@ makeSummedInteractionHeatmap = function(interactionResults, clusters, type, logS
   rownames(summedInteractionsByClusterMatrix) = clusterNames
   if (logScale){
     pheatmap(log(summedInteractionsByClusterMatrix +1))
+    return(log(summedInteractionsByClusterMatrix +1))
   } else{
     pheatmap((summedInteractionsByClusterMatrix))
+    return(summedInteractionsByClusterMatrix)
   }
 }
 
@@ -1131,7 +989,7 @@ makeSummedInteractionHeatmap = function(interactionResults, clusters, type, logS
 #' centroids of edges between cells. The "expression matrix" is the 
 #' binarised presence/absence of an interaction (ligand receptor pair) on an edge. 
 #'
-#' @param interactionResults - as returned by performInteractionAnalysis()
+#' @param ligandReceptorResults - as returned by performLigandReceptorResultsAnalysis()
 #' @param centroids - a dataframe containing centroids 
 #' where rownames are cellnames and the first two columns
 #' contain x and y coordinates respectively.
@@ -1143,15 +1001,16 @@ makeSummedInteractionHeatmap = function(interactionResults, clusters, type, logS
 #' binarised presence/absence of an interaction (ligand receptor pair) on an edge. 
 #' @export
 
-computeEdgeSeurat = function(interactionResults, centroids, npcs = 10){
-  interactionsOnEdges = interactionResults$interactionsOnEdges
-  rownames(interactionsOnEdges) = paste0(interactionsOnEdges$nodeA, "_", interactionsOnEdges$nodeB)
+computeEdgeSeurat = function(ligandReceptorResults, centroids, npcs = 10){
+  interactionsOnEdges = ligandReceptorResults$interactionsOnEdges
+  rownames(interactionsOnEdges) = paste0(interactionsOnEdges$nodeA, "-", interactionsOnEdges$nodeB)
   interactionsOnEdgesMat = as.matrix(interactionsOnEdges[,5:ncol(interactionsOnEdges)])
   interactionsOnEdgesMat= 1 * interactionsOnEdgesMat
   edgeSeurat = CreateSeuratObject(t(interactionsOnEdgesMat), meta = interactionsOnEdges[,1:5])
-  edgeCoords = cbind(centroids[interactionsOnEdges$nodeA, 1:2], centroids[interactionsOnEdges$nodeB, 1:2])
+  edgeCoords = as.data.frame(cbind(centroids[interactionsOnEdges$nodeA, 1:2], 
+                                  centroids[interactionsOnEdges$nodeB, 1:2]))
   
-  edgeCoords$edgeX = 0.6 * edgeCoords[,1] + 0.4 * edgeCoords[,3] 
+  edgeCoords$edgeX = 0.6 * edgeCoords[,1] + 0.4 * edgeCoords[,3]
   edgeCoords$edgeY = 0.6 * edgeCoords[,2] + 0.4 * edgeCoords[,4] 
   
   
@@ -1221,7 +1080,7 @@ nbhdsAsEdgesToNbhdsAsList = function(cells=unique(neighbourhoods$nodeA),
 #' @return a Seurat object giving total gene expression
 #' in each neighbourhood.
 #' @export
-aggregateGeneExpression = function(f,neighbourhoods)
+aggregateSeuratGeneExpression = function(f,neighbourhoods)
 {
     cells = colnames(f)
     nbhds = unique(neighbourhoods$nodeA)
@@ -1238,7 +1097,7 @@ aggregateGeneExpression = function(f,neighbourhoods)
     nbhdList =nbhdsAsEdgesToNbhdsAsList(cells,
                                         neighbourhoods)
     
-    C = aggregateFeature(counts, nbhdList, rowsums)
+    C = aggregateFeatureMatrix(counts, nbhdList, rowsums)
 
     nbhdObj = CreateSeuratObject(counts=C)
     nbhdObj = NormalizeData(nbhdObj)
@@ -1268,7 +1127,7 @@ aggregateGeneExpression = function(f,neighbourhoods)
 #' rowMeans)
 #' @return a matrix giving aggregated gene expression for a cell's neighbourhood.
 #' @export
-aggregateFeature = function(M, nbhdList, aggregateFunction)
+aggregateFeatureMatrix = function(M, nbhdList, aggregateFunction)
 {
     cells = colnames(M)
     res = lapply(cells, function(x, M, nbhdList) aggregateFunction(M[,nbhdList[[x]], drop = F]), 
@@ -1294,7 +1153,7 @@ aggregateFeature = function(M, nbhdList, aggregateFunction)
 #' @return a matrix giving aggregated gene expression for a cell's neighbourhood.
 #' @export
 computeMoransI = function(M,nbhdList){
-  aggrM = aggregateFeature(M,nbhdList, rowMeans)
+  aggrM = aggregateFeatureMatrix(M,nbhdList, rowMeans)
   means = rowmeans(M)
   zi = M - means
   zj = aggrM - means
@@ -1345,4 +1204,37 @@ runMoransI = function(obj, spatialGraph, assay = "RNA", layer = "data",
   results = results[order(moransI, decreasing = T),]
   results = data.frame(results)
   return(results)
+}
+
+
+## ####################################################
+#' This function takes a spatial graph and computes a new spatial graph where
+#' edges become nodes and A-B edges (in the original graph) become connected to
+#' all A- edges and all B- edges. 
+#' 
+#' 
+#' @param spatialGraph - a data frame of neighbouring edge pairs. 
+#' @param selfEdges - a logical determining whether to include self edges. 
+#' Defaults to False.
+#' @return a graph in neighbour format  where edges in the original graph 
+#' become nodes and A-B edges (in the original graph) become connected to
+#' all A- edges and all B- edges. 
+#' @import data.table
+#' @export
+#' @examples
+#' edgeNeighbours = computeEdgeGraph(delaunayNeighbours)
+
+computeEdgeGraph = function(spatialGraph, selfEdges = F){
+  spatialGraph = data.table(spatialGraph)
+  spatialGraph$edge = paste0(spatialGraph$nodeA, "-", spatialGraph$nodeB)
+  spatialGraphEdgesA = merge(spatialGraph, spatialGraph[,c(1,3)], by = "nodeA", allow.cartesian = T)
+  spatialGraphEdgesB = merge(spatialGraph, spatialGraph[,c(2,3)], by = "nodeB", allow.cartesian = T)
+  
+  spatialGraphEdges = rbind(spatialGraphEdgesA[,c(3,4)],spatialGraphEdgesB[,c(3,4)])
+  names(spatialGraphEdges) = c("nodeA","nodeB")
+  if (! selfEdges){
+    spatialGraphEdges = spatialGraphEdges[spatialGraphEdges$nodeA != spatialGraphEdges$nodeB,]
+  }
+  
+  return(spatialGraphEdges)
 }
