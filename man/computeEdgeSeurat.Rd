@@ -7,11 +7,11 @@ each point represents an edge between cells, and spatial coordinates are the
 centroids of edges between cells. The "expression matrix" is the
 binarised presence/absence of an interaction (ligand receptor pair) on an edge.}
 \usage{
-computeEdgeSeurat(interactionResults, centroids, npcs = 10)
+computeEdgeSeurat(ligandReceptorResults, centroids, npcs = 10)
 }
 \arguments{
-\item{interactionResults}{\itemize{
-\item as returned by performInteractionAnalysis()
+\item{ligandReceptorResults}{\itemize{
+\item as returned by performLigandReceptorResultsAnalysis()
 }}
 
 \item{centroids}{\itemize{

@@ -103,7 +103,7 @@
 #' This gives the x and y coordinates for cell centroids from xenium  
 #' mouse brain spatial data.
 #' }
-#' @source tiny subset from
+#' @source subset of tiny subset from
 #' https://www.10xgenomics.com/resources/datasets/fresh-frozen-mouse-brain-for-xenium-explorer-demo-1-standard
 "centroids"
 
@@ -118,7 +118,7 @@
 #' This contains cluster annotations for xenium mouse brain data extracted from
 #' a Seurat analysis. 
 #' }
-#' @source clusters from Seurat analysis of 
+#' @source clusters from Seurat analysis of subset of
 #' https://www.10xgenomics.com/resources/datasets/fresh-frozen-mouse-brain-for-xenium-explorer-demo-1-standard
 "clusters"
 
@@ -149,7 +149,7 @@
 "mouseLRN"
 
 ## ####################################################
-#' samllXenium
+#' smallXenium
 #'
 #' A spatial Seurat object of 4261 cells and 248 genes
 #'
@@ -157,9 +157,7 @@
 #'
 #' \describe{
 #' A spatial Seurat object subset from the Xenium object used in
-#' https://satijalab.org/seurat/articles/seurat5_spatial_vignette_2
-#' Other data objects whose names begin with small are derived from
-#' this object using CatsCradle.
+#' https://satijalab.org/seurat/articles/seurat5_spatial_vignette_2.
 #' }
 #' 
 #' @source This is subset from the Xenium spatial Seurat object
@@ -167,84 +165,104 @@
 #' to include a small region of the field of view surrounding the dentate gyrus. 
 "smallXenium"
 
-## ####################################################
-#' smallCentroids
-#'
-#' A data.frame of the centroids of the cells in the
-#' smallXenium Seurat object
-#'
-#' @format A data frame with columns x, y, and cell.  Rownames
-#' also give the names of the cells.
-#'
-#' \describe{
-#' This data frame gives the centroids of the cells in smallXenium.
-#' }
-#'
-#' @source Extracted from smallXenium with GetTissueCoordinates().
-#' The names of the cells are appended as rownames.
-"smallCentroids"
+
 
 ## ####################################################
-#' smallDelaunayTriangulation
+#' delaunayNeighbours
 #'
-#' A data frame of the Delaunay triangulation of smallCentroids,
-#' the centroids of sammXenium
+#' A data frame of the Delaunay triangulation of centroids of cells in
+#' smallXenium
 #'
 #' @format A data frame with character columns nodeA and nodeB.
 #'
 #' \describe{
 #' The entries in this data frame are cell names from smallXenium.
 #' Each row represents an undirected edge in the Delaunay
-#' triangulation of smallCentroids.
+#' triangulation of centroids.
 #' }
 #'
-#' @source This is computed from smallCentroids using
+#' @source This is computed from centroids using
 #' computeNeighboursDelaunay()
-"smallDelaunayTriangulation"
+"delaunayNeighbours"
+
 
 ## ####################################################
-#' smallNbhds
+#' euclideanNeighbours
 #'
-#' A named list of characters in which each name is the
-#' name of a cell from smallXenium and its vector gives
-#' the names of the surrounding cells.
-#' 
-#' @format A named list.  Each entry in this lists gives
-#' the names of the cells surrounding a given cell.
+#' A data frame of nearest neighbours calculated 
+#' using euclidean distance as a cutoff.
+#'
+#' @format A data frame with character columns nodeA and nodeB.
 #'
 #' \describe{
-#' This list gives the combinatorial balls of radius 1
-#' around the cells in smallDelaunayTriangulation
-#'}
-#' 
-#' @source Computed from smallDelaunayTriangulation using
-#' computeNeighbourhoods() with addSelf=TRUE
-"smallNbhds"
-
-## ####################################################
-#' smallCombNbhds
-#'
-#' A named list giving the combinatorial neighbourhood
-#' of radius 2 around each cell
-#'
-#' @format A named list.  Each entry in this lists gives
-#' the names of the cells in the combinatorial ball of
-#' radius 2 surrounding a given cell.
-#'
-#' \describe{
-#' A named list.  This gives the cells in the combinatorial
-#' ball of radius 2 around each cell.
+#' The entries in this data frame are cell names from smallXenium.
+#' Each row represents an undirected edge in the nearest neighbour 
+#' graph using a cutoff euclidean distance of 20 \mu m.
 #' }
 #'
-#' @source This is computed from smallDelaunayTriangulation using
-#' findCombinatorialNeighbourhoods() with radius 2
-"smallCombNbhds"
+#' @source This is computed from centroids using
+#' computeNeighboursEuclidean()
+"euclideanNeighbours"
+
 
 ## ####################################################
-#' smallNbhdMatrix
+#' extendedNeighboursList
+#'
+#' A list of nth degree neighbour graphs calculated from delaunayNeighbours.
+#'
+#' @format A list of dataframes with character columns nodeA and nodeB.
+#'
+#' \describe{
+#' A named list of neighbour graphs, where each graph contains edges 
+#' connecting vertices of degree n. Each graph (list entry) is named according to degree n.
+#' }
+#'
+#' @source This is computed from delaunayNeighbours using
+#' getExtendedNBHDs()
+"extendedNeighboursList"
+
+## ####################################################
+#' extendedNeighbours
+#'
+#' A neighbour graph where nodes are connected to all nodes up to 
+#' and including degree 4 in the original graph (delaunayNeighbours)
+#'
+#' @format A data frame with character columns nodeA and nodeB.
+#'
+#' \describe{
+#' The entries in this data frame are cell names from smallXenium.
+#' Each row represents an undirected edge in the extended neighbour 
+#' graph. Nodes are connected to all nodes up to 
+#' and including degree 4 in the original graph (delaunayNeighbours).
+#' }
+#'
+#' @source This is computed from extendedNeighboursList using
+#' collapseExtendedNBHDs() 
+"extendedNeighbours"
+
+## ####################################################
+#' edgeNeighbours
+#'
+#' A neighbour graph where nodes represent interactions between cells. 
+#'
+#' @format A data frame with character columns nodeA and nodeB.
+#'
+#' \describe{
+#' A spatial graph where edges in the original delaunayNeighbours become nodes 
+#' and A-B edges (in the original graph) become connected to
+#' all A- edges and all B- edges. 
+#' }
+#'
+#' @source This is computed from delaunayNeighbours using
+#' computeEdgeGraph()
+"edgeNeighbours"
+
+
+## ####################################################
+#' NBHDByCTMatrix
 #'
 #' A neighbourhoods by cell types matrix giving the count
-#' of cells of each type in each neighbourhood
+#' of cells of each type in each neighbourhood.
 #'
 #' @format A matrix whose rows correspond to neighbourhoods
 #' (and therefore, to cells) and whose columns correspond to
@@ -252,35 +270,73 @@
 #'
 #' \describe{
 #' This matrix gives the counts for each of the cell types
-#' in each neighbourhoods.  Since it is taken from the subset
-#' smallXenium rather from the full Xenium object, not all
-#' cell types appear.
+#' in each neighbourhood.
 #' }
 #'
-#' @source This is computed from smallNbhds and
-#' smallXenium$seurat_clusters using computeNeighbourhoodByCTMatrix().
-"smallNbhdMatrix"
+#' @source This is computed from delaunayNeighbours and
+#' clusters using computeNBHDByCTMatrix().
+"NBHDByCTMatrix"
+
 
 ## ####################################################
-#' smallNbhdObj
+#' NBHDByCTMatrixExtended
 #'
-#' A Seurat object computed from smallNbhdMatrix. Think of
+#' A neighbourhoods by cell types matrix giving the count
+#' of cells of each type in each extended neighbourhood.
+#'
+#' @format A matrix whose rows correspond to extended neighbourhoods
+#' (and therefore, to cells) and whose columns correspond to
+#' cell types.
+#'
+#' \describe{
+#' This matrix gives the counts for each of the cell types
+#' in each extended neighbourhood.
+#' }
+#'
+#' @source This is computed from delaunayNeighbours and
+#' clusters using computeNBHDByCTMatrix().
+"NBHDByCTMatrixExtended"
+
+
+## ####################################################
+#' NBHDByCTSeurat
+#'
+#' A Seurat object computed from NBHDByCTMatrix. Think of
 #' neighbourhoods "expressing" cell types.
 #'
 #' @format A Seurat object consisting of 4261 samples (the
 #' neighbourhoods and 24 features (the cell types).
 #'
 #' \describe{
-#' This is a Seurat object created by taking smallNbhdMatrix
+#' This is a Seurat object created by taking NBHDByCTMatrix
 #' as the counts.
 #' }
 #'
-#' @source Created from smallNbhdMatrix by
-#' computeNeighbourhoodByCTSeurat()
-"smallNbhdObj"
+#' @source Created from NBHDByCTMatrix by
+#' computeNBHDVsCTSeurat()
+"NBHDByCTSeurat"
+
 
 ## ####################################################
-#' smallCellTypesPerCellTypeMatrix
+#' NBHDByCTSeuratExtended
+#'
+#' A Seurat object computed from NBHDByCTMatrixExtended. Think of
+#' neighbourhoods "expressing" cell types.
+#'
+#' @format A Seurat object consisting of 4261 samples (the
+#' neighbourhoods) and 24 features (the cell types).
+#'
+#' \describe{
+#' This is a Seurat object created by taking NBHDByCTMatrixExtended
+#' as the counts.
+#' }
+#'
+#' @source Created from NBHDByCTMatrixExtended by
+#' computeNBHDVsCTSeurat()
+"NBHDByCTSeuratExtended"
+
+## ####################################################
+#' cellTypesPerCellTypeMatrix
 #'
 #' For each cell type, this matrix shows the fraction
 #' of the neighbourhoods of that cell type composed of
@@ -293,20 +349,184 @@
 #' Each row of this matrix corresponds to a cell type.  On
 #' that row we see the proportions of all neighbourhoods
 #' surrounding cells of that cell type as regards the cell types
-#' they contain.  In particular, each row sums to 1.  Since
-#' this comes from a subset of the full Xenium object, not all
-#' cell types appear.
+#' they contain.  In particular, each row sums to 1.
 #' }
 #'
-#' @source This is created from smallNbhdMatrix and the seurat_clusters
-#' of smallXenium using cellTypesPerCellTypeMatrix()
-"smallCellTypesPerCellTypeMatrix"
+#' @source This is created from NBHDByCTMatrix and the clusters
+#' using cellTypesPerCellTypeMatrix()
+"cellTypesPerCellTypeMatrix"
+
+
+## ####################################################
+#' cellTypesPerCellTypePValues
+#' A symmetric matrix containing P values describing whether cell types are more 
+#' frequently neighbours than expected by chance. 
+#' 
+#' @format A matrix whose rows and columns correspond to
+#' cell types.
+#'
+#' \describe{
+#' Rows and columns of this matrix correspond to a cell types. Matrix give p 
+#' values describing whether cell types are more frequently neighbours than 
+#' expected by chance.
+#' }
+#'
+#' @source This is created from delaunayNeighbours and the clusters
+#' using computeNeighbourEnrichment()
+"cellTypesPerCellTypePValues"
 
 
 
+## ####################################################
+#' cellTypesPerCellTypeMatrixExtended
+#'
+#' For each cell type, this matrix shows the fraction
+#' of the extended neighbourhoods of that cell type composed of
+#' each cell type.
+#'
+#' @format A matrix whose rows and columns correspond to
+#' cell types.
+#'
+#' \describe{
+#' Each row of this matrix corresponds to a cell type.  On
+#' that row we see the proportions of all neighbourhoods
+#' surrounding cells of that cell type as regards the cell types
+#' they contain.  In particular, each row sums to 1.
+#' }
+#'
+#' @source This is created from NBHDByCTMatrixExtended and the clusters
+#' using cellTypesPerCellTypeMatrix()
+"cellTypesPerCellTypeMatrix"
 
 
+## ####################################################
+#' colours
+#'
+#' A character vector of colours where names are clusters.
+#'
+#' @format A character vector of colours where names are clusters.
+#'
+#' \describe{
+#' A character vector of colours from the polychrome palette where names 
+#' are clusters.
+#' }
+#'
+#' @source Created using Seurat DiscretePalette() 
+"colours"
 
 
+## ####################################################
+#' CTByNBHDSeurat
+#'
+#' A Seurat object computed from the transpose of NBHDByCTMatrix. Think of
+#' cell types "expressing" (being found in) neighbourhoods.
+#'
+#' @format A Seurat object consisting of 24 samples (the cell types) and 
+#' 4261 features (the neighbourhoods).
+#'
+#' \describe{
+#' This is a Seurat object created by taking t(NBHDByCTMatrix)
+#' as the counts.
+#' }
+#'
+#' @source Created from t(NBHDByCTMatrix) by
+#' computeNBHDVsCTSeurat()
+"CTByNBHDSeurat"
 
+
+## ####################################################
+#' moransI
+#'
+#' A data fame containing Moran's I and related pvalues.
+#'
+#' @format A data fame containing Moran's I and related pvalues.
+#'
+#' \describe{
+#' Moran's I values calculated for the genes in smallXenium (using the SCT 
+#' assay). Pvalues derived using 100 permutations.
+#' }
+#'
+#' @source Created from smallXenium and delaunayNeighbours by using
+#' runMoransI()
+"moransI"
+
+
+## ####################################################
+#' moransILigandReceptor
+#'
+#' A data fame containing Moran's I for the spatial distribution of the presence 
+#' of ligand receptor pairs on edges.
+#'
+#' @format A data fame containing Moran's I for ligand receptor pairs and 
+#' related pvalues.
+#'
+#' \describe{
+#' Moran's I values calculated for the ligand receptor pairs in edgeSeurat. 
+#' Pvalues derived using 100 permutations.
+#' }
+#'
+#' @source Created from edgeSeurat and edgeNeighbours by using runMoransI()
+"moransILigandReceptor"
+
+
+## ####################################################
+#' ligandReceptorResults
+#'
+#' The result of performLigandReceptorAnalysis(smallXenium, delaunayNeighbours, 
+#' "mouse", clusters,verbose=FALSE) 
+#'
+#' @format A list of data frames.
+#'
+#' \describe{
+#' A list containing:
+#' interactionsOnEdges - a data frame whose first two columns give
+#' the neighbouring cells and next two columns give their corresponding 
+#' clusters. Each of the remaining columns is a logical
+#' corresponding to a ligand-receptor pair telling whether the ligand
+#' is expressed in the first cell and the receptor is expressed in the
+#' second cell.
+#' totalInteractionsByCluster - a dataframe where the first column gives a 
+#' directed (sender-receiver) pair of clusters. The second column gives the 
+#' total number of edges between those clusters. The remaining columns give the 
+#' total numbers of edges on which particular ligand receptor interactions are 
+#' present.
+#' meanInteractionsByCluster - a dataframe where the first column gives a 
+#' directed (sender-receiver) pair of clusters. The second column gives the 
+#' total number of edges between those clusters. The remaining columns give the 
+#' total numbers of edges on which particular ligand receptor interactions are 
+#' present (for that cluster pair) divided by the total number of edges between 
+#' those clusters.
+#' simResults - a dataframe where the rownames are sender-receiver cluster pairs 
+#' and column names are ligand receptor pairs. Values give the number of 
+#' simulations for which observed values are greater than simulated values.
+#' pValues - a dataframe where the rownames are sender-receiver cluster pairs 
+#' and column names are ligand receptor pairs. Entries are uppertail pvalues 
+#' describing whether a particular ligand receptor interaction is observed more 
+#' frequently between 2 clusters than expected.
+#' }
+#'
+#' @source Created from smallXenium and delaunayNeighbours by using
+#' performLigandReceptorAnalysis(()
+"ligandReceptorResults"
+
+
+## ####################################################
+#' edgeSeurat
+#'
+#' A Seurat object computed from ligandReceptorResults using 
+#' computeEdgeSeurat()
+#'
+#' @format A Seurat object consisting of 25518 samples (edges between cells
+#' and 28 features (ligand-receptor pairs).
+#'
+#' \describe{
+#' This is a Seurat object where 
+#' each point represents an edge between cells, and spatial coordinates are the 
+#' centroids of edges between cells. The "expression matrix" is the 
+#' binarised presence/absence of an interaction (ligand receptor pair) on an edge. 
+#' }
+#'
+#' @source Created from ligandReceptorResults by
+#' computeEdgeSeurat()
+"edgeSeurat"
 

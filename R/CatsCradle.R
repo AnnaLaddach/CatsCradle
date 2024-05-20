@@ -53,6 +53,7 @@ transposeSeuratObject = function(f,active.assay='RNA',
 #' correspond to cell clusters and the columns correspond to
 #' gene clusters.
 #' @export
+#' @import stringr
 #' @examples
 #' M = getAverageExpressionMatrix(S,STranspose)
 getAverageExpressionMatrix = function(f,fPrime, v5 = T,
@@ -62,7 +63,7 @@ getAverageExpressionMatrix = function(f,fPrime, v5 = T,
     cellCluster = unique(f$clustering)
     cellCluster = cellCluster[order(as.numeric(cellCluster))]
 
-    fPrime$clustering = as.character(f@meta.data[,clusteringName])
+    fPrime$clustering = as.character(fPrime@meta.data[,clusteringName])
     geneCluster = unique(fPrime$clustering)
     geneCluster = geneCluster[order(as.numeric(geneCluster))]
     
@@ -73,8 +74,15 @@ getAverageExpressionMatrix = function(f,fPrime, v5 = T,
         X = GetAssayData(f,slot='scale')
     }
     ## Seems X can be smaller:
-    f = f[rownames(X),]
-    fPrime = fPrime[,rownames(X)]
+    selected = rownames(X)
+    f = f[selected,]
+    selectedUnderscore = str_replace(selected,'-','_')
+    if (sum(selectedUnderscore %in% colnames(fPrime)) > 
+        sum(selected %in% colnames(fPrime))){
+      fPrime = fPrime[,selectedUnderscore]
+    } else {
+      fPrime = fPrime[,selected]
+    }
    
     M = matrix(0,nrow=length(cellCluster),ncol=length(geneCluster))
     rownames(M) = cellCluster

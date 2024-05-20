@@ -77,7 +77,7 @@ To illustrate this concept we use a subset of a xenium data set that
 profiles the mouse hippocampus available from 10x genomics
 (https://www.10xgenomics.com/datasets/fresh-frozen-mouse-brain-for-xenium-explorer-demo-1-standard)
 
-We will now visualise this dataset coloured by cell population (louvain cluster)
+We will now visualise this dataset coloured by cell population. Here cell clusters  (louvain cluster) have been assigned cell type identities using RCTD along with a reference dataset (https://www.dropbox.com/s/cuowvm4vrf65pvq/allen_cortex.rds?dl=1) followed by minimal manual curation. Please note these assignments are not definitive and are for illustratory purporses only. 
 
 ```{r}
 ImageDimPlot(smallXenium, cols = "polychrome", size = 1)
@@ -91,7 +91,6 @@ rownames(centroids) = centroids$cell
 ```
 
 Additionally we will extract information on celltype or cluster.
-
 ```{r}
 clusters = smallXenium@active.ident
 ```
@@ -101,7 +100,7 @@ clusters = smallXenium@active.ident
 
 The centroids of the cells are given as points in the plane. Delaunay
 triangulation discovers an optimal way of connecting each of these
-points to its neighbors.  For each cell in the spatial Seurat object
+points to its neighbours.  For each cell in the spatial Seurat object
 the following discovers its neighbours based on this Delaunay
 triangulation:
 
@@ -110,7 +109,6 @@ Compute spatial neighbours based on Delaunay triangulation.
 library(CatsCradle)
 delaunayNeighbours = computeNeighboursDelaunay(centroids)
 ```
-
 
 Another way to compute the neighbours of a given cell is to simply ask
 for all the cells within a fixed (Euclidean) distance of that cell:
@@ -132,10 +130,10 @@ ligands.
 ### nth degree neighbour graphs
 
 Given any graph calculated to report neighbours of degree one, it is now 
-possible to expand this to neighbours up to a higher degree (n).  
+possible to extend this to neighbours up to a higher degree (n).  
 
 ```{r}
-expandedNeighbours = expandNeighbourhoods(delaunayNeighbours, 4)
+extendedNeighboursList = getExtendedNBHDs(delaunayNeighbours, 4)
 ```
 This returns a list of neighbour graphs where the first item 
 (expandedNeighbours[[1]]) is the graph of 1st degree neighbours, the second item
@@ -144,7 +142,7 @@ the graph of 2nd degree neighbours e.t.c.
 We can now collapse this to obtain a graph that contains the all neighbours up to and including degree 4 (for example).
 
 ```{r}
-expandedNeighboursFourth = collapseNeighbourhoods(expandedNeighbours, n = 4)
+extendedNeighbours = collapseExtendedNBHDs(extendedNeighboursList, 4)
 ```
 
 
@@ -154,8 +152,7 @@ Given any of the spatial graphs describing neighbourhoods calculated above,
 we can now calculate the cell type composition of neighbourhoods.
 
 ```{r}
-neighbourhoodByCTMatrix = computeNeighbourhoodByCTMatrix(delaunayNeighbours, 
-                                                        clusters)
+NBHDByCTMatrix = computeNBHDByCTMatrix(delaunayNeighbours, clusters)
 ```
 
 In the resulting matrix neighbourhoods are rows and cell types are columns. 
@@ -164,10 +161,10 @@ neighbourhood. Note that not all seurat_clusters of the full spatial
 Seurat object appear in the subset we are working with.  The resulting
 neighbourhoodByCTMatrix lists only those cell types that actually appear.
 
-Let's do the same for our expanded neighbourhoods.
+Let's do the same for our extended neighbourhoods.
 ```{r}
-neighbourhoodByCTMatrixExpanded = 
-  computeNeighbourhoodByCTMatrix(expandedNeighboursFourth, clusters)
+NBHDByCTMatrixExtended = 
+  computeNBHDByCTMatrix(extendedNeighbours, clusters)
 ```
 
 ## Analysis of contact based interactions between cell types
@@ -176,7 +173,7 @@ We can go on to calculate a matrix which gives the fraction of contacts cells of
 a given type make with cells of another cell type.
 ```{r}
 cellTypesPerCellTypeMatrix = 
-  computeCellTypesPerCellTypeMatrix(neighbourhoodByCTMatrix,clusters)
+  computeCellTypesPerCellTypeMatrix(NBHDByCTMatrix,clusters)
 ```
 
 Rows and columns both correspond to cell types, but they are playing
@@ -190,10 +187,11 @@ interactions. Of note, this graph is directed as, for example, 50% of cell type
 A's interactions might be with cell type B, but only 5% of cell type B's 
 interactions might be with cell type A.   
 ```{r}
-colors = DiscretePalette(length(levels(clusters)), palette = "polychrome")
-names(colors) = levels(clusters)
-cellTypesPerCellTypeGraphFromMatrix(cellTypesPerCellTypeMatrix, 
-                                    minWeight = 0.05, colors = colors)
+colours = DiscretePalette(length(levels(clusters)), palette = "polychrome")
+names(colours) = levels(clusters)
+
+cellTypesPerCellTypeGraphFromCellMatrix(cellTypesPerCellTypeMatrix, 
+                                    minWeight = 0.05, colours = colours)
 ```
 
 Here arrows are directed from rows to columns. Thus, we see an arrow from
@@ -219,9 +217,9 @@ pheatmap(cellTypesPerCellTypeMatrix)
 Let's do the same for our expanded nighbourhoods.
 
 ```{r}
-cellTypesPerCellTypeMatrixExpanded = computeCellTypesPerCellTypeMatrix(neighbourhoodByCTMatrixExpanded,clusters)
+cellTypesPerCellTypeMatrixExtended = computeCellTypesPerCellTypeMatrix(NBHDByCTMatrixExtended,clusters)
 
-cellTypesPerCellTypeGraphFromMatrix(cellTypesPerCellTypeMatrixExpanded, minWeight = 0.05, colors = colors)
+cellTypesPerCellTypeGraphFromCellMatrix(cellTypesPerCellTypeMatrixExtended, minWeight = 0.05, colours = colours)
 ```
 We can also calculate p values (one-sided) for whether cell types are more 
 commonly neighbours than expected by chance. To do this we compare the actual 
@@ -229,7 +227,7 @@ neighbour graph to randomised neighbour graphs where edges are randomised but
 the degree of each vertice is preserved.
 
 ```{r}
-cellTypesPerCellPValues = computeNeighbourEnrichment(delaunayNeighbours, 
+cellTypesPerCellTypePValues = computeNeighbourEnrichment(delaunayNeighbours, 
                                                      clusters)
 ```
 
@@ -237,8 +235,8 @@ cellTypesPerCellPValues = computeNeighbourEnrichment(delaunayNeighbours,
 Let's plot -log10(pvalue)
 ```{r}
 library(pheatmap)
-cellTypesPerCellPValuesNegLog = -log10(cellTypesPerCellPValues + 1e-6)
-pheatmap(cellTypesPerCellPValuesNegLog)
+cellTypesPerCellTypePValuesNegLog = -log10(cellTypesPerCellTypePValues)
+pheatmap(cellTypesPerCellTypePValuesNegLog)
 ```
 
 Recall that the entry in row A and column B represents the enrichment
@@ -253,46 +251,46 @@ relatively low (number of cell types) we calculate the UMAP using features
 rather than PCs.
 
 ```{r}
-neighbourhoodSeurat = computeNeighbourhoodByCTSeurat(neighbourhoodByCTMatrix)
+NBHDByCTSeurat = computeNBHDVsCTSeurat(NBHDByCTMatrix)
 ```
 
 Add cell type information to the neighbourhoodSeurat object.
 ```{r}
-neighbourhoodSeurat$cellType = as.character(clusters)
+NBHDByCTSeurat$cellType = clusters
 ```
 
 Visualise neighbourhood clusters.
 ```{r}
-DimPlot(neighbourhoodSeurat, group.by = c("cellType"), cols = "polychrome", reduction = "umap")
-DimPlot(neighbourhoodSeurat, group.by = c("neighbourhood_clusters"), cols = "polychrome", reduction = "umap")
+DimPlot(NBHDByCTSeurat, group.by = c("cellType"), cols = "polychrome", reduction = "umap")
+DimPlot(NBHDByCTSeurat, group.by = c("neighbourhood_clusters"), cols = "polychrome", reduction = "umap")
 ```
 
 
 We can now add information on neighbourhood clusters to our original xenium object and visualise these on the tissue.
 ```{r}
-smallXenium$neighbourhoodCluster = neighbourhoodSeurat@active.ident
-ImageDimPlot(smallXenium, group.by = "neighbourhoodCluster", size = 1, cols = "polychrome")
+smallXenium$NBHDCluster = NBHDByCTSeurat@active.ident
+ImageDimPlot(smallXenium, group.by = "NBHDCluster", size = 1, cols = "polychrome")
 ```
 
-Lets try the same thing with our expanded neighbourhoods up to degree 4.
+Let's try the same thing with our extended neighbourhoods up to degree 4.
 ```{r}
-neighbourhoodSeuratExpanded = computeNeighbourhoodByCTSeurat(neighbourhoodByCTMatrixExpanded)
+NBHDByCTSeuratExtended = computeNBHDVsCTSeurat(NBHDByCTMatrixExtended)
 ```
-Add cell type information to the neighbourhoodSeurat object.
+Add cell type information to the NBHDByCTSeuratExtended object.
 ```{r}
-neighbourhoodSeuratExpanded$cellType = as.character(clusters)
+NBHDByCTSeuratExtended$cellType = clusters
 ```
 
 Visualise neighbourhood clusters.
 ```{r}
-DimPlot(neighbourhoodSeuratExpanded, group.by = c("cellType"), cols = "polychrome", reduction = "umap")
-DimPlot(neighbourhoodSeuratExpanded, group.by = c("neighbourhood_clusters"), cols = "polychrome", reduction = "umap")
+DimPlot(NBHDByCTSeuratExtended, group.by = c("cellType"), cols = "polychrome", reduction = "umap")
+DimPlot(NBHDByCTSeuratExtended, group.by = c("neighbourhood_clusters"), cols = "polychrome", reduction = "umap")
 ```
 We can now add information on neighbourhood clusters to our original xenium object and visualise these on the tissue.
 ```{r}
-smallXenium$neighbourhoodClusterExpanded = 
-  neighbourhoodSeuratExpanded@active.ident
-ImageDimPlot(smallXenium, group.by = c("neighbourhoodClusterExpanded"), 
+smallXenium$NBHDClusterExtended= 
+  NBHDByCTSeuratExtended@active.ident
+ImageDimPlot(smallXenium, group.by = c("NBHDClusterExtended"), 
              size = 1, cols = "polychrome")
 ```
 
@@ -315,42 +313,39 @@ percentage of the time a cell of type A sits at the center of a
 neighbourhood of type B.
 
 ```{r}
-CTbyNeighbourhoodCluster = table(neighbourhoodSeurat$cellType,neighbourhoodSeurat@active.ident)
-CTbyNeighbourhoodCluster = CTbyNeighbourhoodCluster/rowSums(CTbyNeighbourhoodCluster)
+CTByNBHDCluster = table(NBHDByCTSeurat$cellType,NBHDByCTSeurat@active.ident)
+CTByNBHDCluster = CTByNBHDCluster/rowSums(CTByNBHDCluster)
 
-rownames(CTbyNeighbourhoodCluster) = paste0("CellType",rownames(CTbyNeighbourhoodCluster))
-colnames(CTbyNeighbourhoodCluster) = paste0("NeighbourhoodCluster",colnames(CTbyNeighbourhoodCluster))
+rownames(CTByNBHDCluster) = paste0("CellType",rownames(CTByNBHDCluster))
+colnames(CTByNBHDCluster) = paste0("NBHDCluster",colnames(CTByNBHDCluster))
 
-pheatmap(CTbyNeighbourhoodCluster,
+pheatmap(CTByNBHDCluster,
       fontsize_row=8,
       fontsize_col=8,
       cellheight=10,
       cellwidth=10)
 
-sankeyFromMatrix(CTbyNeighbourhoodCluster)
+sankeyFromMatrix(CTByNBHDCluster)
 ```
 
 This allows us to see which cell types share the same niche (neighbourhood 
-clusters). Let's also perform this analysis using the expanded neighbourhoods. 
+clusters). Let's also perform this analysis using the extended neighbourhoods. 
+
 
 ```{r}
-CTbyNeighbourhoodClusterExpanded = table(neighbourhoodSeuratExpanded$cellType,
-                                      neighbourhoodSeuratExpanded@active.ident)
-CTbyNeighbourhoodClusterExpanded = 
-  CTbyNeighbourhoodClusterExpanded/rowSums(CTbyNeighbourhoodClusterExpanded)
+CTByNBHDClusterExtended = table(NBHDByCTSeuratExtended$cellType,NBHDByCTSeuratExtended@active.ident)
+CTByNBHDClusterExtended = CTByNBHDClusterExtended/rowSums(CTByNBHDClusterExtended)
 
-rownames(CTbyNeighbourhoodClusterExpanded) = paste0("CellType",
-                                    rownames(CTbyNeighbourhoodClusterExpanded))
-colnames(CTbyNeighbourhoodClusterExpanded) = paste0("NeighbourhoodCluster",
-                                   colnames(CTbyNeighbourhoodClusterExpanded))
+rownames(CTByNBHDClusterExtended) = paste0("CellType",rownames(CTByNBHDClusterExtended))
+colnames(CTByNBHDClusterExtended) = paste0("NBHDCluster",colnames(CTByNBHDClusterExtended))
 
-pheatmap(CTbyNeighbourhoodClusterExpanded,
+pheatmap(CTByNBHDClusterExtended,
       fontsize_row=8,
       fontsize_col=8,
       cellheight=10,
       cellwidth=10)
 
-sankeyFromMatrix(CTbyNeighbourhoodClusterExpanded)
+sankeyFromMatrix(CTByNBHDClusterExtended)
 ```
 
 ## Analysing cell types based on their neighbourhoods
@@ -367,68 +362,68 @@ the low number of observations we need to set a lower value for n.neighbours.
 
 
 ```{r}
-neighbourhoodSeuratPrime = 
-  computeNeighbourhoodByCTSeurat(t(neighbourhoodByCTMatrix), npcs = 10, 
+CTByNBHDSeurat = 
+  computeNBHDVsCTSeurat(t(NBHDByCTMatrix), npcs = 10, 
                                  transpose = T, resolution = 1, n.neighbors = 5)
 
-neighbourhoodSeuratPrime$cellType = colnames(neighbourhoodSeuratPrime)
+CTByNBHDSeurat$cellType = colnames(CTByNBHDSeurat)
 
-DimPlot(neighbourhoodSeuratPrime, group.by = "cellType", cols = "polychrome", 
+DimPlot(CTByNBHDSeurat, group.by = "cellType", cols = "polychrome", 
         reduction = "umap", label = T)
 ```
 
 
 
-Let's perform the same analysis using the expanded neighbourhoods.
+Let's perform the same analysis using the extended neighbourhoods.
 
 ```{r}
-neighbourhoodSeuratPrimeExpanded = 
-  computeNeighbourhoodByCTSeurat(t(neighbourhoodByCTMatrixExpanded), npcs = 10, 
+CTByNBHDSeuratExtended = 
+  computeNBHDVsCTSeurat(t(NBHDByCTMatrixExtended), npcs = 10, 
                                  transpose = T, resolution = 1, n.neighbors = 5)
 
-neighbourhoodSeuratPrimeExpanded$cellType = colnames(neighbourhoodSeuratPrimeExpanded)
+CTByNBHDSeuratExtended$cellType = colnames(CTByNBHDSeuratExtended)
 
-DimPlot(neighbourhoodSeuratPrimeExpanded, group.by = "cellType", cols = "polychrome", 
+DimPlot(CTByNBHDSeuratExtended, group.by = "cellType", cols = "polychrome", 
         reduction = "umap", label = T)
 ```
 
 
 We can also compute a graph embedding.
 ```{r}
-neighbourhoodSeuratPrimeExpanded = computeGraphEmbedding(neighbourhoodSeuratPrimeExpanded)
+CTByNBHDSeurat= computeGraphEmbedding(CTByNBHDSeurat)
 
-DimPlot(neighbourhoodSeuratPrimeExpanded,group.by = "cellType", cols = "alphabet", reduction = "graph", label = T)
+DimPlot(CTByNBHDSeurat,group.by = "cellType", cols = "alphabet", reduction = "graph", label = T)
 ```
+```{r}
+CTByNBHDSeuratExtended = computeGraphEmbedding(CTByNBHDSeuratExtended)
 
+DimPlot(CTByNBHDSeuratExtended,group.by = "cellType", cols = "alphabet", reduction = "graph", label = T)
+```
 
 We achieve only one cluster using the louvain algorithm. Let's try hierachical 
 clustering.
-
 ```{r}
-pca = Embeddings(neighbourhoodSeuratPrime, reduction = "pca")
+pca = Embeddings(CTByNBHDSeurat, reduction = "pca")
 res = pheatmap(pca)
 ```
 
 And for expanded neighbourhoods.
 ```{r}
-pcaExpanded = Embeddings(neighbourhoodSeuratPrimeExpanded, reduction = "pca")
-resExpanded = pheatmap(pcaExpanded)
+pcaExtended = Embeddings(CTByNBHDSeuratExtended, reduction = "pca")
+resExtended = pheatmap(pcaExtended)
 ```
-```{r}
-pca = Embeddings(neighbourhoodSeuratPrime, reduction = "pca")
-res = pheatmap(pca)
-```
+
 
 Here we decide to cut the tree at the correct level to form 11 clusters.
 ```{r}
-CTclust = cutree(res$tree_row, k = 11)
-neighbourhoodSeuratPrime$seurat_clusters = factor(CTclust)
+CTClust = cutree(res$tree_row, k = 11)
+CTByNBHDSeurat$neighbourhood_clusters = factor(CTClust)
 ```
 
 Let's investigate how neighbourhood clusters relate to cell type clusters.
 ```{r}
-averageExpMatrix = getAverageExpressionMatrix(neighbourhoodSeurat,
-                            neighbourhoodSeuratPrime,
+averageExpMatrix = getAverageExpressionMatrix(NBHDByCTSeurat,
+                           CTByNBHDSeurat,
 			    clusteringName='neighbourhood_clusters')
 averageExpMatrix = tagRowAndColNames(averageExpMatrix,
                                      ccTag='neighbourhoodClusters_',
@@ -492,35 +487,35 @@ interactions observed between/within clusters is higher than in simulated data,
 this allows us to assign a pvalue for the enrichment of these interactions.
 
 Perform interaction analysis:
- 
 ```{r}
-interactionResults = performInteractionAnalysis(smallXenium, delaunayNeighbours, 
+ligandReceptorResults = performLigandReceptorAnalysis(smallXenium, delaunayNeighbours, 
                                                 "mouse", clusters,verbose=FALSE)
 ```
 
+
 Look at interactions on edges:
 ```{r}
-head(interactionResults$interactionsOnEdges,10)
+head(ligandReceptorResults$interactionsOnEdges,10)
 ```
 
 Look at total interactions between/within clusters:
 ```{r}
-head(interactionResults$totalInteractionsByCluster,10)
+head(ligandReceptorResults$totalInteractionsByCluster,10)
 ```
 
 Look at mean interactions per edge between/within clusters:
 ```{r}
-head(interactionResults$meanInteractionsByCluster,10)
+head(ligandReceptorResults$meanInteractionsByCluster,10)
 ```
 
 Look at number of times observed interactions are more frequent than expected:
 ```{r}
-head(interactionResults$simResults,10)
+head(ligandReceptorResults$simResults,10)
 ```
 
 Look at pvalues for the enrichment of interactions.
 ```{r}
-head(interactionResults$pValues,10)
+head(ligandReceptorResults$pValues,10)
 ```
 
 
@@ -528,32 +523,77 @@ Plot a heatmap showing -log10(pvalues) for the enrichment of ligand-receptor
 interactions between pairs of clusters. 
 
 ```{r}
-makeInteractionHeatmap(interactionResults, clusters, colors = colors, labelClusterPairs = F)
+ligRecMatrix = makeLRInteractionHeatmap(ligandReceptorResults, clusters, colours = colours, labelClusterPairs = F)
 ```
-
-```{r}
-makeInteractionHeatmap(interactionResults, clusters, labelClusterPairs = F)
-```
-```{r}
-interactionResults$totalInteractionsByCluster
-```
-
-
-```{r}
-makeSummedInteractionHeatmap(interactionResults, clusters, "total")
-```
-```{r}
-makeSummedInteractionHeatmap(interactionResults, clusters, "mean", logScale = T)
-```
-
 
 
 
 ```{r}
-edgeSeurat = computeEdgeSeurat(interactionResults, centroids)
+makeLRInteractionHeatmap(ligandReceptorResults, clusters, labelClusterPairs = F)
 ```
 
 
+```{r}
+cellTypePerCellTypeLigRecMatrix = makeSummedLRInteractionHeatmap(ligandReceptorResults, clusters, "total")
+```
+
+```{r}
+cellTypePerCellTypeLigRecMatrix = makeSummedLRInteractionHeatmap(ligandReceptorResults, clusters, "mean", logScale = T)
+```
+```{r}
+hist(cellTypePerCellTypeLigRecMatrix)
+```
+Visualise in graph format.
+```{r}
+cellTypesPerCellTypeGraphFromCellMatrix(cellTypePerCellTypeLigRecMatrix/5, 
+                                    minWeight = 0.08, colours = colours)
+```
+
+
+Create a Seurat object where each point represents an edge between cells, and spatial coordinates are thecentroids of edges between cells. The "expression matrix" is the binarised presence/absence of an interaction (ligand receptor pair) on an edge. This is useful for visualising where ligand receptor interactions occur spatially.
+```{r}
+edgeSeurat = computeEdgeSeurat(ligandReceptorResults, centroids)
+```
+
+
+Visualise Penk-Htr1f interaction.
 ```{r}
 ImageFeaturePlot(edgeSeurat, features = "Penk-Htr1f")
+```
+
+We can compute a spatial graph where edges in the original delaunayNeighbours 
+become nodes and A-B edges (in the original graph) become connected to all 
+A- edges and all B- edges. This allows us to perfom graph-based associated with 
+the spatial localisation of ligand receptor pairs on edges.  
+```{r}
+edgeNeighbours = computeEdgeGraph(delaunayNeighbours)
+```
+
+
+Compute Moran's I for the spatial autocorrelation of ligand-receptor interactions.
+```{r}
+moransILigandReceptor = runMoransI(edgeSeurat, edgeNeighbours, assay = "RNA", 
+                     layer = "counts", nSim = 100)
+use_data(moransILigandReceptor, overwrite = T)
+```
+
+View most spatially autocorrelated ligand-receptor interactions.
+```{r}
+head(moransILigRec)
+```
+
+View least spatially autocorrelated ligand-receptor interactions.
+```{r}
+tail(moransILigRec)
+```
+
+
+View ligand-receptor interaction with the highest spatial autocorrelation (Moran's I).
+```{r}
+ImageFeaturePlot(edgeSeurat, "Penk-Htr1f")
+```
+
+View ligand-receptor interaction with the lowest spatial autocorrelation (Moran's I).
+```{r}
+ImageFeaturePlot(edgeSeurat, "Sst-Gpr17")
 ```
