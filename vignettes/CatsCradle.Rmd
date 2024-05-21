@@ -157,7 +157,7 @@ $X$.)
 ```{r eval = FALSE}
 g2mGenes = intersect(colnames(STranspose),
                      hallmark[['HALLMARK_G2M_CHECKPOINT']])
-stats = getSubsetClusteringStatistics(STranspose,
+stats = getSeuratSubsetClusteringStatistics(STranspose,
                                       g2mGenes,
                                       numTrials=1000)
 ```				      
@@ -169,6 +169,12 @@ and its z-score.  Here we report a p-value of 0.001. However, as can
 be seen from the figure, the actual p-value is lower by many orders of
 magnitude. 
 ![clustering statistics](g2mClusteringStats.png){width=6in}
+
+Here we have shown that statistics for one of the gene sets that is
+most tightly clustered on UMAP.  However, 31 of the 50 Hallmark gene
+sets cluster with a p-value better than 0.05.
+
+![Hallmark clustering statistics](hallmarkClusteringPValues.png){width=6in}
 
 ## Nearby genes
 
@@ -189,9 +195,9 @@ the reciprocal of edge weight.
 ```{r eval = FALSE}
 geneSet = intersect(colnames(STranspose),
                     hallmark[['HALLMARK_INTERFERON_ALPHA_RESPONSE']])
-geometricallyNearbyGenes = nearbyGenes(STranspose,geneSet,radius=0.2,metric='umap')
+geometricallyNearbyGenes = getNearbyGenes(STranspose,geneSet,radius=0.2,metric='umap')
 theGeometricGenesThemselves = names(geometricallyNearbyGenes)
-combinatoriallyNearbyGenes = nearbyGenes(STranspose,geneSet,radius=1,metric='NN')
+combinatoriallyNearbyGenes = getNearbyGenes(STranspose,geneSet,radius=1,metric='NN')
 theCombinatoricGenesThemselves = names(combinatoriallyNearbyGenes)
 
 ```
@@ -202,6 +208,56 @@ theCombinatoricGenesThemselves = names(combinatoriallyNearbyGenes)
 
 ## Predicting gene function
 
+Given a particular gene, it is interesting to look at the annotations
+of nearby genes in the gene Seurat object.  In this context,
+"annotations" might mean GO or Hallmark "nearby" might mean in terms
+of UMAP or PCA coordinates or in the nearest neighbour graph in the
+gene Seurat object.  Here we will look at Hallmark annotations and
+UMAP coordinates.
+
+Gene annotation lists give lists of genes.  For each gene, we can
+collect the annotations is belongs to.  The function annotateGenesByGeneSet()
+inverts the gene sets to give a list of the sets each gene belongs
+to. 
+
+```{r}
+library(CatsCradle)
+annotatedGenes = annotateGenesByGeneSet(hallmark)
+names(annotatedGenes[['Myc']])
+```
+We see that Myc belongs to ten hallmark sets.  We can also give the
+annotations of a gene as a vector.
+
+```{r}
+ Myc = annotateGeneAsVector('Myc',hallmark)
+ MycNormalised = annotateGeneAsVector('Myc',hallmark,TRUE)
+```
+These are named vectors whose names are the Hallmark sets. Myc is a
+ 0-1 vector indicated membership.  MycNormalised gives these values
+ normalised by the size of the sets in question.  This is appropriate
+ when we wish to weight the contributions of nearby genes as they are
+ more likely to belong to larger gene sets.
+
+```{r}
+predicted = predictAnnotation('Myc',hallmark,STranspose,radius=.5)
+predicted$Myc
+```
+
+predictAnnotation() accepts a vector of genes and returns a list of
+prediction vectors.  Here we have given it a single gene, Myc, and we
+see that it has predicted one of the gene sets listed for Myc.
+
+Predictions made in this manner perform well above chance. Of the 2000
+genes in STranspose, 922 have the property that they appear in at
+least one of the Hallmark gene sets and at least one of their nearby
+genes appears in a Hallmark gene set.  This means that we are able to
+compare their actual annotation vectors with their predicted
+annotation vectors.  After normalising both to unit vectors, we can
+take their dot prodcts as a measure of their closeness.  Comparing the
+actual dot products for these 922 genes to those produced by 1000
+randomised predictions produces the following comparison.
+
+![comparing real and randomised predictions](actualVsRandomisedPredictions.png){width=6in}
 
 
 

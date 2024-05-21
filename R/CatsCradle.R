@@ -751,8 +751,8 @@ readGmt = function(gmtFile, addDescr = F){
 #' @return - A list where names are genes and values are lists of terms
 #' @export
 #' @examples
-#' annotatedGenes = annotateGenes(hallmark)
-annotateGenes = function(geneSets)
+#' annotatedGenes = annotateGenesByGeneSet(hallmark)
+annotateGenesByGeneSet = function(geneSets)
 {
     genes = unique(unlist(geneSets))
     genes = genes[order(genes)]
@@ -835,26 +835,26 @@ annotateGeneAsVector = function(gene,geneSets,normalise=FALSE)
 #' @examples
 #' set.seed(100)
 #' genes = sample(colnames(STranspose),5)
-#' predictions = predictTerms(genes,hallmark,STranspose,radius=.5)
-predictTerms = function(genes,
-                        geneSets,
-                        fPrime,
-                        radius,
-                        metric='umap',
-                        numPCs=NULL,
-                        normaliseByGeneSet=TRUE,
-                        normaliseByDistance=TRUE,
-                        normaliseToUnitVector=TRUE)
+#' predictions = predictAnnotation(genes,hallmark,STranspose,radius=.5)
+predictAnnotation = function(genes,
+                             geneSets,
+                             fPrime,
+                             radius,
+                             metric='umap',
+                             numPCs=NULL,
+                             normaliseByGeneSet=TRUE,
+                             normaliseByDistance=TRUE,
+                             normaliseToUnitVector=TRUE)
 {
-    genesAnno = annotateGenes(geneSets)
+    genesAnno = annotateGenesByGeneSet(geneSets)
 
     predictions = list()
     for(gene in genes)
     {
         ## This returns only the gene sets that show up:
-        p = predictTermsImpl(gene,fPrime,genesAnno,
-                             radius,metric,numPCs,
-                             normaliseByDistance)
+        p = predictGeneAnnotationImpl(gene,fPrime,genesAnno,
+                                      radius,metric,numPCs,
+                                      normaliseByDistance)
 
         ## The 'wrapping' here is to produce a vector using
         ## all the gene sets:
@@ -899,18 +899,18 @@ predictTerms = function(genes,
 #' are the relative wieghts of the contributions.
 #' @export 
 #' @examples
-#' genesAnno = annotateGenes(hallmark)
-#' predictions = predictTermsImpl('Myc',STranspose,genesAnno,
+#' genesAnno = annotateGenesByGeneSet(hallmark)
+#' predictions = predictGeneAnnotationImpl('Myc',STranspose,genesAnno,
 #' radius=.5,metric='umap')
-predictTermsImpl = function(gene,fPrime,genesAnno,
-                            radius,metric,numPCs=NULL,
-                            normaliseByDistance=TRUE)
+predictGeneAnnotationImpl = function(gene,fPrime,genesAnno,
+                                     radius,metric,numPCs=NULL,
+                                     normaliseByDistance=TRUE)
 {
     predictedTerms = list()
 
     ## Use weights only in this case:
     weights = (metric == 'NN' & normaliseByDistance==TRUE)
-    nearby = nearbyGenes(fPrime,gene,radius,metric,numPCs,weights)
+    nearby = getNearbyGenes(fPrime,gene,radius,metric,numPCs,weights)
 
     ## Neighbour genes are names.
     ## Distances are values.
@@ -962,25 +962,25 @@ predictTermsImpl = function(gene,fPrime,genesAnno,
 #' of gene annotations whose entries correspond to the geneSets
 #' @export
 #' @examples
-#' predictions = predictTermsAllGenes(hallmark,STranspose,radius=.5)
-predictTermsAllGenes = function(geneSets,
-                                fPrime,
-                                radius,
-                                metric='umap',
-                                normaliseByGeneSet=TRUE,
-                                normaliseByDistance=TRUE,
-                                normaliseToUnitVector=TRUE)
+#' predictions = predictAnnotationAllGenes(hallmark,STranspose,radius=.5)
+predictAnnotationAllGenes = function(geneSets,
+                                     fPrime,
+                                     radius,
+                                     metric='umap',
+                                     normaliseByGeneSet=TRUE,
+                                     normaliseByDistance=TRUE,
+                                     normaliseToUnitVector=TRUE)
 {
     genes = colnames(fPrime)
     
-    return(predictTerms(genes,
-                        geneSets,
-                        fPrime,
-                        radius,
-                        metric,
-                        normaliseByGeneSet,
-                        normaliseByDistance,
-                        normaliseToUnitVector))
+    return(predictAnnotation(genes,
+                             geneSets,
+                             fPrime,
+                             radius,
+                             metric,
+                             normaliseByGeneSet,
+                             normaliseByDistance,
+                             normaliseToUnitVector))
 }
 
 ## ####################################################
@@ -1006,18 +1006,18 @@ predictTermsAllGenes = function(geneSets,
 #' @export
 #' @examples
 #' geneSubset = intersect(colnames(STranspose),hallmark[[1]])
-#' p = getSubsetClusteringPValue(STranspose,geneSubset,100)
-getSubsetClusteringPValue = function(fPrime,
+#' p = getSeuratSubsetClusteringPValue(STranspose,geneSubset,100)
+getSeuratSubsetClusteringPValue = function(fPrime,
                                      geneSubset,
                                      numTrials=1000,
                                      reduction='UMAP',
                                      numPCs=10)
 {
-    stats = getSubsetClusteringStatistics(fPrime,
-                                          geneSubset,
-                                          numTrials,
-                                          reduction,
-                                          numPCs)
+    stats = getSeuratSubsetClusteringStatistics(fPrime,
+                                                geneSubset,
+                                                numTrials,
+                                                reduction,
+                                                numPCs)
     
     return(stats$pValue)
 }
@@ -1050,12 +1050,12 @@ getSubsetClusteringPValue = function(fPrime,
 #' @export
 #' @examples
 #' geneSubset = intersect(colnames(STranspose),hallmark[[1]])
-#' stats = getSubsetClusteringStatistics(STranspose,geneSubset,100)
-getSubsetClusteringStatistics = function(fPrime,
-                                         geneSubset,
-                                         numTrials=1000,
-                                         reduction='UMAP',
-                                         numPCs=10)
+#' stats = getSeuratSubsetClusteringStatistics(STranspose,geneSubset,100)
+getSeuratSubsetClusteringStatistics = function(fPrime,
+                                               geneSubset,
+                                               numTrials=1000,
+                                               reduction='UMAP',
+                                               numPCs=10)
 {
     if(reduction == 'UMAP')
         S = fetchUMAP(fPrime)
@@ -1071,9 +1071,9 @@ getSubsetClusteringStatistics = function(fPrime,
     S = as.matrix(S)
     rownames(S) = colnames(fPrime)
 
-    answer = runClusteringTrials(S,
-                                 geneSubset,
-                                 numTrials)
+    answer = runGeometricClusteringTrials(S,
+                                          geneSubset,
+                                          numTrials)
 
     return(answer)
 }
@@ -1101,9 +1101,9 @@ getSubsetClusteringStatistics = function(fPrime,
 #' on the rank of the actual distance among the random
 #' distances and zScore gives its z-score.
 #' @export
-runClusteringTrials = function(S,
-                               geneSubset,
-                               numTrials)
+runGeometricClusteringTrials = function(S,
+                                        geneSubset,
+                                        numTrials)
 {
     if(inherits(geneSubset,'character'))
         geneSubset = rownames(S) %in% geneSubset
@@ -1173,10 +1173,10 @@ medianComplementDistance = function(S,geneSubset)
 #' @export
 #' @examples
 #' geneSet = intersect(colnames(STranspose),hallmark[[1]])
-#' geometricallyNearby = nearbyGenes(STranspose,geneSet,radius=0.2,metric='umap')
-#' combinatoriallyNearby = nearbyGenes(STranspose,geneSet,radius=1,metric='NN')
-#' weightedNearby = nearbyGenes(STranspose,'Myc',radius=1,metric='NN',weights=TRUE)
-nearbyGenes = function(fPrime,geneSet,radius,metric='umap',
+#' geometricallyNearby = getNearbyGenes(STranspose,geneSet,radius=0.2,metric='umap')
+#' combinatoriallyNearby = getNearbyGenes(STranspose,geneSet,radius=1,metric='NN')
+#' weightedNearby = getNearbyGenes(STranspose,'Myc',radius=1,metric='NN',weights=TRUE)
+getNearbyGenes = function(fPrime,geneSet,radius,metric='umap',
                        numPCs=NULL,weights=FALSE)
 {
     stopifnot(metric %in% c('umap','tsne','pca','NN'))
@@ -1301,7 +1301,7 @@ fetchUMAP = function(f)
 #' @return This returns the distance of the furthest point
 #' in A from its nearest point in B.
 #' @export
-directedHausdorf = function(A,B)
+directedHausdorfDistance = function(A,B)
 {
     D = distmat(A,B)
     
