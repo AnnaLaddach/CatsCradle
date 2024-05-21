@@ -267,6 +267,7 @@ DimPlot(NBHDByCTSeurat, group.by = c("neighbourhood_clusters"), cols = "polychro
 
 
 We can now add information on neighbourhood clusters to our original xenium object and visualise these on the tissue.
+
 ```{r}
 smallXenium$NBHDCluster = NBHDByCTSeurat@active.ident
 ImageDimPlot(smallXenium, group.by = "NBHDCluster", size = 1, cols = "polychrome")
@@ -464,6 +465,22 @@ Visualise most spatially autocorrelated gene.
 ```{r}
 ImageFeaturePlot(smallXenium, "Nwd2")
 ```
+We can compute a p-value for the localisation of gene expression with the
+following
+
+```{r eval = FALSE}
+## We need the coordinates as a matrix:
+cellCoords = data.matrix(centroids[,1:2])
+Nwd2 = FetchData(smallXenium,'Nwd2')
+## We need to threshold gene expression:
+Nwd2 = Nwd2[,1] > 0.01
+pValue = medianComplementPValue(coords,Nwd2)
+```
+
+This returns a p-value of 0.001, here limited by the default number of
+permutation trials used by medianComplementPValue()
+
+
 Visualise least spatially autocorrelated gene.
 ```{r}
 ImageFeaturePlot(smallXenium, "Trbc2")
@@ -574,7 +591,6 @@ Compute Moran's I for the spatial autocorrelation of ligand-receptor interaction
 ```{r}
 moransILigandReceptor = runMoransI(edgeSeurat, edgeNeighbours, assay = "RNA", 
                      layer = "counts", nSim = 100)
-use_data(moransILigandReceptor, overwrite = T)
 ```
 
 View most spatially autocorrelated ligand-receptor interactions.
@@ -597,3 +613,4 @@ View ligand-receptor interaction with the lowest spatial autocorrelation (Moran'
 ```{r}
 ImageFeaturePlot(edgeSeurat, "Sst-Gpr17")
 ```
+
