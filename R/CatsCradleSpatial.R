@@ -64,8 +64,7 @@ computeNeighboursDelaunay = function(centroids){
 #' @import Rfast
 #' @export
 #' @examples
-#' euclideanNeighbours = computeNeighboursEuclidean(centroids)
-
+#' euclideanNeighbours = computeNeighboursEuclidean(centroids,20)
 computeNeighboursEuclidean = function(centroids, threshold){
   centroids = centroids[,c(1,2)]
   colnames(centroids) = c("x","y")
@@ -247,7 +246,7 @@ computeNBHDVsCTSeurat= function(dataMatrix, resolution = 0.1,
 #' @import igraph
 #' @export
 #' @examples
-#' objWithEmbedding = computeGraphEmbedding(smallNbhdObj)
+#' objWithEmbedding = computeGraphEmbedding(NBHDByCTSeurat)
 computeGraphEmbedding = function(seuratObj, graph=defaultGraph(seuratObj)){
   graph = seuratObj@graphs[[graph]]
   igraphGraph = igraph::graph_from_adjacency_matrix(graph)
@@ -346,7 +345,7 @@ collapseExtendedNBHDs = function(extendedNeighboursList, n = length(extendedNeig
 #' @import dplyr
 #' @export
 #' @examples
-#' smallCellTypesPerCellType = computeCellTypesPerCellTypeMatrix(smallNbhdMatrix,
+#' cellTypesPerCellType = computeCellTypesPerCellTypeMatrix(NBHDByCTMatrix,
 #'                                                      smallXenium$seurat_clusters)
 computeCellTypesPerCellTypeMatrix = function(nbhdByCellType,cellTypes)
 {
@@ -809,7 +808,7 @@ annotateLRInteractionCounts = function(interactionCounts,obj,nbhdObj)
 #' frequently between 2 clusters than expected.
 #' @export
 #' @examples performLigandReceptorAnalysis(smallXenium, delaunayNeighbours, 
-#' "mouse", clusters,verbose=FALSE)
+#'                                       "mouse", clusters,verbose=FALSE)
 
 performLigandReceptorAnalysis = function(obj, spatialGraph, species, clusters,
                                       nSim = 1000, 
@@ -1107,6 +1106,10 @@ aggregateSeuratGeneExpression = function(f,neighbourhoods)
     nbhdObj = RunUMAP(nbhdObj,dims=1:20)
     nbhdObj = FindNeighbors(nbhdObj)
     nbhdObj = FindClusters(nbhdObj)
+
+    ## Rename the clusters:
+    idx = names(nbhdObj@meta.data) == 'seurat_clusters'
+    names(nbhdObj@meta.data)[idx] = 'aggregation_clusters'
     
     return(nbhdObj)
 }

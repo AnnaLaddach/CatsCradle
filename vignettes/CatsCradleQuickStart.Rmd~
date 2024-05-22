@@ -198,6 +198,15 @@ smallXenium$aggregateNBHDClusters = agg@active.ident
 ImageDimPlot(smallXenium,group.by='aggregateNBHDClusters',cols='polychrome')
 ```
 
+Notice that since our neighbourhoods are all indexed by cells, we can
+compare the different methods of clustering neighbourhoods.  Here we
+compare the clustering based on cell types in our extended
+neighbourhoods to that based on aggregate gene expression. and see,
+for example, that aggregation cluster 9 is predominantly made up of
+celltype cluster 2.
+
+![comparing neighbourhood clusterings](aggregationVsCelltypeNbhdClustering.png){width=6in}
+
 
 ## Ligand Receptor analysis
 

@@ -87,5 +87,5 @@ chance.
 }
 \examples{
 performLigandReceptorAnalysis(smallXenium, delaunayNeighbours, 
-"mouse", clusters,verbose=FALSE)
+                                      "mouse", clusters,verbose=FALSE)
 }
