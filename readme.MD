@@ -1,4 +1,6 @@
-#CatsCradle ![](CatsCradleLogoTransparent)
+# CatsCradle 
+
+![](CatsCradleLogoTransparent.png)
 
 CatsCradle is an R package which provides tools for exploring duality present in single cell datasets. It interfaces with analyses performed with the Seurat Package, although many functions take simple lists, dataframes or matrices as input. 
 
