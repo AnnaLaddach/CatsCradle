@@ -23,5 +23,5 @@ a seurat object with a "graph" dimensionality reduction.
 This function adds a force directed graph embedding to a seurat object
 }
 \examples{
-objWithEmbedding = computeGraphEmbedding(smallNbhdObj)
+objWithEmbedding = computeGraphEmbedding(NBHDByCTSeurat)
 }

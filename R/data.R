@@ -197,7 +197,7 @@
 #' \describe{
 #' The entries in this data frame are cell names from smallXenium.
 #' Each row represents an undirected edge in the nearest neighbour 
-#' graph using a cutoff euclidean distance of 20 \mu m.
+#' graph using a cutoff euclidean distance of 20 \\mu m.
 #' }
 #'
 #' @source This is computed from centroids using
