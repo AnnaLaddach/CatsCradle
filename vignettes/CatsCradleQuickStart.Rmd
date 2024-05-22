@@ -1,5 +1,5 @@
 ---
-title: "Cats Cradle Quick Start"
+title: "CatsCradle Quick Start"
 author: "Anna Laddach and Michael Shapiro"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -18,17 +18,17 @@ knitr::opts_chunk$set(
 ```
 ## Introduction
 
-Cats Cradle provides two types of functionality for analysing single
+CatsCradle provides two types of functionality for analysing single
 cell data.  It provides tools for the clustering and annotation of
 genes and it provides extensive tools for analysing spatial
-transcriptomic data.
+transcriptomics data.
 
 ## Clustering and annotation of genes
 
-A typical Seurat analysis involves dimension reduction (PCA, UMAP,
-tSNE) and the clustering of cells using the louvain algorithm. All of
+A typical analysis of scRNA-seq data using Seurat involves dimensionality reduction 
+(PCA, UMAP, tSNE) and the clustering of cells using the louvain algorithm. All of
 this is done based on the similarities and differences in the genes
-they express.
+cells express.
 
 ```{r}
 library(Seurat)
@@ -37,14 +37,12 @@ DimPlot(S,cols='polychrome')
 ```
 
 By transposing the expression matrix, we can use the same technology
-to produce a Seurat object where the objects are the genes.  They have
-their own UMAP and their own clustering.  This is all done on the
-basis of the similarities and differences in the cells they are
+to produce a Seurat object where the samples are the genes and the features are 
+cells.  Genes now have their own UMAP and their own clusters.  This is all done 
+on the basis of the similarities and differences in the cells they are
 expressed in.
 
 ```{r}
-library(Seurat)
-library(CatsCradle)
 DimPlot(STranspose,cols='polychrome')
 ```
 
@@ -52,20 +50,19 @@ DimPlot(STranspose,cols='polychrome')
 
 There are a number of ways of investigating the relationship between
 gene clusters and cell clusters.  One is by computing the average
-expression of each gene cluster in each cell cluster and this can be
+expression of each gene cluster in each cell cluster; this can be
 displayed as a heat map or a Sankey graph - the cat's cradle of our
 CatsCradle. (See getAverageExpressionMatrix() and sankeyFromMatrix()
-in the CatsCradle vignette.)  
+in the CatsCradle vignette [CatsCradle](doc/CatsCradle.html).)  
 
 ### Spatial co-location on gene UMAP
 
 Gene sets such as Hallmark tend to localise on gene UMAP, though they
 are not necessarily confined to specific gene clusters.  Here we show
-HALLMARK_OXIDATIVE_PHOSPHORYLATION.
+HALLMARK_OXIDATIVE_PHOSPHORYLATION visualised in black and outlined in white on 
+the UMAP.
 
 ```{r}
-library(Seurat)
-library(CatsCradle)
 library(ggplot2)
 h = 'HALLMARK_OXIDATIVE_PHOSPHORYLATION'
 umap = FetchData(STranspose,c('umap_1','umap_2'))
@@ -76,6 +73,9 @@ g = DimPlot(STranspose,cols='polychrome') +
 print(g)
 pValue = getSeuratSubsetClusteringPValue(STranspose,idx)
 ```
+```{r}
+pValue 
+```
 
 This reports a p-value for the geometric clustering of these genes of
 0.001. Here this is limited by the default number of randomisation
@@ -84,26 +84,26 @@ trials in getSubsetClusteringPValue().  Of the 50 Hallmark gene sets,
 
 ### Gene annotation
 
-This suggests propose annotations for a given gene by looking at
-annotations for its neighbouring genes.  If a gene has its own
+This allows one to predict functions of a given gene by looking at
+annotations of its neighbouring genes.  If a gene has its own
 annotation and also has neighbours which have annotations, we can
-compare the actual annotation to the predicted annotation based on its
-neighbours. The predictions perform well above chance.  This is
-described in the section Predicting gene function of the CatsCradle
-vignette.
+compare the actual annotation to the predicted annotation. These predictions 
+perform well above chance as described in the section Predicting gene function 
+of the CatsCradle vignette.
 
 ## Analysis of spatial transcriptomic data
 
 CatsCradle provides extensive tools for the analysis of spatial
-transcriptomic data.  Here we see cell type plotted on the centroids
+transcriptomics data.  Here we see cell type plotted on the centroids
 of our example data.
 
 ```{r}
 ImageDimPlot(smallXenium,cols='polychrome')
 ```
 
-With Moran's I, we can see localisation of gene expression and compute
-p-values for this localisation.  See Cats Cradle spatial vignette.
+With Moran's I, we can see spatial autocorrelation of gene expressionand compute
+p-values for this.  See CatsCradle spatial vignette 
+[CatsCradleSpatial](doc/CatsCradleSpatial.html).
 
 
 ### Neighbourhoods
@@ -145,8 +145,8 @@ cellTypesPerCellTypeGraphFromCellMatrix(cellTypesPerCellTypeMatrixExtended, minW
 ```
 
 We can also test for statistical significance for the enrichment of a
-given cell type in the neighbourhoods around another cell type.
-
+given cell type in the neighbourhoods around another cell type 
+(see [CatsCradleSpatial](doc/CatsCradleSpatial.html)).
 
 ### Neighourhood Seurat objects.
 
@@ -156,7 +156,7 @@ There are two ways to do this.
 #### Neighbourhoods and cell types
 
 Just as cells express genes, with poetic license we can say that
-neighbourhoods "express" cell types.  A cell types by neighbourhoods
+neighbourhoods "express" cell types.  A neighbourhoods by cell types
 matrix gives the counts of cells of each type in each neighbourhood.
 This can be taken as the counts matrix for a Seurat object.  We can
 then use the Louvain algorithm to cluster neighbourhoods into
@@ -164,7 +164,7 @@ neighbourhood types.
 
 Here we attach these neighbourhood_clusters from a neighbourhood
 Seurat object (created by computeNBHDVsCTSeurat()) to our original
-spatial object and visualize the neighbourhood clusters on tissue
+spatial object and visualize the neighbourhood clusters on the tissue
 coordinates. (Again, we are using extended neighbourhoods.)
 
 ```{r}
@@ -219,10 +219,11 @@ panel.  Nichnetr lists over eleven thousand ligand-receptor pairs.  Of
 these 28 appear in our example panel.
 
 The main function for carrying out ligand-receptor analysis is
-performLigandReceptorAnalysis().  This produces an object with
-multiple fields.  These include a data frame interactionsOnEdges.
+performLigandReceptorAnalysis().  This produces an list with
+multiple entries.  These include a data frame interactionsOnEdges.
 Here the first two columns are nodeA and nodeB which give the edge in
-question.  The remaining columns are logicals, each corresponding to a
+question and next two columns give their corresponding clusters. The remaining 
+columns are logicals, each corresponding to a
 particular ligand-receptor pair and indicating whether that pair is
 present on that edge.  Notice that while the neighbour-neighbour
 relationship in the Delaunay triangulation is undirected, the
@@ -230,11 +231,16 @@ ligand-receptor relationship is directed.  Accordingly, in
 interactionsOnEdges, a given edge appears as both the pair cell A -
 cell B and as the pair cell B - cell A.  
 
- Other fields are downstream of this data frame.  For example, pValue
-tells whether a given ligand-receptor is statistically significantly
+```{r}
+ligandReceptorResults$interactionsOnEdges[1:10,1:10]
+```
+
+
+Other fields are downstream of this data frame.  For example, pValue
+tells whether a given ligand-receptor pair is statistically significantly
 enriched in the interactions between two specific cell types.  For
 further details see the section Ligand receptor analysis in the Cats
-Cradle Spatial vignette.
+Cradle Spatial vignette [CatsCradleSpatial](doc/CatsCradleSpatial.html).
 
 
 
