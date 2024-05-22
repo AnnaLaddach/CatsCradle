@@ -1,6 +1,7 @@
 # CatsCradle 
 
-![](CatsCradleLogoTransparent.png){width=1in}
+<img src="CatsCradleLogoTransparent.png" alt="" width="200"/>
+
 CatsCradle is an R package which provides tools for exploring duality present in single cell datasets. It interfaces with analyses performed with the Seurat Package, although many functions take simple lists, dataframes or matrices as input. 
 
 In a typical scRNAseq dataset duality exist between cells and the genes they express. Cells are typically assigned cell types based on gene expression; however, programmes of gene expression can cut across cell types. Furthermore, information on how genes are coexpressed can be leveraged to infer functionality. Please see vignette [CatsCradle](doc/CatsCradle.html) to find out how you can apply CatsCradle to explore this duality. 
