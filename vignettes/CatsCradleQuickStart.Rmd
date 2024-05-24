@@ -209,7 +209,8 @@ addition, we can find the marker genes giving the transcriptomic
 differences between the neighbourhood types.
 
 ```{r}
-agg = aggregateSeuratGeneExpression(smallXenium,extendedNeighbours)
+agg = aggregateSeuratGeneExpression(smallXenium,extendedNeighbours,
+                                    verbose=FALSE)
 smallXenium$aggregateNBHDClusters = agg@active.ident
 ImageDimPlot(smallXenium,group.by='aggregateNBHDClusters',cols='polychrome')
 ```
