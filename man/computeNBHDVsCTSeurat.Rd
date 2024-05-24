@@ -10,7 +10,8 @@ computeNBHDVsCTSeurat(
   resolution = 0.1,
   npcs = 10,
   n.neighbors = 30L,
-  transpose = F
+  transpose = F,
+  verbose = T
 )
 }
 \arguments{
@@ -33,6 +34,10 @@ transpose.
 
 \item{transpose}{\itemize{
 \item defaults to FALSE.
+}}
+
+\item{verbose}{\itemize{
+\item defaults to TRUE, used to limit trace if FALSE
 }}
 }
 \value{

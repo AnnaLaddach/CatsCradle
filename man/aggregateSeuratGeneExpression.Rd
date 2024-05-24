@@ -8,7 +8,7 @@ columns are the neighbourhoods, the rows are are the
 genes and the values are gene expression totals for
 the cells in each neighbourhood}
 \usage{
-aggregateSeuratGeneExpression(f, neighbourhoods)
+aggregateSeuratGeneExpression(f, neighbourhoods, verbose = TRUE)
 }
 \arguments{
 \item{f}{\itemize{
@@ -20,6 +20,10 @@ aggregateSeuratGeneExpression(f, neighbourhoods)
 collapsed expanded edge graph, as produced by
 collapseNeighbourhoods. In particular, each cell should
 appear as nodeA.
+}}
+
+\item{verbose}{\itemize{
+\item used to control trace, defaults to TRUE
 }}
 }
 \value{

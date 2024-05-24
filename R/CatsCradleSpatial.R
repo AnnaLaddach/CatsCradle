@@ -194,6 +194,7 @@ computeNBHDByCTMatrix = function(spatialGraph, cellTypes){
 #' @param npcs - number of pcs used for PCA, defaults to 10.
 #' @param n.neighbors - number of neighbors used by UMAP, defaults to 30.
 #' @param transpose - defaults to FALSE.
+#' @param verbose - defaults to TRUE, used to limit trace if FALSE
 #' @return a seurat object based on a neighbourhood by cell type matrix or its 
 #' transpose, containing clusters and UMAP.
 #' @import Seurat
@@ -201,32 +202,38 @@ computeNBHDByCTMatrix = function(spatialGraph, cellTypes){
 #' @examples
 #' NBHDByCTSeurat = computeNBHDVsCTSeurat(NBHDByCTMatrix)
 computeNBHDVsCTSeurat= function(dataMatrix, resolution = 0.1, 
-                                         npcs = 10, n.neighbors = 30L, 
-                                         transpose = F){
+                                npcs = 10, n.neighbors = 30L, 
+                                transpose = F,
+                                verbose=T){
     dataMatrix = t(dataMatrix)
     NBHDSeurat = CreateSeuratObject(dataMatrix)
     NBHDSeurat[['RNA']]$data = NBHDSeurat[['RNA']]$counts
-    NBHDSeurat = ScaleData(NBHDSeurat)
+    NBHDSeurat = ScaleData(NBHDSeurat,verbose=verbose)
     NBHDSeurat = RunPCA(NBHDSeurat, assay = "RNA", 
-                                 features = rownames(NBHDSeurat), 
-                                 npcs = npcs)
+                        features = rownames(NBHDSeurat), 
+                        npcs = npcs,
+                        verbose=verbose)
     if (transpose){
       NBHDSeurat = RunUMAP(NBHDSeurat,assay='RNA',
-                                      dims = 1:npcs, n.neighbors = n.neighbors)
+                           dims = 1:npcs, n.neighbors = n.neighbors,
+                           verbose=verbose)
   
     } else{
       NBHDSeurat = RunUMAP(NBHDSeurat,assay='RNA',
-                                      features=rownames(NBHDSeurat), 
-                                      n.neighbors = n.neighbors)
+                           features=rownames(NBHDSeurat), 
+                           n.neighbors = n.neighbors,
+                           verbose=verbose)
     }
     if (transpose){
-      NBHDSeurat = FindNeighbors(NBHDSeurat, dims = 1:npcs)
+        NBHDSeurat = FindNeighbors(NBHDSeurat, dims = 1:npcs,
+                                   verbose=verbose)
     } else{
-      NBHDSeurat = FindNeighbors(NBHDSeurat, 
-                                            features=rownames(NBHDSeurat))
+        NBHDSeurat = FindNeighbors(NBHDSeurat, 
+                                   features=rownames(NBHDSeurat),
+                                   verbose=verbose)
     }
     NBHDSeurat = FindClusters(NBHDSeurat,
-                                       resolution=resolution)
+                              resolution=resolution)
 
     ## Rename seurat_clusters to neighbourhood_clusters
     idx = names(NBHDSeurat@meta.data) == 'seurat_clusters'
@@ -1075,14 +1082,16 @@ nbhdsAsEdgesToNbhdsAsList = function(cells=unique(neighbourhoods$nodeA),
 #' collapsed expanded edge graph, as produced by
 #' collapseNeighbourhoods. In particular, each cell should
 #' appear as nodeA.
+#' @param verbose - used to control trace, defaults to TRUE
 #' @import Seurat
 #' @return a Seurat object giving total gene expression
 #' in each neighbourhood.
 #' @export
-aggregateSeuratGeneExpression = function(f,neighbourhoods)
+aggregateSeuratGeneExpression = function(f,neighbourhoods,verbose=TRUE)
 {
     cells = colnames(f)
-    nbhds = unique(neighbourhoods$nodeA)
+    nbhds = unique(c(neighbourhoods$nodeA,
+                     neighbourhoods$nodeB))
 
     ## Sanity check:
     stopifnot(identical(cells[order(cells)],
@@ -1099,13 +1108,13 @@ aggregateSeuratGeneExpression = function(f,neighbourhoods)
     C = aggregateFeatureMatrix(counts, nbhdList, rowsums)
 
     nbhdObj = CreateSeuratObject(counts=C)
-    nbhdObj = NormalizeData(nbhdObj)
-    nbhdObj = ScaleData(nbhdObj)
-    nbhdObj = FindVariableFeatures(nbhdObj)
-    nbhdObj = RunPCA(nbhdObj)
-    nbhdObj = RunUMAP(nbhdObj,dims=1:20)
-    nbhdObj = FindNeighbors(nbhdObj)
-    nbhdObj = FindClusters(nbhdObj)
+    nbhdObj = NormalizeData(nbhdObj,verbose=verbose)
+    nbhdObj = ScaleData(nbhdObj,verbose=verbose)
+    nbhdObj = FindVariableFeatures(nbhdObj,verbose=verbose)
+    nbhdObj = RunPCA(nbhdObj,verbose=verbose)
+    nbhdObj = RunUMAP(nbhdObj,dims=1:20,verbose=verbose)
+    nbhdObj = FindNeighbors(nbhdObj,verbose=verbose)
+    nbhdObj = FindClusters(nbhdObj,verbose=verbose)
 
     ## Rename the clusters:
     idx = names(nbhdObj@meta.data) == 'seurat_clusters'
