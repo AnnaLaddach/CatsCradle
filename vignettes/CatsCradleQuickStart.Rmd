@@ -55,11 +55,14 @@ displayed as a heat map or a Sankey graph - the cat's cradle of our
 CatsCradle. (See getAverageExpressionMatrix() and sankeyFromMatrix()
 in the CatsCradle vignette [CatsCradle](doc/CatsCradle.html).)  
 
-### Spatial co-location on gene UMAP
+### Spatial co-location of genes on gene UMAP
 
 Gene sets such as Hallmark tend to localise on gene UMAP, though they
 are not necessarily confined to specific gene clusters.  Here we show
-HALLMARK_OXIDATIVE_PHOSPHORYLATION visualised in black and outlined in white on 
+HALLMARK_OXIDATIVE_PHOSPHORYLATION (subset to the genes in our Seurat
+object) superimposed in green and black on the gene cluster UMAP.
+
+visualised in black and outlined in white on 
 the UMAP.
 
 ```{r}
@@ -68,19 +71,32 @@ h = 'HALLMARK_OXIDATIVE_PHOSPHORYLATION'
 umap = FetchData(STranspose,c('umap_1','umap_2'))
 idx = colnames(STranspose) %in% hallmark[[h]]
 g = DimPlot(STranspose,cols='polychrome') +
-    geom_point(data=umap[idx,],aes(x=umap_1,y=umap_2),color='black') +
+    geom_point(data=umap[idx,],aes(x=umap_1,y=umap_2),color='black',size=2.7) +
+    geom_point(data=umap[idx,],aes(x=umap_1,y=umap_2),color='green') +
     ggtitle(paste(h,'on gene clusters'))
 print(g)
 pValue = getSeuratSubsetClusteringPValue(STranspose,idx)
+pValue
 ```
 ```{r}
 pValue 
 ```
 
-This reports a p-value for the geometric clustering of these genes of
-0.001. Here this is limited by the default number of randomisation
+The p-value here this is limited by the default number of randomisation
 trials in getSubsetClusteringPValue().  Of the 50 Hallmark gene sets,
 31 have clustering p-values less than 0.05.
+
+The computation of these p-values is ultimately carried out by
+medianComplementPValue().  We wish to determine whether a subset _X_
+of a spatial subset _S_ is randomly scattered across _S_ or is somehow
+localised.  To do this we consider the complement _C_ of _X_ in _S_.
+If _X_ is "spread out" randomly across _S_, every point of _C_ will be
+close to some point in _X_.  Accordingly, the median distance from
+points in _C_ to their nearest point in _X_ will be small.  If on the
+contrary, _X_ is localised, many points in _C_ will be distant from
+_X_, thereby producing a larger median complement distance.  We
+produce a p-value by comparing the median complement distance for _X_
+to those for randomised sets of the same size as _X_.
 
 ### Gene annotation
 
@@ -201,14 +217,26 @@ ImageDimPlot(smallXenium,group.by='aggregateNBHDClusters',cols='polychrome')
 Notice that since our neighbourhoods are all indexed by cells, we can
 compare the different methods of clustering neighbourhoods.  Here we
 give a heatmap comparing the clustering based on cell types in our
-extended neighbourhoods to that based on aggregate gene
-expression. and see, for example, that aggregation cluster 9 is
-predominantly made up of celltype cluster 2.  One might also compute
-the Rand index or Adjusted Rand index to estimate the similarity /
-dis-similarity of two clusterings.
+extended neighbourhoods to that based on aggregate gene expression.
+We see, for example, that aggregation clusters 7, 13, 14, 16 and 17
+are subsumed into cell type neighbourhood cluster 0.  More generally,
+we see that clustering based on aggregate gene expression tends to
+subdivide that based on the cell types in each neighbourhood.
 
 ![comparing neighbourhood clusterings](aggregationVsCelltypeNbhdClustering.png){width=6in}
 
+Another way of comparing clusterings is via the adjusted Rand
+index. This compares two classifications of the same set of objects.
+It can vary between -1 and 1.  It takes the value 1 when these
+classifications denote the same subsets and 0 when they agree at a
+level no better than chance.
+
+```{r}
+library(fossil)
+adjustedRandIndex = adj.rand.index(agg@active.ident,
+                                   NBHDByCTSeuratExtended@active.ident)
+adjustedRandIndex
+```
 
 ## Ligand Receptor analysis
 
