@@ -32,7 +32,8 @@ Imports: Seurat,
 	 dplyr,
 	 data.table,
 	 abind,
-	 pheatmap
+	 pheatmap,
+	 fossil
 Depends: 
     R (>= 4.0)
 LazyData: true

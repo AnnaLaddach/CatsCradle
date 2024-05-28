@@ -402,9 +402,9 @@ computeCellTypesPerCellTypeMatrix = function(nbhdByCellType,cellTypes)
 #' @export
 #' @examples
 #' G = cellTypesPerCellTypeGraphFromCellMatrix(cellTypesPerCellTypeMatrix, 
-#' minWeight = 0.05, colours = colours)
+#' minWeight = 0.05, colors = colours)
 cellTypesPerCellTypeGraphFromCellMatrix = function(M,
-                                               colours=NULL,
+                                               colors=NULL,
                                                selfEdges=FALSE,
                                                minWeight=0,
                                                edgeWeighting=20,
@@ -421,17 +421,17 @@ cellTypesPerCellTypeGraphFromCellMatrix = function(M,
                                     weighted=TRUE,
                                     diag=selfEdges)
 
-    if(! is.null(colours))    
-        V(G)$colour = colours[names(V(G))]
+    if(! is.null(colors))    
+        V(G)$color = colors[names(V(G))]
     G$coords = layout_with_fr(G)
     E(G)$width = edgeWeighting * E(G)$weight
 
     if(plotGraph)
     {
-        if(! is.null(colours))
+        if(! is.null(colors))
             plot(G,
                  layout=G$coords,
-                 vertex.color=V(G)$colour,
+                 vertex.color=V(G)$color,
                  edge.width=E(G)$width,
                  edge.curved = edgeCurved,
                  arrow.size = arrowSize,
@@ -483,7 +483,7 @@ cellTypesPerCellTypeGraphFromCellMatrix = function(M,
 #' @export
 cellTypesPerCellTypeGraphFromNbhdMatrix = function(nbhdByCellType,
                                      clusters,
-                                     colours=NULL,
+                                     colors=NULL,
                                      selfEdges=FALSE,
                                      minWeight=0,
                                      edgeWeighting=20,
@@ -494,7 +494,7 @@ cellTypesPerCellTypeGraphFromNbhdMatrix = function(nbhdByCellType,
 {
     M = cellTypesPerCellTypeMatrix(nbhdByCellType,clusters)
     G = cellTypesPerCellTypeGraphFromCellMatrix(M,
-                                            colours=colours,
+                                            colors=colors,
                                             selfEdges=selfEdges,
                                             minWeight=minWeight,
                                             edgeWeighting=edgeWeighting,
@@ -916,7 +916,7 @@ performLigandReceptorAnalysis = function(obj, spatialGraph, species, clusters,
 #' @export
 makeLRInteractionHeatmap = function(ligandReceptorResults,
                                   clusters,
-                                  colours = c(),
+                                  colors = c(),
                                   pValCutoffClusterPair = 0.05, 
                                   pValCutoffLigRec = 0.05,
                                   labelClusterPairs = T)
@@ -931,9 +931,9 @@ makeLRInteractionHeatmap = function(ligandReceptorResults,
   rowAnno$sender = factor(rowAnno$sender, levels = levels(clusters))
   rowAnno$receiver = factor(rowAnno$receiver, levels = levels(clusters))
   rownames(rowAnno) = rownames(selectedPValues)
-  if (length(colours) > 0){
-  pheatmap(negLog10PValues, annotation_row = rowAnno, annotation_colors = list("sender" = colours, 
-                                                                    "receiver" = colours),
+  if (length(colors) > 0){
+  pheatmap(negLog10PValues, annotation_row = rowAnno, annotation_colors = list("sender" = colors, 
+                                                                    "receiver" = colors),
            show_rownames = labelClusterPairs)
   } else{
     pheatmap(negLog10PValues, annotation_row = rowAnno, show_rownames = labelClusterPairs)
@@ -1159,7 +1159,7 @@ aggregateFeatureMatrix = function(M, nbhdList, aggregateFunction)
 #' @param M - a matrix where column names are cells and row names are features.
 #' @param nbhdList - a named list with memberships of the neighbourhoods
 #' of cells
-#' @param aggregateFunction - a function to aggregate expression (e.g. rowSums,
+## #' @param aggregateFunction - a function to aggregate expression (e.g. rowSums,
 #' rowMeans)
 
 #' @return a matrix giving aggregated gene expression for a cell's neighbourhood.
