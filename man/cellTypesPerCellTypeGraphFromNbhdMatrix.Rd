@@ -10,7 +10,7 @@ around cells of each type.}
 cellTypesPerCellTypeGraphFromNbhdMatrix(
   nbhdByCellType,
   clusters,
-  colours = NULL,
+  colors = NULL,
   selfEdges = FALSE,
   minWeight = 0,
   edgeWeighting = 20,
@@ -30,6 +30,12 @@ cell types, and whose entries are counts.
 \item{clusters}{\itemize{
 \item a named vector whose names are the cells
 and whose entries are their seurat_clusters.
+}}
+
+\item{colors}{\itemize{
+\item a named vector of colors used to color the
+vertices of the graph.  The names are the seurat_clusters
+as character strings.
 }}
 
 \item{selfEdges}{\itemize{
@@ -63,12 +69,6 @@ Defaults to 0.2
 \item{plotGraph}{\itemize{
 \item a logical which determines whether to
 plot the graph.  Defaults to TRUE.
-}}
-
-\item{colors}{\itemize{
-\item a named vector of colors used to color the
-vertices of the graph.  The names are the seurat_clusters
-as character strings.
 }}
 }
 \value{

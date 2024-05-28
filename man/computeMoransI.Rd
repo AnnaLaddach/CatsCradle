@@ -15,10 +15,6 @@ computeMoransI(M, nbhdList)
 \item{nbhdList}{\itemize{
 \item a named list with memberships of the neighbourhoods
 of cells
-}}
-
-\item{aggregateFunction}{\itemize{
-\item a function to aggregate expression (e.g. rowSums,
 rowMeans)
 }}
 }

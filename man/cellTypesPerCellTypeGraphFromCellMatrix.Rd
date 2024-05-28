@@ -9,7 +9,7 @@ edge correspond to occupancy fraction.}
 \usage{
 cellTypesPerCellTypeGraphFromCellMatrix(
   M,
-  colours = NULL,
+  colors = NULL,
   selfEdges = FALSE,
   minWeight = 0,
   edgeWeighting = 20,
@@ -25,6 +25,12 @@ cellTypesPerCellTypeGraphFromCellMatrix(
 however, that this matrix may need to be reduced to a square matrix
 as the matrix produced from a subset object may be missing certain
 cell types as rows.
+}}
+
+\item{colors}{\itemize{
+\item a named vector of colors used to color the
+vertices of the graph.  The names are the seurat_clusters
+as character strings.
 }}
 
 \item{selfEdges}{\itemize{
@@ -59,12 +65,6 @@ Defaults to 0.2
 \item a logical which determines whether to
 plot the graph.  Defaults to TRUE.
 }}
-
-\item{colors}{\itemize{
-\item a named vector of colors used to color the
-vertices of the graph.  The names are the seurat_clusters
-as character strings.
-}}
 }
 \value{
 This returns a directed igraph whose vertices are
@@ -83,5 +83,5 @@ edge correspond to occupancy fraction.
 }
 \examples{
 G = cellTypesPerCellTypeGraphFromCellMatrix(cellTypesPerCellTypeMatrix, 
-minWeight = 0.05, colours = colours)
+minWeight = 0.05, colors = colours)
 }

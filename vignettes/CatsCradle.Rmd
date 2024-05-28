@@ -33,8 +33,8 @@ matrix $M$, we can use the same methods to produce lower-dimensional
 representations of the genes and cluster the genes into groups that
 show similar patterns of expression.
 
-```{r message = FALSE, warning=FALSE, eval=FALSE}
-library(CatsCradle)
+```{r}
+library(CatsCradle,quietly=TRUE)
 STranspose = transposeSeuratObject(S)
 ```
 This function transposes the expression matrix and carries out the
@@ -61,7 +61,7 @@ the individual points and discover the genes in each cluster. Typical
 code might be
 
 ```{r eval = FALSE}
-library(plotly)
+library(plotly,quietly=TRUE)
 umap = FetchData(STranspose,c('UMAP_1','UMAP_2','seurat_clusters'))
 umap$gene = colnames(STranspose)
 plot = ggplot(umap,aes(x=UMAP_1,y=UMAP_2,color=seurat_clusters,label=gene) +
@@ -78,7 +78,7 @@ we give a heatmap of average expression of each gene cluster (columns)
 across each cell cluster (rows)
 
 ```{r  eval = FALSE}
-library(pheatmap)
+library(pheatmap,quietly=TRUE)
 averageExpMatrix = getAverageExpressionMatrix(S,STranspose)
 averageExpMatrix = tagRowAndColNames(averageExpMatrix,
                                      ccTag='cellClusters_',
@@ -171,8 +171,8 @@ magnitude.
 ![clustering statistics](g2mClusteringStats.png){width=6in}
 
 Here we have shown that statistics for one of the gene sets that is
-most tightly clustered on UMAP.  However, 31 of the 50 Hallmark gene
-sets cluster with a p-value better than 0.05.
+most tightly clustered on UMAP.  However, of the 50 Hallmark gene
+sets 31 cluster with a p-value better than 0.05.
 
 ![Hallmark clustering statistics](hallmarkClusteringPValues.png){width=6in}
 
@@ -221,7 +221,6 @@ inverts the gene sets to give a list of the sets each gene belongs
 to. 
 
 ```{r}
-library(CatsCradle)
 annotatedGenes = annotateGenesByGeneSet(hallmark)
 names(annotatedGenes[['Myc']])
 ```

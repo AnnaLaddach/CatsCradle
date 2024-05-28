@@ -28,11 +28,12 @@ transcriptomics data.
 A typical analysis of scRNA-seq data using Seurat involves dimensionality reduction 
 (PCA, UMAP, tSNE) and the clustering of cells using the louvain algorithm. All of
 this is done based on the similarities and differences in the genes
-cells express.
+cells express.  Here we see a UMAP where the points cells, coloured by
+their seurat_clusters.  
 
 ```{r}
-library(Seurat)
-library(CatsCradle)
+library(Seurat,quietly=TRUE)
+library(CatsCradle,quietly=TRUE)
 DimPlot(S,cols='polychrome')
 ```
 
@@ -66,7 +67,7 @@ visualised in black and outlined in white on
 the UMAP.
 
 ```{r}
-library(ggplot2)
+library(ggplot2,quietly=TRUE)
 h = 'HALLMARK_OXIDATIVE_PHOSPHORYLATION'
 umap = FetchData(STranspose,c('umap_1','umap_2'))
 idx = colnames(STranspose) %in% hallmark[[h]]
@@ -78,9 +79,6 @@ print(g)
 pValue = getSeuratSubsetClusteringPValue(STranspose,idx)
 pValue
 ```
-```{r}
-pValue 
-```
 
 The p-value here this is limited by the default number of randomisation
 trials in getSubsetClusteringPValue().  Of the 50 Hallmark gene sets,
@@ -88,7 +86,7 @@ trials in getSubsetClusteringPValue().  Of the 50 Hallmark gene sets,
 
 The computation of these p-values is ultimately carried out by
 medianComplementPValue().  We wish to determine whether a subset _X_
-of a spatial subset _S_ is randomly scattered across _S_ or is somehow
+of a set of points _S_ is randomly scattered across _S_ or is somehow
 localised.  To do this we consider the complement _C_ of _X_ in _S_.
 If _X_ is "spread out" randomly across _S_, every point of _C_ will be
 close to some point in _X_.  Accordingly, the median distance from
@@ -105,20 +103,20 @@ annotations of its neighbouring genes.  If a gene has its own
 annotation and also has neighbours which have annotations, we can
 compare the actual annotation to the predicted annotation. These predictions 
 perform well above chance as described in the section Predicting gene function 
-of the CatsCradle vignette.
+of the CatsCradle vignette[CatsCradle](doc/CatsCradle.html) .
 
 ## Analysis of spatial transcriptomic data
 
 CatsCradle provides extensive tools for the analysis of spatial
-transcriptomics data.  Here we see cell type plotted on the centroids
-of our example data.
+transcriptomics data.  Here we see cell type plotted on the cell
+centroids of our example data.
 
 ```{r}
 ImageDimPlot(smallXenium,cols='polychrome')
 ```
 
-With Moran's I, we can see spatial autocorrelation of gene expressionand compute
-p-values for this.  See CatsCradle spatial vignette 
+With Moran's I, we can see spatial autocorrelation of gene expression
+and compute p-values for this.  See CatsCradle spatial vignette
 [CatsCradleSpatial](doc/CatsCradleSpatial.html).
 
 
@@ -127,12 +125,13 @@ p-values for this.  See CatsCradle spatial vignette
 The key concept in our analysis of this kind of data is the
 _neighbourhood_. In general, a neighbourhood is a contiguous set of
 cells.  In all of our use cases, each neighbourhood is set of cells
-_around_ a given cell.  Accordingly, a neighbourhood can be referred
+_around a given cell_.  Accordingly, a neighbourhood can be referred
 to by the name of the cell at its centre.
 
-The simplest type of neighbourhood arises from Delaunay
-triangulation.  This is an undirected graph in which each cell has an
-edge connecting it to each of its immediate neighbours.
+The simplest type of neighbourhood arises from Delaunay triangulation
+where each neighbourhood consists of a cell and its immediate
+neighbours.  This is an undirected graph in which each cell has an
+edge connecting it to each of these neighbours.
 
 ```{r}
 head(delaunayNeighbours,10)
@@ -151,13 +150,15 @@ distance.
 For each cell type A, we can ask "What types of cells are found around
 cells of type A?"  We can display the answer in a directed graph. Here
 we are using an extended neighbourhood.  A fat arrow from type A to
-type B indicates that neighbourhoods around type A have lots of cells
-of type B.
+type B indicates that neighbourhoods around cells of type A have lots
+of cells of type B. Here we only display an arrow from A to B when
+cells of type B compose at least 5 percent of the cells in
+neighbourhoods around type A.
 
 ```{r}
 cellTypesPerCellTypeMatrixExtended = computeCellTypesPerCellTypeMatrix(NBHDByCTMatrixExtended,clusters)
 
-cellTypesPerCellTypeGraphFromCellMatrix(cellTypesPerCellTypeMatrixExtended, minWeight = 0.05, colours = colours)
+cellTypesPerCellTypeGraphFromCellMatrix(cellTypesPerCellTypeMatrixExtended, minWeight = 0.05, colors = colours)
 ```
 
 We can also test for statistical significance for the enrichment of a
@@ -172,11 +173,12 @@ There are two ways to do this.
 #### Neighbourhoods and cell types
 
 Just as cells express genes, with poetic license we can say that
-neighbourhoods "express" cell types.  A neighbourhoods by cell types
+neighbourhoods "express" cell types.  A cell types by neighbourhoods
 matrix gives the counts of cells of each type in each neighbourhood.
 This can be taken as the counts matrix for a Seurat object.  We can
 then use the Louvain algorithm to cluster neighbourhoods into
-neighbourhood types.
+neighbourhood types.  If we like, we can display these on a
+neighbourhood UMAP.
 
 Here we attach these neighbourhood_clusters from a neighbourhood
 Seurat object (created by computeNBHDVsCTSeurat()) to our original
@@ -192,8 +194,8 @@ ImageDimPlot(smallXenium, group.by = c("NBHDClusterExtended"),
 
 ### Aggregate gene expression
 
-As well as expressing cell types, neighbourhoods express genes.  We
-can take the gene expression profile of a neighbourhood to be the
+As well as expressing cell types, neighbourhoods express also genes.
+We can take the gene expression profile of a neighbourhood to be the
 total aggregate expression of each gene across all cells in the
 neighbourhood.  This produces a genes by neighbourhoods count
 matrix. The function aggregateSeuratGeneExpression() takes as
@@ -201,7 +203,9 @@ arguments an underlying Seurat object and a set of neighbourhoods and
 produces a Seurat object where the rows are the genes of the
 underlying Seurat object and the columns are the neighbourhoods.
 Since each neighbourhood corresponds to a cell in our usage, this is
-formally indistinguishable from a normal Seurat object.
+formally indistinguishable from a normal Seurat object.  However, to
+avoid confusion, we have labelled the clusters as aggregation_clusters
+rather than the standard seurat_clusters.
 
 This enables all the usual analyses: dimension reduction and Louvain
 clustering (here giving another clustering of the neighbourhoods). In
@@ -233,7 +237,7 @@ classifications denote the same subsets and 0 when they agree at a
 level no better than chance.
 
 ```{r}
-library(fossil)
+library(fossil,quietly=TRUE)
 adjustedRandIndex = adj.rand.index(agg@active.ident,
                                    NBHDByCTSeuratExtended@active.ident)
 adjustedRandIndex
@@ -248,7 +252,7 @@ panel.  Nichnetr lists over eleven thousand ligand-receptor pairs.  Of
 these 28 appear in our example panel.
 
 The main function for carrying out ligand-receptor analysis is
-performLigandReceptorAnalysis().  This produces an list with
+performLigandReceptorAnalysis().  This produces a list with
 multiple entries.  These include a data frame interactionsOnEdges.
 Here the first two columns are nodeA and nodeB which give the edge in
 question and next two columns give their corresponding clusters. The remaining 
