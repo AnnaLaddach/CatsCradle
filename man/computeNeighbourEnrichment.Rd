@@ -51,5 +51,5 @@ preserved.
 }
 \examples{
 cellTypesPerCellTypePValues = computeNeighbourEnrichment(delaunayNeighbours, 
-clusters, nSim = 10, verbose = F)
+clusters, nSim = 10, verbose = FALSE)
 }

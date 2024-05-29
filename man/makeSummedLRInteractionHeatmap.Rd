@@ -9,7 +9,7 @@ makeSummedLRInteractionHeatmap(
   ligandReceptorResults,
   clusters,
   type,
-  logScale = T
+  logScale = TRUE
 )
 }
 \arguments{

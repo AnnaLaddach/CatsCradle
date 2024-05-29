@@ -10,8 +10,8 @@ computeNBHDVsCTSeurat(
   resolution = 0.1,
   npcs = 10,
   n.neighbors = 30L,
-  transpose = F,
-  verbose = T
+  transpose = FALSE,
+  verbose = TRUE
 )
 }
 \arguments{

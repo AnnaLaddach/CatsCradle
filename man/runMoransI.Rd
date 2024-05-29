@@ -11,7 +11,7 @@ runMoransI(
   assay = "RNA",
   layer = "data",
   nSim = 100,
-  verbose = T
+  verbose = TRUE
 )
 }
 \arguments{

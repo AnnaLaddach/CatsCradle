@@ -10,7 +10,7 @@ makeLRInteractionHeatmap(
   colours = c(),
   pValCutoffClusterPair = 0.05,
   pValCutoffLigRec = 0.05,
-  labelClusterPairs = T
+  labelClusterPairs = TRUE
 )
 }
 \arguments{
@@ -52,5 +52,5 @@ This function takes ligandReceptorResults and plots a heatmap of -log10(pvalues)
 }
 \examples{
 ligRecMatrix = makeLRInteractionHeatmap(ligandReceptorResults, 
-clusters, colours = colours, labelClusterPairs = F)
+clusters, colours = colours, labelClusterPairs = FALSE)
 }

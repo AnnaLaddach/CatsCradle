@@ -6,7 +6,7 @@
 edges become nodes and A-B edges (in the original graph) become connected to
 all A- edges and all B- edges.}
 \usage{
-computeEdgeGraph(spatialGraph, selfEdges = F)
+computeEdgeGraph(spatialGraph, selfEdges = FALSE)
 }
 \arguments{
 \item{spatialGraph}{\itemize{
