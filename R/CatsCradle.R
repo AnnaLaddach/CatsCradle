@@ -190,6 +190,13 @@ geneListPValue = function(A,B,C,background=25000)
 #' clusters
 #' @import stats
 #' @export
+#' @examples
+#' clusterDF = data.frame(gene=colnames(STranspose),
+#'                        geneCluster=STranspose$seurat_clusters)
+#' geneSet = instersect(hallmark[[1]],colnames(STranspose))
+#' pvalueMatrix = geneSetsVsGeneClustersPValueMatrix(geneSet,
+#'                                               clusterDF,
+#'                                               colnames(STranspose))
 geneSetsVsGeneClustersPValueMatrix = function(geneSets,
                                               clusterDF,
                                               backgroundGenes,
@@ -421,6 +428,8 @@ getGeneClusterAveragesPerCell = function(f,
 #' @param f - a Seurat object with meta.data column seurat_clusters
 #' @return A vector of these unique values in order
 #' @export
+#' @examples
+#' geneClusters = getClusterOrder(STranspose)
 getClusterOrder = function(f)
 {
     a = unique(f$seurat_clusters)
@@ -1101,6 +1110,10 @@ getSeuratSubsetClusteringStatistics = function(fPrime,
 #' on the rank of the actual distance among the random
 #' distances and zScore gives its z-score.
 #' @export
+#' @examples
+#' S = data.matrix(FetchData(STranspose,c('umap_1','umap_2'))
+#' geneSubset = rownames(S) %in% hallmark[[1]]
+#' geneClustering = runGeometricClusteringTrials(S,geneSubset,100)
 runGeometricClusteringTrials = function(S,
                                         geneSubset,
                                         numTrials)
@@ -1301,6 +1314,9 @@ fetchUMAP = function(f)
 #' @return This returns the distance of the furthest point
 #' in A from its nearest point in B.
 #' @export
+#' A = matrix(1:8,ncol=2)
+#' B = matrix(3:16,ncol=2)
+#' d_hausdorf = directedHausdorfDistance(A,B)
 directedHausdorfDistance = function(A,B)
 {
     D = distmat(A,B)
@@ -1339,6 +1355,9 @@ directedMedianDistance =function(A,B)
 #' @return This returns the median distance from the complement
 #' to the subset
 #' @export
+#' S = matrix(1:12,ncol=2)
+#' idx = c(rep(FALSE,3),rep(TRUE,3))
+#' compDist = medianComplementDistance(S,idx)
 medianComplementDistance = function(S,idx)
 {
     ## The complement:
