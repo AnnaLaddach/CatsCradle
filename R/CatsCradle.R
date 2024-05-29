@@ -1111,7 +1111,7 @@ getSeuratSubsetClusteringStatistics = function(fPrime,
 #' distances and zScore gives its z-score.
 #' @export
 #' @examples
-#' S = data.matrix(FetchData(STranspose,c('umap_1','umap_2'))
+#' S = data.matrix(FetchData(STranspose,c('umap_1','umap_2')))
 #' geneSubset = rownames(S) %in% hallmark[[1]]
 #' geneClustering = runGeometricClusteringTrials(S,geneSubset,100)
 runGeometricClusteringTrials = function(S,

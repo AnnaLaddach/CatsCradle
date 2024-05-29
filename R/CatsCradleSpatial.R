@@ -207,8 +207,8 @@ computeNBHDByCTMatrix = function(spatialGraph, cellTypes){
 #' NBHDByCTSeurat = computeNBHDVsCTSeurat(NBHDByCTMatrix)
 computeNBHDVsCTSeurat= function(dataMatrix, resolution = 0.1, 
                                 npcs = 10, n.neighbors = 30L, 
-                                transpose = F,
-                                verbose=T){
+                                transpose = FALSE,
+                                verbose=TRUE){
     dataMatrix = t(dataMatrix)
     NBHDSeurat = CreateSeuratObject(dataMatrix)
     NBHDSeurat[['RNA']]$data = NBHDSeurat[['RNA']]$counts
@@ -297,7 +297,7 @@ getExtendedNBHDs = function(spatialGraph, n){
   for (i in (2:n)){
     writeLines(paste('radius',i))
     graph = merge(neighbours[[i-1]], neighbours[[1]], by.x = "nodeB", 
-                  by.y = "nodeA", allow.cartesian = T)
+                  by.y = "nodeA", allow.cartesian = TRUE)
     graph = graph[,c("nodeA","nodeB.y")]
     names(graph) = c("nodeA","nodeB")
     graph = unique(graph)
@@ -562,7 +562,7 @@ randomiseGraph = function(spatialGraph, maxTries = 1000){
 #' @export
 #' @examples
 #' cellTypesPerCellTypePValues = computeNeighbourEnrichment(delaunayNeighbours, 
-#' clusters, nSim = 10, verbose = F)
+#' clusters, nSim = 10, verbose = FALSE)
 computeNeighbourEnrichment = function(spatialGraph, cellTypes, nSim = 1000,
                                       maxTries = 1000,
                                       verbose=TRUE){
@@ -947,17 +947,17 @@ performLigandReceptorAnalysis = function(obj, spatialGraph, species, clusters,
 #' @export
 #' @examples
 #' ligRecMatrix = makeLRInteractionHeatmap(ligandReceptorResults, 
-#' clusters, colours = colours, labelClusterPairs = F)
+#' clusters, colours = colours, labelClusterPairs = FALSE)
 makeLRInteractionHeatmap = function(ligandReceptorResults,
                                   clusters,
                                   colours = c(),
                                   pValCutoffClusterPair = 0.05, 
                                   pValCutoffLigRec = 0.05,
-                                  labelClusterPairs = T)
+                                  labelClusterPairs = TRUE)
 {
   pValues = as.matrix(ligandReceptorResults$pValues)
-  selectedPValues = pValues[rowMins(pValues, value = T) < pValCutoffClusterPair,
-                                             colMins(pValues, value = T) < pValCutoffLigRec]
+  selectedPValues = pValues[rowMins(pValues, value = TRUE) < pValCutoffClusterPair,
+                                             colMins(pValues, value = TRUE) < pValCutoffLigRec]
   negLog10PValues = -log10(selectedPValues)
   rowAnno = str_split_fixed(rownames(selectedPValues), pattern = "-", 2)
   rowAnno = as.data.frame(rowAnno)
@@ -991,7 +991,7 @@ makeLRInteractionHeatmap = function(ligandReceptorResults,
 #' @examples 
 #' cellTypePerCellTypeLigRecMatrix = 
 #' makeSummedLRInteractionHeatmap(ligandReceptorResults, clusters, "mean")
-makeSummedLRInteractionHeatmap = function(ligandReceptorResults, clusters, type, logScale = T){ 
+makeSummedLRInteractionHeatmap = function(ligandReceptorResults, clusters, type, logScale = TRUE){ 
   if (type == "total"){
     interactionsByCluster = ligandReceptorResults$totalInteractionsByCluster
   } 
@@ -1186,7 +1186,7 @@ aggregateSeuratGeneExpression = function(f,neighbourhoods,verbose=TRUE)
 aggregateFeatureMatrix = function(M, nbhdList, aggregateFunction)
 {
     cells = colnames(M)
-    res = lapply(cells, function(x, M, nbhdList) aggregateFunction(M[,nbhdList[[x]], drop = F]), 
+    res = lapply(cells, function(x, M, nbhdList) aggregateFunction(M[,nbhdList[[x]], drop = FALSE]), 
                  M = M, nbhdList = nbhdList)
     
     aggrM = do.call(cbind, res)
@@ -1238,7 +1238,7 @@ computeMoransI = function(M,nbhdList){
 #' layer = "data", nSim = 10, verbose = FALSE)
 
 runMoransI = function(obj, spatialGraph, assay = "RNA", layer = "data",
-                      nSim = 100, verbose = T){
+                      nSim = 100, verbose = TRUE){
   spatialGraph = symmetriseNN(spatialGraph)
   
   M = as.matrix(LayerData(obj, assay = assay, layer = layer))
@@ -1260,7 +1260,7 @@ runMoransI = function(obj, spatialGraph, assay = "RNA", layer = "data",
   pValues = abs((simResults - nSim)/nSim) 
   pValues = pmax(pValues, (1/nSim))
   results = cbind(moransI, pValues)
-  results = results[order(moransI, decreasing = T),]
+  results = results[order(moransI, decreasing = TRUE),]
   results = data.frame(results)
   return(results)
 }
@@ -1282,11 +1282,11 @@ runMoransI = function(obj, spatialGraph, assay = "RNA", layer = "data",
 #' @examples
 #' edgeNeighbours = computeEdgeGraph(delaunayNeighbours)
 
-computeEdgeGraph = function(spatialGraph, selfEdges = F){
+computeEdgeGraph = function(spatialGraph, selfEdges = FALSE){
   spatialGraph = data.table(spatialGraph)
   spatialGraph$edge = paste0(spatialGraph$nodeA, "-", spatialGraph$nodeB)
-  spatialGraphEdgesA = merge(spatialGraph, spatialGraph[,c(1,3)], by = "nodeA", allow.cartesian = T)
-  spatialGraphEdgesB = merge(spatialGraph, spatialGraph[,c(2,3)], by = "nodeB", allow.cartesian = T)
+  spatialGraphEdgesA = merge(spatialGraph, spatialGraph[,c(1,3)], by = "nodeA", allow.cartesian = TRUE)
+  spatialGraphEdgesB = merge(spatialGraph, spatialGraph[,c(2,3)], by = "nodeB", allow.cartesian = TRUE)
   
   spatialGraphEdges = rbind(spatialGraphEdgesA[,c(3,4)],spatialGraphEdgesB[,c(3,4)])
   names(spatialGraphEdges) = c("nodeA","nodeB")
