@@ -1090,6 +1090,8 @@ computeEdgeSeurat = function(ligandReceptorResults, centroids, npcs = 10){
 #' @return a named list with memberships of the neighbourhoods
 #' of cells
 #' @export
+#' @examples 
+#' nbhdsList = nbhdsAsEdgesToNbhdsAsList(delaunayNeighbours)
 nbhdsAsEdgesToNbhdsAsList = function(cells=unique(neighbourhoods$nodeA),
                                      neighbourhoods)
 {
@@ -1120,6 +1122,9 @@ nbhdsAsEdgesToNbhdsAsList = function(cells=unique(neighbourhoods$nodeA),
 #' @return a Seurat object giving total gene expression
 #' in each neighbourhood.
 #' @export
+#' @examples 
+#' agg = aggregateSeuratGeneExpression(smallXenium,extendedNeighbours,
+#' verbose=FALSE)
 aggregateSeuratGeneExpression = function(f,neighbourhoods,verbose=TRUE)
 {
     cells = colnames(f)
@@ -1172,6 +1177,8 @@ aggregateSeuratGeneExpression = function(f,neighbourhoods,verbose=TRUE)
 #' rowMeans)
 #' @return a matrix giving aggregated gene expression for a cell's neighbourhood.
 #' @export
+#' @examples 
+#' aggregateFeatureMatrix = function(M, nbhdList, aggregateFunction)
 aggregateFeatureMatrix = function(M, nbhdList, aggregateFunction)
 {
     cells = colnames(M)
