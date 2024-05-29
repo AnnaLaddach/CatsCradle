@@ -30,3 +30,8 @@ by an n x d matrix and a subset A given by a logical
 and returns the median distance from the complement to
 the given subset.
 }
+\examples{
+S = matrix(1:12,ncol=2)
+idx = c(rep(FALSE,3),rep(TRUE,3))
+compDist = medianComplementDistance(S,idx)
+}

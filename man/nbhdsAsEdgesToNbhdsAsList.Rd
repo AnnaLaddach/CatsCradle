@@ -4,12 +4,12 @@
 \alias{nbhdsAsEdgesToNbhdsAsList}
 \title{nbhdsAsEdgesToNbhdsAsList}
 \usage{
-nbhdsAsEdgesToNbhdsAsList(cells = unique(neighbourhoods$nodeA), neighbourhoods)
+nbhdsAsEdgesToNbhdsAsList(cells, neighbourhoods)
 }
 \arguments{
 \item{cells}{\itemize{
 \item The cells whose neighbourhoods to
-extract.  Defaults to neighbourhoods$nodeA
+extract.
 }}
 
 \item{neighbourhoods}{\itemize{
@@ -26,4 +26,8 @@ of cells
 This function takes a set of neighbourhoods given
 by edges and turns it into a named list giving the
 memberships of each neighbourhood
+}
+\examples{
+cells = unique(c(delaunayNeighbours$nodeA,delaunayNeighbours$nodeB))
+nbhdsList = nbhdsAsEdgesToNbhdsAsList(cells,delaunayNeighbours)
 }

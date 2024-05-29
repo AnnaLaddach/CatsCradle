@@ -44,3 +44,11 @@ e.g., GO, Hallmark, and determines the p-value for
 their overlaps when compared to a set of background
 genes.
 }
+\examples{
+clusterDF = data.frame(gene=colnames(STranspose),
+                       geneCluster=STranspose$seurat_clusters)
+geneSet = instersect(hallmark[[1]],colnames(STranspose))
+pvalueMatrix = geneSetsVsGeneClustersPValueMatrix(geneSet,
+                                              clusterDF,
+                                              colnames(STranspose))
+}

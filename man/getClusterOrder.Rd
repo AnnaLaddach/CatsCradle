@@ -19,3 +19,6 @@ This deals with skullduggery in which seurat_clusters
 has been converted from a factor to a character or a
 numeric.
 }
+\examples{
+geneClusters = getClusterOrder(STranspose)
+}

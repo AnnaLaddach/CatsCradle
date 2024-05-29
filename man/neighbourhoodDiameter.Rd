@@ -26,3 +26,8 @@ This function takes a list of neighbourhoods and and the
 centroids of the cells and finds their diameters, i.e.,
 for each neighbourhood, the maximum distance between.
 }
+\examples{
+cells = unique(c(delaunayNeighbours$nodeA,delaunayNeighbours$nodeB))
+nbhds = nbhdsAsEdgesToNbhdsAsList(cells,delaunayNeighbours)
+diameters = neighbourhoodDiameter(nbhds[1:100],centroids)
+}

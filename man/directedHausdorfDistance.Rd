@@ -24,3 +24,8 @@ in A from its nearest point in B.
 \description{
 This finds the directed Hausdorf distance from A to B
 }
+\examples{
+A = matrix(1:8,ncol=2)
+B = matrix(3:16,ncol=2)
+d_hausdorf = directedHausdorfDistance(A,B)
+}

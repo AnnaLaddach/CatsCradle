@@ -36,3 +36,6 @@ each point represents an edge between cells, and spatial coordinates are the
 centroids of edges between cells. The "expression matrix" is the
 binarised presence/absence of an interaction (ligand receptor pair) on an edge.
 }
+\examples{
+edgeSeurat = computeEdgeSeurat(ligandReceptorResults, centroids)
+}

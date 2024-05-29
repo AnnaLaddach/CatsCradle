@@ -37,3 +37,7 @@ matrix of total ligand receptor interactions that underlies the heatmap.
 This function takes ligandReceptorResults and plots a heatmap of the total
 number of ligand receptor interactions between clusters.
 }
+\examples{
+cellTypePerCellTypeLigRecMatrix = 
+makeSummedLRInteractionHeatmap(ligandReceptorResults, clusters, "mean")
+}

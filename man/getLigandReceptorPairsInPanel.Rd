@@ -38,3 +38,6 @@ and a ligand receptor network and subsets the ligand
 receptor network to those pairs that occur in the
 panel
 }
+\examples{
+lrPairs = getLigandReceptorPairsInPanel(smallXenium, "mouse")
+}
