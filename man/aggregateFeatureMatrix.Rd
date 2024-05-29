@@ -34,6 +34,3 @@ and a neighbourhood list, and creates an matrix where columns are the
 neighbourhoods, the rows are are the features and the values are aggregated
 expression values for cells in each neighbourhood.
 }
-\examples{
-aggregateFeatureMatrix = function(M, nbhdList, aggregateFunction)
-}
