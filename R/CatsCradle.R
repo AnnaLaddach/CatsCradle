@@ -297,9 +297,9 @@ orderGeneSetPValues = function(M,ascending=TRUE,cutoff=NULL,nameTag='')
 #' @param disambiguation - used to distinguish between
 #' the row names and the column names if these overlap
 #' @param fontSize - defaults to 20
-#' @param minus - color to use for links with negative
+#' @param minus - colour to use for links with negative
 #' values
-#' @param plus - color for positive values
+#' @param plus - colour for positive values
 #' @param height - height in pixels, defaults to 1200
 #' @param width - width in pixels, defaults to 900
 #' @return A sankey graph
@@ -340,7 +340,7 @@ sankeyFromMatrix = function(M,disambiguation=c('R_','C_'),
   links = data.frame(source,target,value,
                      stringsAsFactors=FALSE)
   
-  ## Color the links DF:
+  ## Colour the links DF:
   idx = links$value >= 0
   links$group = ''
   links$group[idx] = 'plus'
@@ -356,14 +356,14 @@ sankeyFromMatrix = function(M,disambiguation=c('R_','C_'),
   links$IDsource = match(links$source,nodes$name) - 1
   links$IDtarget = match(links$target,nodes$name) - 1
   
-  linkColor = 'd3.scaleOrdinal() .domain(["minus","plus"]) .range(["X", "Y"])'
-  linkColor = str_replace(linkColor,'X',minus)
-  linkColor = str_replace(linkColor,'Y',plus)  
+  linkColour = 'd3.scaleOrdinal() .domain(["minus","plus"]) .range(["X", "Y"])'
+  linkColour = str_replace(linkColour,'X',minus)
+  linkColour = str_replace(linkColour,'Y',plus)  
   
   
   p = sankeyNetwork(Links = links, Nodes = nodes, Source = "IDsource", Target = "IDtarget", 
                     Value = "value", NodeID = "name", 
-                    colourScale=linkColor,
+                    colourScale=linkColour,
                     LinkGroup="group",
                     fontSize=fontSize,
                     height=height,
