@@ -377,7 +377,7 @@ computeCellTypesPerCellTypeMatrix = function(nbhdByCellType,cellTypes)
 #' however, that this matrix may need to be reduced to a square matrix
 #' as the matrix produced from a subset object may be missing certain
 #' cell types as rows.
-#' @param colors - a named vector of colors used to color the
+#' @param colours - a named vector of colours used to colour the
 #' vertices of the graph.  The names are the seurat_clusters
 #' as character strings.
 #' @param selfEdges - a logical which determines whether to include
@@ -396,15 +396,15 @@ computeCellTypesPerCellTypeMatrix = function(nbhdByCellType,cellTypes)
 #' the cell types and whose arrows indicate "ownership" of
 #' cells of the target type by neighbourhoods of cells of the
 #' source type.  Layout is done witht the FR algorithm and
-#' coordinates are found in G$coords.  If colors were supplied
+#' coordinates are found in G$coords.  If colours were supplied
 #' these are found in V(G)$color.  Edge weights and widths are
 #' found in E(G)$weight and E(G)$width.
 #' @export
 #' @examples
 #' G = cellTypesPerCellTypeGraphFromCellMatrix(cellTypesPerCellTypeMatrix, 
-#' minWeight = 0.05, colors = colours)
+#' minWeight = 0.05, colours = colours)
 cellTypesPerCellTypeGraphFromCellMatrix = function(M,
-                                               colors=NULL,
+                                               colours=NULL,
                                                selfEdges=FALSE,
                                                minWeight=0,
                                                edgeWeighting=20,
@@ -421,14 +421,14 @@ cellTypesPerCellTypeGraphFromCellMatrix = function(M,
                                     weighted=TRUE,
                                     diag=selfEdges)
 
-    if(! is.null(colors))    
-        V(G)$color = colors[names(V(G))]
+    if(! is.null(colours))    
+        V(G)$color = colours[names(V(G))]
     G$coords = layout_with_fr(G)
     E(G)$width = edgeWeighting * E(G)$weight
 
     if(plotGraph)
     {
-        if(! is.null(colors))
+        if(! is.null(colours))
             plot(G,
                  layout=G$coords,
                  vertex.color=V(G)$color,
@@ -458,7 +458,7 @@ cellTypesPerCellTypeGraphFromCellMatrix = function(M,
 #' cell types, and whose entries are counts.
 #' @param clusters - a named vector whose names are the cells
 #' and whose entries are their seurat_clusters.
-#' @param colors - a named vector of colors used to color the
+#' @param colours - a named vector of colours used to colour the
 #' vertices of the graph.  The names are the seurat_clusters
 #' as character strings.
 #' @param selfEdges - a logical which determines whether to include
@@ -477,13 +477,13 @@ cellTypesPerCellTypeGraphFromCellMatrix = function(M,
 #' the cell types and whose arrows indicate "ownership" of
 #' cells of the target type by neighbourhoods of cells of the
 #' source type.  Layout is done witht the FR algorithm and
-#' coordinates are found in G$coords.  If colors were supplied
+#' coordinates are found in G$coords.  If colours were supplied
 #' these are found in V(G)$color.  Edge weights and widths are
 #' found in E(G)$weight and E(G)$width. 
 #' @export
 cellTypesPerCellTypeGraphFromNbhdMatrix = function(nbhdByCellType,
                                      clusters,
-                                     colors=NULL,
+                                     colours=NULL,
                                      selfEdges=FALSE,
                                      minWeight=0,
                                      edgeWeighting=20,
@@ -494,7 +494,7 @@ cellTypesPerCellTypeGraphFromNbhdMatrix = function(nbhdByCellType,
 {
     M = cellTypesPerCellTypeMatrix(nbhdByCellType,clusters)
     G = cellTypesPerCellTypeGraphFromCellMatrix(M,
-                                            colors=colors,
+                                            colours=colours,
                                             selfEdges=selfEdges,
                                             minWeight=minWeight,
                                             edgeWeighting=edgeWeighting,
@@ -926,8 +926,8 @@ performLigandReceptorAnalysis = function(obj, spatialGraph, species, clusters,
 #' @param ligandReceptorResults - as returned by performLigandReceptorAnalysis()
 #' @param clusters - named vector of cell types where names are each cell and
 #' clusters are a factor
-#' @param colors - a named list of colors where names are clusters. If not 
-#' specified the default pheatmap color scheme will be used.
+#' @param colours - a named list of colours where names are clusters. If not 
+#' specified the default pheatmap colour scheme will be used.
 #' @param  pValCutoffClusterPair - a cutoff for showing interactions between two
 #' clusters. A cluster pair must have at least one ligand-receptor interaction
 #' pvalue <  pValCutoffClusterPair. Defaults to 0.05.
@@ -941,7 +941,7 @@ performLigandReceptorAnalysis = function(obj, spatialGraph, species, clusters,
 #' @export
 makeLRInteractionHeatmap = function(ligandReceptorResults,
                                   clusters,
-                                  colors = c(),
+                                  colours = c(),
                                   pValCutoffClusterPair = 0.05, 
                                   pValCutoffLigRec = 0.05,
                                   labelClusterPairs = T)
@@ -956,9 +956,9 @@ makeLRInteractionHeatmap = function(ligandReceptorResults,
   rowAnno$sender = factor(rowAnno$sender, levels = levels(clusters))
   rowAnno$receiver = factor(rowAnno$receiver, levels = levels(clusters))
   rownames(rowAnno) = rownames(selectedPValues)
-  if (length(colors) > 0){
-  pheatmap(negLog10PValues, annotation_row = rowAnno, annotation_colors = list("sender" = colors, 
-                                                                    "receiver" = colors),
+  if (length(colours) > 0){
+  pheatmap(negLog10PValues, annotation_row = rowAnno, annotation_colors = list("sender" = colours, 
+                                                                    "receiver" = colours),
            show_rownames = labelClusterPairs)
   } else{
     pheatmap(negLog10PValues, annotation_row = rowAnno, show_rownames = labelClusterPairs)
