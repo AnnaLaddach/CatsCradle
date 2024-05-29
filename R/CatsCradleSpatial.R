@@ -1183,7 +1183,6 @@ aggregateSeuratGeneExpression = function(f,neighbourhoods,verbose=TRUE)
 #' rowMeans)
 #' @return a matrix giving aggregated gene expression for a cell's neighbourhood.
 #' @export
-#' aggregateFeatureMatrix = function(M, nbhdList, aggregateFunction)
 aggregateFeatureMatrix = function(M, nbhdList, aggregateFunction)
 {
     cells = colnames(M)
