@@ -43,15 +43,15 @@ ImageDimPlot(smallXenium, cols = "polychrome", size = 1)
 
 We will want to answer questions like the following:
 
-Is the expression of particular genes localised?  Who are the
+Is the expression of a particular gene localised?  Who are the
 immediate neighbours of a given cell?  Do certain types of cells tend
-to co-locate?  Is the association of two cell types, (say, glia and
-macrophages) statistically significant?  For any pair of neighbouring
-cells, are they engaged ligand-repceptor interaction?  Can we classify
-the different types of tissue neighbourhoods?  Are different
-neighbourhood types characterised by the cell types in them?  The
-genes expressed in them?  The ligand-receptor interactions taking
-place in them?
+to co-localise?  Is the spatial association of two cell types, (say,
+glia and macrophages) statistically significant?  For any pair of
+neighbouring cells, are they engaged in ligand-repceptor interactions?
+Can we classify different types of tissue neighbourhoods?  Are
+different neighbourhood types characterised by the cell types found in
+them?  The genes expressed in them?  The ligand-receptor interactions
+taking place in them?
 
 
 ### Neighbourhoods
@@ -74,7 +74,7 @@ head(delaunayNeighbours)
 ```
 
 Two cells are neighbours if they appear on the same row.  The
-neighbourhood of the cell 16307 consists of the following 7 cells
+neighbourhood of the cell 16307 consists of the following 7 cells:
 
 ```{r}
 idx = (delaunayNeighbours$nodeA == 16307 |
@@ -84,18 +84,19 @@ nbhd = unique(c(delaunayNeighbours$nodeA[idx],
 nbhd		
 ```
 
-We can compute extended neighbourhoods by consider (say) each cells
+We can compute extended neighbourhoods by considering (say) each cell's
 neighbours, their neighbours, their neighbours and their neighbours.
 Here we have such an extended neighbourhood as a list and again as a
 data frame with each row giving a pair of cells in a common extended
-neighbourhood.
+neighbourhood.  In this case we are building an extended neighbourhood
+of combinatorial radius 4.
 
 ```{r}
 extendedNeighboursList = getExtendedNBHDs(delaunayNeighbours, 4)
 extendedNeighbours = collapseExtendedNBHDs(extendedNeighboursList, 4)
 ```
 
-Now the extended neighbourhood of  cell 16307 consists of 92 cells.
+Now the extended neighbourhood of  cell 16307 consists of 92 cells:
 
 ```{r}
 idx = (extendedNeighbours$nodeA == 16307 |
@@ -118,7 +119,7 @@ is that while the Delaunay triangulation might be more appropriate for
 looking at cell to cell interactions involving direct contact,
 extended neighbourhoods might be more appropriate for studying
 interactions based on diffusible ligands.  The second is that when we
-go to characterise the _types_ of neighbourhoods, these extended
+go on to characterise _types_ of neighbourhoods, these extended
 neighbourhoods exhibit less noise.
 
 
@@ -130,13 +131,13 @@ neighbourhood also expresses genes.  That is, for each neighbourhood,
 we can compute the total gene expression across all the cells in that
 neighbourhood.
 
-Our exposition will focus on the first viewpoint.  This is not because
-we think the first viewpoint is more important or because we
+In this vignette we will focus on the first viewpoint.  This is not
+because we think the first viewpoint is more important or because we
 necessarily expect it to be more fruitful.  It's because the second
 viewpoint so directly parallels standard Seurat single cell
-transcriptomics analyses.  So before we move on to the neighbourhoods
-/ cell types viewpoint, we give an overview of the neighbourhoods /
-aggregate gene expression viewpoint.
+transcriptomics analyses that it requires less explanation.  So before
+we move on to the neighbourhoods / cell types viewpoint, we give an
+overview of the neighbourhoods / aggregate gene expression viewpoint.
 
 ### Neighbourhoods as characterised by gene expression
 
@@ -156,10 +157,10 @@ Since neighbourhoods here are indexed by individual cells, the
 neighbourhood gene aggregation Seurat object is formally identical to
 a standard Seurat object.  In particular, this allows the standard
 sorts of analyses including clustering of neighbourhoods into types;
-dimension reduction using PCA, UMAP, tSNE; discovery a marker genes
+dimension reduction using PCA, UMAP, tSNE; discovery of marker genes
 for each neighbourhood type; plotting of aggregate gene expression on
 neighbourhood UMAP; use of CatsCradle to discover novel clustering of
-genes based on their expression across the different neighbourhoods
+genes based on their expression across the different neighbourhoods.
 
 
 ## Neighbourhoods as characterised by cell types
@@ -236,13 +237,16 @@ Let's do the same for our extended nighbourhoods.
 ```{r}
 cellTypesPerCellTypeMatrixExtended = computeCellTypesPerCellTypeMatrix(NBHDByCTMatrixExtended,clusters)
 
-cellTypesPerCellTypeGraphFromCellMatrix(cellTypesPerCellTypeMatrixExtended, minWeight = 0.05, colours = colours)
-```
-We can also calculate p values (upper tail, one-sided) for whether cell types are more 
-commonly neighbours than expected by chance. To do this we compare the actual 
-spatial neighbour graph to randomised spatial neighbour graphs where edges are randomised but 
-the degree of each vertice is preserved. As this is carried out on the level of 
-counts of undirected edges between celltypes the p value matrix is symmetric.
+cellTypesPerCellTypeGraphFromCellMatrix(cellTypesPerCellTypeMatrixExtended,
+minWeight = 0.05, colours = colours) ```
+
+We can also calculate p values (upper tail, one-sided) for whether
+cell types are more commonly neighbours than expected by chance. To do
+this we compare the actual spatial neighbour graph to randomised
+spatial neighbour graphs where edges are randomised but the degree of
+each vertice is preserved. As this is carried out on the level of
+counts of undirected edges between celltypes the p value matrix is
+symmetric.
 
 ```{r}
 cellTypesPerCellTypePValues = computeNeighbourEnrichment(delaunayNeighbours, 
@@ -283,7 +287,9 @@ DimPlot(NBHDByCTSeurat, group.by = c("neighbourhood_clusters"), cols = "polychro
 ```
 
 
-We can now add information on neighbourhood clusters to our original Xenium object and visualise these on the tissue.
+We can now add information on neighbourhood clusters to our original
+Xenium object and visualise these on the tissue.
+
 
 ```{r}
 smallXenium$NBHDCluster = NBHDByCTSeurat@active.ident
@@ -305,7 +311,10 @@ Visualise extended neighbourhood clusters.
 DimPlot(NBHDByCTSeuratExtended, group.by = c("cellType"), cols = "polychrome", reduction = "umap")
 DimPlot(NBHDByCTSeuratExtended, group.by = c("neighbourhood_clusters"), cols = "polychrome", reduction = "umap")
 ```
-We can now add information on neighbourhood clusters to our original Xenium object and visualise these on the tissue.
+
+We can now add information on extended neighbourhood clusters to our
+original Xenium object and visualise these on the tissue.
+
 ```{r}
 smallXenium$NBHDClusterExtended= 
   NBHDByCTSeuratExtended@active.ident
@@ -369,13 +378,13 @@ sankeyFromMatrix(CTByNBHDClusterExtended)
 
 ## Analysing cell types based on their neighbourhoods
 
-Now we perform dimensionality and clustering of cell types, based on the 
+Now we perform dimensionality reduction and clustering of cell types, based on the 
 neighbourhoods they are found in. Note that this is based on the transpose of 
 the matrix used in the previous section.
 
-First we create a seurat object for a cell type by neighbourhood matrix (the 
+First we create a Seurat object for a cell type by neighbourhood matrix (the 
 transposed NBHDByCTMatrix). Here we have a 
-large feature space (numbers of cells) however low number of observations 
+large feature space (number of cells) however a low number of observations 
 (number of cell types). Therefore we compute the UMAP using PCs, however due to 
 the low number of observations we need to set a lower value for n.neighbours.
 
@@ -392,10 +401,11 @@ DimPlot(CTByNBHDSeurat, group.by = "cellType", cols = "polychrome",
         reduction = "umap", label = T)
 ```
 
-Note how Pyramidal, Pvalb and Lamp5 neurons are located close together indicating
-they are often found in the same neighbourhoods.
+Note how Pyramidal, Pvalb and Lamp5 neurons are located close together
+in UMAP space indicating they are often found in the same
+neighbourhoods.
 
-We can also compute a graph embedding.
+We can also compute a force-directed graph embedding.
 
 ```{r}
 CTByNBHDSeurat= computeGraphEmbedding(CTByNBHDSeurat)
@@ -411,7 +421,7 @@ ImageDimPlot(smallXenium, cols = "polychrome", size = 1)
 ```
 
 
-Clustering cell types using the Louvain algorithm achaeives only one cluster. 
+Clustering cell types using the Louvain algorithm acheives only one cluster. 
 Let's try hierachical clustering.
 ```{r}
 pca = Embeddings(CTByNBHDSeurat, reduction = "pca")
@@ -424,7 +434,7 @@ CTClust = cutree(res$tree_row, k = 11)
 CTByNBHDSeurat$neighbourhood_clusters = factor(CTClust)
 ```
 
-Lets look at the celltype composition of these clusters.
+Let's look at the celltype composition of these clusters.
 ```{r}
 CTComposition = table(CTByNBHDSeurat$cellType, CTByNBHDSeurat$neighbourhood_clusters)
 pheatmap(CTComposition)
@@ -456,7 +466,7 @@ sankeyFromMatrix(averageExpMatrix)
 Given a neighbour graph describing the spatial relationships between cells, 
 we can compute spatial autocorrelation (here we use Moran's I). This describes
 how clustered gene expression values are in space. We derive an upper tail p 
-value based on simulations where expression values for genes are permuted. N.B 
+value based on permutation testing where expression values for genes are permuted. N.B 
 in this implementation equal weights are given to all neighbours of a cell.
 
 ```{r}
@@ -473,19 +483,20 @@ Look at least spatially autocorrelated genes.
 tail(moransI)
 ```
 
-Visualise most spatially autocorrelated gene.
+Here we visualise the most spatially autocorrelated gene.
 ```{r}
 ImageFeaturePlot(smallXenium, "Nwd2")
 ```
 
-Visualise least spatially autocorrelated gene.
+Here we visualise the least spatially autocorrelated gene.
 ```{r}
 ImageFeaturePlot(smallXenium, "Trbc2")
 ```
 
-We can compute a p-value for the localisation of gene expression using
-medianComplementPValue() which is described in the vignette
+We can also compute a p-value for the localisation of gene expression
+using medianComplementPValue() which is described in the vignette
 [CatsCradle](doc/CatsCradleQuickStart.html).
+
 
 ```{r eval = FALSE}
 ## We need the coordinates as a matrix:
@@ -509,17 +520,17 @@ spatial graph, i.e. between neighbouring cells, where cell A expresses
 a ligand and cell B expresses a receptor. Note that the distance
 between cell A and cell B will vary depending on how the graph has
 been constructed, larger distances may be desired for analyses
-involving diffusable ligands and receptors. We also analyse the number
+involving diffusable ligands. We also analyse the number
 of ligand receptor interactions that occur between cells from the same
 cluster and between cells from different clusters. Note that clusters
 may represent cell type, or another property of the cells such as
 their neighbourhood type. We leave this for the user to decide. We
 then calculate how frequently the number of ligand-receptor
 interactions observed between/within clusters is higher than in
-simulated data, this allows us to assign a pvalue for the enrichment
+simulated data - this allows us to assign a pvalue for the enrichment
 of these interactions.
 
-Here we perform interaction analysis:
+
 ```{r}
 ligandReceptorResults = performLigandReceptorAnalysis(smallXenium, delaunayNeighbours, 
                                                 "mouse", clusters,verbose=FALSE)
@@ -529,7 +540,7 @@ ligandReceptorResults = performLigandReceptorAnalysis(smallXenium, delaunayNeigh
 We look at interactions on edges.  For concision, we display the
 first six of our 28 ligand-receptor pairs.  Since ligand-receptor
 interactions are directed, each undirected edge will show up both as
-cell A - cell B and cell B - cell A.
+cell A - cell B and as cell B - cell A.
 ```{r}
 head(ligandReceptorResults$interactionsOnEdges[,1:10],10)
 ```
@@ -568,8 +579,10 @@ Make a heatmap of total ligand-receptor interactions between clusters.
 cellTypePerCellTypeLigRecMatrix = makeSummedLRInteractionHeatmap(ligandReceptorResults, clusters, "total")
 ```
 
-Make a heatmap of summed mean ligand/receptor interactions between clusters (sum of all ligand 
-receptor interactions on A-B edges)/(total A-B edges)
+Make a heatmap of summed mean ligand/receptor interactions between
+clusters i.e., (sum of all ligand receptor interactions on A-B edges)/(total
+A-B edges)
+
 ```{r}
 cellTypePerCellTypeLigRecMatrix = makeSummedLRInteractionHeatmap(ligandReceptorResults, clusters, "mean", logScale = T)
 ```
@@ -592,7 +605,17 @@ cellTypesPerCellTypeGraphFromCellMatrix(cellTypePerCellTypeLigRecMatrix/scaleFac
                                     minWeight = 0.4/scaleFactor, colours = colours)
 ```
 
-Create a Seurat object where each point represents an edge between cells, and spatial coordinates are the centroids of edges between cells. The "expression matrix" is the binarised presence/absence of an interaction (ligand receptor pair) on an edge. This is useful for visualising where ligand receptor interactions occur spatially.
+### Visualising ligand-receptor interactions: Seurat objects of edges
+
+We wish to create a Seurat object where the points are edges between
+cells as a way of visualising ligand-receptor interactions.  Since
+these interactions are asymmetric we need to consider directed edges.
+We will place the spatial coordinates of the edges A-B and B-A
+slightly separate but both between the centroids of cells A and B. The
+"expression matrix" is the binarised presence/absence of an
+interaction (ligand receptor pair) on an edge. This is useful for
+visualising where ligand receptor interactions occur spatially.
+
 ```{r}
 edgeSeurat = computeEdgeSeurat(ligandReceptorResults, centroids)
 ```
@@ -603,15 +626,22 @@ For example we can visualise the Pdyn-Npy2r interaction.
 ImageFeaturePlot(edgeSeurat, features = "Pdyn-Npy2r")
 ```
 
+In principle, the edge Seurat object allows for the computation of an
+edge UMAP and Louvain clustering of the edges based on ligand-receptor
+interaction.  However some of these analyses are computationally
+expensive due to large number of edges.
+
+
+### Spatial autocorrelation of ligand-receptor interactions
 
 We can compute a spatial graph where edges in the original delaunayNeighbours 
 become nodes and A-B edges (in the original graph) become connected to all 
-A- edges and all B- edges. This allows us to perfom graph-based associated with 
+A- edges and all B- edges. This allows us to perfom graph-based
+analyses associated with 
 the spatial localisation of ligand receptor pairs on edges.  
 ```{r}
 edgeNeighbours = computeEdgeGraph(delaunayNeighbours)
 ```
-
 
 Compute Moran's I for the spatial autocorrelation of ligand-receptor interactions.
 ```{r}
@@ -639,3 +669,4 @@ View ligand-receptor interaction with the lowest spatial autocorrelation (Moran'
 ```{r}
 ImageFeaturePlot(edgeSeurat, "Sst-Gpr17")
 ```
+
