@@ -558,7 +558,7 @@ randomiseGraph = function(spatialGraph, maxTries = 1000){
 #' @export
 #' @examples
 #' cellTypesPerCellTypePValues = computeNeighbourEnrichment(delaunayNeighbours, 
-#' clusters, verbose = F)
+#' clusters, nSim = 10, verbose = F)
 computeNeighbourEnrichment = function(spatialGraph, cellTypes, nSim = 1000,
                                       maxTries = 1000,
                                       verbose=TRUE){
@@ -621,6 +621,8 @@ getLigandReceptorNetwork = function(species)
 #' @return This returns a data frame with columns ligand and
 #' receptor
 #' @export
+#' @examples 
+#' lrPairs = getLigandReceptorPairsInPanel(smallXenium, "mouse")
 getLigandReceptorPairsInPanel = function(obj,species,
                                          lrn = getLigandReceptorNetwork(species))
 {
@@ -669,7 +671,6 @@ getLigandReceptorPairsInPanel = function(obj,species,
 #' corresponding to a ligand-receptor pair telling whether the ligand
 #' is expressed in the first cell and the receptor is expressed in the
 #' second cell.
-#' @export
 getInteractionsOnEdges = function(M,pairDF,spatialGraph)
 {
   ## Find the interactions on the edges:
@@ -839,7 +840,8 @@ annotateLRInteractionCounts = function(interactionCounts,obj,nbhdObj)
 #' frequently between 2 clusters than expected.
 #' @export
 #' @examples performLigandReceptorAnalysis(smallXenium, delaunayNeighbours, 
-#'                                       "mouse", clusters,verbose=FALSE)
+#'                                       "mouse", clusters, nSim = 10,
+#'                                        verbose=FALSE)
 
 performLigandReceptorAnalysis = function(obj, spatialGraph, species, clusters,
                                       nSim = 1000, 
@@ -938,6 +940,9 @@ performLigandReceptorAnalysis = function(obj, spatialGraph, species, clusters,
 #' @import pheatmap
 #' @return matrix of -log10(pvalues) that underlies the heatmap.
 #' @export
+#' @examples ligRecMatrix = makeLRInteractionHeatmap(ligandReceptorResults, 
+#' clusters, colours = colours, labelClusterPairs = F)
+#' 
 makeLRInteractionHeatmap = function(ligandReceptorResults,
                                   clusters,
                                   colours = c(),
@@ -978,6 +983,9 @@ makeLRInteractionHeatmap = function(ligandReceptorResults,
 #' @import pheatmap
 #' @return matrix of total ligand receptor interactions that underlies the heatmap.
 #' @export
+#' @examples 
+#' cellTypePerCellTypeLigRecMatrix = 
+#' makeSummedLRInteractionHeatmap(ligandReceptorResults, clusters, "mean")
 makeSummedLRInteractionHeatmap = function(ligandReceptorResults, clusters, type, logScale = T){ 
   if (type == "total"){
     interactionsByCluster = ligandReceptorResults$totalInteractionsByCluster
@@ -1030,7 +1038,8 @@ makeSummedLRInteractionHeatmap = function(ligandReceptorResults, clusters, type,
 #' centroids of edges between cells. The "expression matrix" is the 
 #' binarised presence/absence of an interaction (ligand receptor pair) on an edge. 
 #' @export
-
+#' @examples 
+#' edgeSeurat = computeEdgeSeurat(ligandReceptorResults, centroids)
 computeEdgeSeurat = function(ligandReceptorResults, centroids, npcs = 10){
   interactionsOnEdges = ligandReceptorResults$interactionsOnEdges
   rownames(interactionsOnEdges) = paste0(interactionsOnEdges$nodeA, "-", interactionsOnEdges$nodeB)
@@ -1213,6 +1222,9 @@ computeMoransI = function(M,nbhdList){
 #' @import Seurat
 #' @return a dataframe containing Moran's I and p values for each feature.
 #' @export
+#' @examples
+#' moransI = runMoransI(smallXenium, delaunayNeighbours, assay = "SCT", 
+#' layer = "data", nSim = 10, verbose = FALSE)
 
 runMoransI = function(obj, spatialGraph, assay = "RNA", layer = "data",
                       nSim = 100, verbose = T){
@@ -1247,7 +1259,6 @@ runMoransI = function(obj, spatialGraph, assay = "RNA", layer = "data",
 #' This function takes a spatial graph and computes a new spatial graph where
 #' edges become nodes and A-B edges (in the original graph) become connected to
 #' all A- edges and all B- edges. 
-#' 
 #' 
 #' @param spatialGraph - a data frame of neighbouring edge pairs. 
 #' @param selfEdges - a logical determining whether to include self edges. 
