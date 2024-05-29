@@ -205,11 +205,11 @@ interactions. Of note, this graph is directed as, for example, 50% of cell type
 A's interactions might be with cell type B, but only 5% of cell type B's 
 interactions might be with cell type A.   
 ```{r}
-colors = DiscretePalette(length(levels(clusters)), palette = "polychrome")
-names(colors) = levels(clusters)
+colours = DiscretePalette(length(levels(clusters)), palette = "polychrome")
+names(colours) = levels(clusters)
 
 cellTypesPerCellTypeGraphFromCellMatrix(cellTypesPerCellTypeMatrix, 
-                                    minWeight = 0.05, colors = colors)
+                                    minWeight = 0.05, colours = colours)
 ```
 
 Here arrows are directed from rows to columns. Thus, we see an arrow
@@ -231,14 +231,12 @@ library(pheatmap)
 pheatmap(cellTypesPerCellTypeMatrix)
 ```
 
-
-
-Let's do the same for our expanded nighbourhoods.
+Let's do the same for our extended nighbourhoods.
 
 ```{r}
 cellTypesPerCellTypeMatrixExtended = computeCellTypesPerCellTypeMatrix(NBHDByCTMatrixExtended,clusters)
 
-cellTypesPerCellTypeGraphFromCellMatrix(cellTypesPerCellTypeMatrixExtended, minWeight = 0.05, colors = colors)
+cellTypesPerCellTypeGraphFromCellMatrix(cellTypesPerCellTypeMatrixExtended, minWeight = 0.05, colours = colours)
 ```
 We can also calculate p values (upper tail, one-sided) for whether cell types are more 
 commonly neighbours than expected by chance. To do this we compare the actual 
@@ -250,6 +248,8 @@ counts of undirected edges between celltypes the p value matrix is symmetric.
 cellTypesPerCellTypePValues = computeNeighbourEnrichment(delaunayNeighbours, 
                                                      clusters, verbose = F)
 ```
+
+
 
 
 Let's plot -log10(pvalue)
@@ -283,7 +283,7 @@ DimPlot(NBHDByCTSeurat, group.by = c("neighbourhood_clusters"), cols = "polychro
 ```
 
 
-We can now add information on neighbourhood clusters to our original xenium object and visualise these on the tissue.
+We can now add information on neighbourhood clusters to our original Xenium object and visualise these on the tissue.
 
 ```{r}
 smallXenium$NBHDCluster = NBHDByCTSeurat@active.ident
@@ -392,25 +392,31 @@ DimPlot(CTByNBHDSeurat, group.by = "cellType", cols = "polychrome",
         reduction = "umap", label = T)
 ```
 
-
-
-
-
+Note how Pyramidal, Pvalb and Lamp5 neurons are located close together indicating
+they are often found in the same neighbourhoods.
 
 We can also compute a graph embedding.
+
 ```{r}
 CTByNBHDSeurat= computeGraphEmbedding(CTByNBHDSeurat)
 
 DimPlot(CTByNBHDSeurat,group.by = "cellType", cols = "alphabet", reduction = "graph", label = T)
 ```
 
-We achieve only one cluster using the Louvain algorithm. Let's try hierachical 
-clustering.
+From this  11_oligo and 5_Astro appear to be in neighbourhoods distinct from the 
+other cell types. Looking at cell type localisation in the tissue shows that 
+they colocalise.
+```{r}
+ImageDimPlot(smallXenium, cols = "polychrome", size = 1)
+```
+
+
+Clustering cell types using the Louvain algorithm achaeives only one cluster. 
+Let's try hierachical clustering.
 ```{r}
 pca = Embeddings(CTByNBHDSeurat, reduction = "pca")
 res = pheatmap(pca)
 ```
-
 
 Here we decide to cut the tree at the correct level to form 11 clusters.
 ```{r}
@@ -418,7 +424,16 @@ CTClust = cutree(res$tree_row, k = 11)
 CTByNBHDSeurat$neighbourhood_clusters = factor(CTClust)
 ```
 
-Let's investigate how neighbourhood clusters relate to cell type clusters.
+Lets look at the celltype composition of these clusters.
+```{r}
+CTComposition = table(CTByNBHDSeurat$cellType, CTByNBHDSeurat$neighbourhood_clusters)
+pheatmap(CTComposition)
+```
+Although most clusters here are formed of a single cell type, cluster 2
+contains several cell types. We anticipate this analysis may be more informative 
+when performed on a larger tissue area, as some cell types are poorly 
+represented in this subset. To this end we demonstrate how to explore the 
+relationship between neighbourhood clusters and cell type clusters.
 ```{r}
 averageExpMatrix = getAverageExpressionMatrix(NBHDByCTSeurat,
                            CTByNBHDSeurat,
@@ -463,6 +478,11 @@ Visualise most spatially autocorrelated gene.
 ImageFeaturePlot(smallXenium, "Nwd2")
 ```
 
+Visualise least spatially autocorrelated gene.
+```{r}
+ImageFeaturePlot(smallXenium, "Trbc2")
+```
+
 We can compute a p-value for the localisation of gene expression using
 medianComplementPValue() which is described in the vignette
 [CatsCradle](doc/CatsCradleQuickStart.html).
@@ -479,12 +499,6 @@ pValue
 
 Here the p-value is limited by the default number of permutation
 trials used by medianComplementPValue()
-
-
-Visualise least spatially autocorrelated gene.
-```{r}
-ImageFeaturePlot(smallXenium, "Trbc2")
-```
 
 ## Ligand receptor analysis
 
@@ -512,7 +526,7 @@ ligandReceptorResults = performLigandReceptorAnalysis(smallXenium, delaunayNeigh
 ```
 
 
-We look at interactions on edges.  For conscision, we display the
+We look at interactions on edges.  For concision, we display the
 first six of our 28 ligand-receptor pairs.  Since ligand-receptor
 interactions are directed, each undirected edge will show up both as
 cell A - cell B and cell B - cell A.
@@ -525,7 +539,8 @@ Look at total interactions between/within clusters:
 head(ligandReceptorResults$totalInteractionsByCluster[,1:10],10)
 ```
 
-Look at mean interactions per edge between/within clusters:
+Look at mean interactions per edge between/within clusters (sum of ligand 
+receptor interactions on A-B edges)/(total A-B edges):
 ```{r}
 head(ligandReceptorResults$meanInteractionsByCluster[,1:10],10)
 ```
@@ -535,7 +550,7 @@ Look at number of times observed interactions are more frequent than expected:
 head(ligandReceptorResults$simResults[,1:10],10)
 ```
 
-Look at pvalues for the enrichment of interactions.
+Look at pvalues (upper tail) for the enrichment of interactions.
 ```{r}
 head(ligandReceptorResults$pValues,10)
 ```
@@ -545,43 +560,49 @@ Plot a heatmap showing -log10(pvalues) for the enrichment of ligand-receptor
 interactions between pairs of clusters. 
 
 ```{r}
-ligRecMatrix = makeLRInteractionHeatmap(ligandReceptorResults, clusters, colors = colors, labelClusterPairs = F)
+ligRecMatrix = makeLRInteractionHeatmap(ligandReceptorResults, clusters, colours = colours, labelClusterPairs = F)
 ```
 
-
-
-```{r}
-M = makeLRInteractionHeatmap(ligandReceptorResults, clusters, labelClusterPairs = F)
-```
-
-
+Make a heatmap of total ligand-receptor interactions between clusters.
 ```{r}
 cellTypePerCellTypeLigRecMatrix = makeSummedLRInteractionHeatmap(ligandReceptorResults, clusters, "total")
 ```
 
+Make a heatmap of summed mean ligand/receptor interactions between clusters (sum of all ligand 
+receptor interactions on A-B edges)/(total A-B edges)
 ```{r}
 cellTypePerCellTypeLigRecMatrix = makeSummedLRInteractionHeatmap(ligandReceptorResults, clusters, "mean", logScale = T)
 ```
+
+Look at a histogram of values for summed mean ligand/receptor interactions between clusters.
 ```{r}
 hist(cellTypePerCellTypeLigRecMatrix)
 ```
 Visualise in graph format.
 ```{r}
-cellTypesPerCellTypeGraphFromCellMatrix(cellTypePerCellTypeLigRecMatrix/5, 
-                                    minWeight = 0.08, colors = colors)
+cellTypesPerCellTypeGraphFromCellMatrix(cellTypePerCellTypeLigRecMatrix, 
+                                    minWeight = 0.4, colours = colours)
+```
+Here the arrows are very thick - we can scale by a constant factor to improve the
+presentation.
+
+```{r}
+scaleFactor = 3
+cellTypesPerCellTypeGraphFromCellMatrix(cellTypePerCellTypeLigRecMatrix/scaleFactor, 
+                                    minWeight = 0.4/scaleFactor, colours = colours)
 ```
 
-
-Create a Seurat object where each point represents an edge between cells, and spatial coordinates are thecentroids of edges between cells. The "expression matrix" is the binarised presence/absence of an interaction (ligand receptor pair) on an edge. This is useful for visualising where ligand receptor interactions occur spatially.
+Create a Seurat object where each point represents an edge between cells, and spatial coordinates are the centroids of edges between cells. The "expression matrix" is the binarised presence/absence of an interaction (ligand receptor pair) on an edge. This is useful for visualising where ligand receptor interactions occur spatially.
 ```{r}
 edgeSeurat = computeEdgeSeurat(ligandReceptorResults, centroids)
 ```
 
 
-Visualise Penk-Htr1f interaction.
+For example we can visualise the Pdyn-Npy2r interaction.
 ```{r}
-ImageFeaturePlot(edgeSeurat, features = "Penk-Htr1f")
+ImageFeaturePlot(edgeSeurat, features = "Pdyn-Npy2r")
 ```
+
 
 We can compute a spatial graph where edges in the original delaunayNeighbours 
 become nodes and A-B edges (in the original graph) become connected to all 
@@ -618,4 +639,3 @@ View ligand-receptor interaction with the lowest spatial autocorrelation (Moran'
 ```{r}
 ImageFeaturePlot(edgeSeurat, "Sst-Gpr17")
 ```
-

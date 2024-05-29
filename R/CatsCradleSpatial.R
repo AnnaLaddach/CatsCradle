@@ -507,6 +507,37 @@ cellTypesPerCellTypeGraphFromNbhdMatrix = function(nbhdByCellType,
     return(G)
 }
 
+## ####################################################
+#' This function performs degree-preserving randomisation of neighbour graphs. 
+#'
+#' @param spatialGraph - a spatial graph in neighbour list format.
+#' @param maxTries - the maximum number of tries to remove self edges during 
+#' graph randomisation. If self edges are remeining this will be reported.
+#' @return A randomised graph where degree from the original graph is preserved.
+#' @import
+randomiseGraph = function(spatialGraph, maxTries = 1000){
+  n = nrow(spatialGraph)
+  toFlip = sample(1:n, size = round(n/2))
+  simGraph = spatialGraph[toFlip,c(2,1)]
+  names(simGraph) =  c("nodeA","nodeB")
+  simGraph = rbind(simGraph, spatialGraph[!(1:n %in% toFlip),])
+  simGraph[,2] = sample(simGraph[,2])
+  selfEdge = which(simGraph$nodeA == simGraph$nodeB)
+  i = 1
+  while((length(selfEdge) > 0) & (i <= maxTries)){
+    nodeB = simGraph$nodeB
+    simGraph$nodeB[selfEdge] = nodeB[(selfEdge + 1) %% n]
+    simGraph$nodeB[(selfEdge + 1) %% n] = nodeB[selfEdge]
+    selfEdge = which(simGraph$nodeA == simGraph$nodeB)
+    i = i + 1
+  }
+  nSelf = length(selfEdge)
+  if (nSelf > 0){
+    print(paste0(nSelf, " self edges not removed"))
+  }
+  return(simGraph)
+}
+
 
 ## ####################################################
 #' This function calculates P values for whether cell types are more frequently 
@@ -519,29 +550,27 @@ cellTypesPerCellTypeGraphFromNbhdMatrix = function(nbhdByCellType,
 #' cell types are a factor.
 #' @param nSim - the number of randomised graphs to create for pvalue 
 #' calculation.
+#' @param maxTries - the maximum number of tries to remove self edges during 
+#' graph randomisation. If self edges are remeining this will be reported.
 #' @param verbose - whether to print trace.  Defaults to TRUE
 #' @return A square matrix containing upper tail p values describing whether two 
 #' cell types are more frequently found together than expected by chance.
 #' @import abind
 #' @export
-## #' @examples
+#' @examples
+#' cellTypesPerCellTypePValues = computeNeighbourEnrichment(delaunayNeighbours, 
+#' clusters, verbose = F)
 computeNeighbourEnrichment = function(spatialGraph, cellTypes, nSim = 1000,
+                                      maxTries = 1000,
                                       verbose=TRUE){
   results = list()
   spatialGraphOrig = spatialGraph
-  NBHDByCT = computeNBHDByCTMatrix(spatialGraphOrig,cellTypes) 
-  cellTypeMatrix = computeCellTypesPerCellTypeMatrix(NBHDByCT, cellTypes) 
+  NBHDByCTmatrix = computeNBHDByCTMatrix(spatialGraphOrig,cellTypes) 
+  cellTypeMatrix = computeCellTypesPerCellTypeMatrix(NBHDByCTmatrix, cellTypes) 
   for (i in 1:nSim){ 
     spatialGraph = spatialGraphOrig
-    spatialGraphBA = spatialGraph[,c(2,1)]
-    names(spatialGraphBA) = c("nodeA","nodeB")
-    spatialGraph = rbind(spatialGraph,spatialGraphBA)
-    spatialGraph = unique(spatialGraph)
-    spatialGraph[,2] = sample(spatialGraph[,2])
-    spatialGraph[,2] = cellTypes[spatialGraph[,2]]
-    NBHDByCTmatrix = table(spatialGraph[,1],spatialGraph[,2])
-    NBHDByCTmatrix = as.data.frame.matrix(NBHDByCTmatrix)
-    NBHDByCTmatrix = NBHDByCTmatrix[names(cellTypes),]
+    simGraph = randomiseGraph(spatialGraph, maxTries = maxTries)
+    NBHDByCTmatrix = computeNBHDByCTMatrix(simGraph,cellTypes)
     results[[i]] = computeCellTypesPerCellTypeMatrix(NBHDByCTmatrix,cellTypes)
     if (i %% 10 == 0 & verbose){
       writeLines(as.character(i))
@@ -554,10 +583,6 @@ computeNeighbourEnrichment = function(spatialGraph, cellTypes, nSim = 1000,
   results = pmax(results,(1/nSim))
   return(results)
 }
-
-
-
-
 
 
 ## ####################################################
