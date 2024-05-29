@@ -843,7 +843,8 @@ annotateLRInteractionCounts = function(interactionCounts,obj,nbhdObj)
 #' describing whether a particular ligand receptor interaction is observed more 
 #' frequently between 2 clusters than expected.
 #' @export
-#' @examples performLigandReceptorAnalysis(smallXenium, delaunayNeighbours, 
+#' @examples
+#' performLigandReceptorAnalysis(smallXenium, delaunayNeighbours, 
 #'                                       "mouse", clusters, nSim = 10,
 #'                                        verbose=FALSE)
 
@@ -944,9 +945,9 @@ performLigandReceptorAnalysis = function(obj, spatialGraph, species, clusters,
 #' @import pheatmap
 #' @return matrix of -log10(pvalues) that underlies the heatmap.
 #' @export
-#' @examples ligRecMatrix = makeLRInteractionHeatmap(ligandReceptorResults, 
+#' @examples
+#' ligRecMatrix = makeLRInteractionHeatmap(ligandReceptorResults, 
 #' clusters, colours = colours, labelClusterPairs = F)
-#' 
 makeLRInteractionHeatmap = function(ligandReceptorResults,
                                   clusters,
                                   colours = c(),
@@ -1182,7 +1183,6 @@ aggregateSeuratGeneExpression = function(f,neighbourhoods,verbose=TRUE)
 #' rowMeans)
 #' @return a matrix giving aggregated gene expression for a cell's neighbourhood.
 #' @export
-#' @examples 
 #' aggregateFeatureMatrix = function(M, nbhdList, aggregateFunction)
 aggregateFeatureMatrix = function(M, nbhdList, aggregateFunction)
 {
