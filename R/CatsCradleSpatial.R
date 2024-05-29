@@ -514,7 +514,6 @@ cellTypesPerCellTypeGraphFromNbhdMatrix = function(nbhdByCellType,
 #' @param maxTries - the maximum number of tries to remove self edges during 
 #' graph randomisation. If self edges are remeining this will be reported.
 #' @return A randomised graph where degree from the original graph is preserved.
-#' @import
 randomiseGraph = function(spatialGraph, maxTries = 1000){
   n = nrow(spatialGraph)
   toFlip = sample(1:n, size = round(n/2))

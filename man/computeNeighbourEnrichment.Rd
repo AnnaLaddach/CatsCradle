@@ -11,6 +11,7 @@ computeNeighbourEnrichment(
   spatialGraph,
   cellTypes,
   nSim = 1000,
+  maxTries = 1000,
   verbose = TRUE
 )
 }
@@ -29,6 +30,11 @@ cell types are a factor.
 calculation.
 }}
 
+\item{maxTries}{\itemize{
+\item the maximum number of tries to remove self edges during
+graph randomisation. If self edges are remeining this will be reported.
+}}
+
 \item{verbose}{\itemize{
 \item whether to print trace.  Defaults to TRUE
 }}
@@ -42,4 +48,8 @@ This function calculates P values for whether cell types are more frequently
 neighbours than expected by chance. It does this by comparison to randomised
 neighbour graphs where edges are randomised but the degree of each node is
 preserved.
+}
+\examples{
+cellTypesPerCellTypePValues = computeNeighbourEnrichment(delaunayNeighbours, 
+clusters, verbose = F)
 }
