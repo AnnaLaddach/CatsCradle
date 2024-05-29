@@ -39,3 +39,9 @@ Depends:
 LazyData: true
 VignetteBuilder: knitr
 LazyDataCompression: xz
+biocViews:
+    BiologicalQuestion,
+    StatisticalMethod,
+    GeneExpression,
+    SingleCell,
+    Transcriptomics
