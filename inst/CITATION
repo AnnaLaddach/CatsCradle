@@ -1,0 +1,15 @@
+citHeader("To cite CatsCradle in publications use:")
+
+citEntry(
+entry    = "misc",
+title    = 'CatsCradle',
+author   = 'Anna Laddach and Michael Shapiro',
+year     = '2024',
+url      = 'https://github.com/AnnaLaddach/CatsCradle',
+textVersion = paste('Anna Laddach and Michael Shapiro,',
+                    'CatsCradle: an R package for spatial',
+                    'single cell transcriptomics and the',
+                    'clustering and annotation of genes',
+                    'https://github.com/AnnaLaddach/CatsCradle')
+)
+
