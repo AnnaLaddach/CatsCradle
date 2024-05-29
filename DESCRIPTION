@@ -1,6 +1,6 @@
 Package: CatsCradle
 Title: This package discovers gene clusters in Seurat data
-Version: 0.0.0.9000
+Version: 0.99.0
 Authors@R:
     person(given = "Anna",
         family = "Laddach",
