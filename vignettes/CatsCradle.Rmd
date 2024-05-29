@@ -18,8 +18,8 @@ knitr::opts_chunk$set(
 
 ## Introduction
 
-The purpose of this package is to discover and analyse clustering
-among genes in single cell RNASeq data.
+Here we describe the functionality in this package concerned with
+analysing the clustering of genes in single cell RNASeq data.
 
 A typical Seurat single cell analysis starts with an expression matrix
 $M$ where the rows represent genes and the columns represent
@@ -44,8 +44,8 @@ RunUMAP(), FindNeighbors(), and FindClusters().
 ## Exploring CatsCradle
 
 After transposing the usual Seurat object, the genes are now the
-colnames and the individual cells are the rownames.  The Louvain
-clustering of the genes is now encoded in
+columns (samples) and the individual cells are the rows (features).
+The Louvain clustering of the genes is now encoded in
 STranspose$seurat_clusters. As with the cells, we can observe these
 clusters on UMAP, tSNE or PCA.
 
@@ -55,10 +55,10 @@ clusters on UMAP, tSNE or PCA.
 
 We have never seen a use case in which there was a reason to query the
 identities of the individual cells in a UMAP plot.  However, this
-changes with a gene UMAP.  We recommend using plotly to produce a
-browseable version of the gene UMAP.  This allows one to hover over
-the individual points and discover the genes in each cluster. Typical
-code might be
+changes with a gene UMAP as each gene has a distinct (and interesting)
+identity.  We recommend using plotly to produce a browseable version
+of the gene UMAP.  This allows one to hover over the individual points
+and discover the genes in each cluster. Typical code might be
 
 ```{r eval = FALSE}
 library(plotly,quietly=TRUE)
@@ -75,7 +75,7 @@ The question arises as to how to annotate the gene clusters.  Assuming
 you have working annotations for the cell clusters it can be useful to
 examine which cells each of the gene clusters is expressed in.  Here
 we give a heatmap of average expression of each gene cluster (columns)
-across each cell cluster (rows)
+across each cell cluster (rows).
 
 ```{r  eval = FALSE}
 library(pheatmap,quietly=TRUE)
@@ -99,7 +99,7 @@ clusters is in a Sankey graph.  This is a bi-partite graph whose
 vertices are the cell clusters and the gene clusters.  The edges of
 the graph display mean expression as the width of the edge.  One can
 either display all edges with edge weight (width) displaying absolute
-value and color distinguishing up- and down-regulation of expression
+value and colour distinguishing up- and down-regulation of expression
 or display separate Sankey graphs for the up- and down-regulated gene
 sets.  It is these bi-partite graphs that contribute the name
 CatsCradle. Here the up-regulated gene sets are shown in cyan, the
@@ -107,7 +107,7 @@ down-regulated sets in pink.  The image was produced with the
 following code.
 
 ```{r eval = FALSE}
-catsCradle =  = sankeyFromMatrix(averageExpMatrix,
+catsCradle = sankeyFromMatrix(averageExpMatrix,
                               disambiguation=c('cells_','genes_'),
                               plus='cyan',minus='pink',
                               height=800)
@@ -127,10 +127,10 @@ Biologically relevant gene sets often cluster on CatsCradle gene
 UMAPs.  Here we see a UMAP plot showing the gene clusters (by color),
 over-printed with the HALLMARK_G2M_CHECKPOINT that appear in
 STranspose in black.  We see that these are strongly associated with
-gene cluster 8, but also show "satelite clusters" including an
+gene cluster 8, but also show "satellite clusters" including an
 association with cluster 4 and with the border between clusters 0 and
-3.  In our experience, the proliferation gene sets are among the most
-strongly clustered.
+3.  In our experience, proliferation associated gene sets are among
+the most strongly clustered.
 
 ![Hallmark G2M](hallmark_g2m_onUMAP.png){width=6in}
 
@@ -139,15 +139,15 @@ strongly clustered.
 Given a set of points, $S$ and a non-empty proper subset $X \subset S$
 we would like to determine the statistical significance of the degree
 to which $X$ is clustered.  To compute this we ask the opposite
-question: what do would we see if $X$ were randomly chosen.  In this
+question: what would we see if $X$ were randomly chosen?  In this
 case we expect to see $X$ broadly spread out across $S$, i.e., most of
-$S$ should be close to a point of $X$.  In particular we expect the
+$S$ should be close to some point of $X$.  In particular we expect the
 median distance from the complement $S \setminus X$ to $X$ to be low.
 Of course, how low, depends on the size of $X$.  Conversely, if the
 points of $X$ cluster together, we expect much of $S \setminus X$ to
 be further from $X$, at least compared to other sets of the same
 size.  We use a distance function inspired by Hausdorf distance. Give
-as set $X$, for each $s_k \in S \setminus X$, we take $d_k$ to be the
+a set $X$, for each $s_k \in S \setminus X$, we take $d_k$ to be the
 distance from $s_k$ to the nearest point of $X$. We then take the __median
 complement distance__ to be the median of the values $d_k$.  Comparing
 this median complement distance for $X \subset S$ with those for
@@ -161,16 +161,18 @@ stats = getSeuratSubsetClusteringStatistics(STranspose,
                                       g2mGenes,
                                       numTrials=1000)
 ```				      
+
 This uses UMAP as the default reduction and returns the median
-complement distance to the G2M genes in STranspose, and the distances
-for 1000 randomly chosen sets of 56 genes.  It computes a p-value
-based on the rank of the actual distance among the random distances
-and its z-score.  Here we report a p-value of 0.001. However, as can
-be seen from the figure, the actual p-value is lower by many orders of
-magnitude. 
+complement distance to the Hallmark G2M genes in STranspose, and the
+distances for 1000 randomly chosen sets of 56 genes.  It computes a
+p-value based on the rank of the actual distance among the random
+distances and its z-score.  Here we report a p-value of
+0.001. However, as can be seen from the figure, the actual p-value is
+lower by many orders of magnitude.
+
 ![clustering statistics](g2mClusteringStats.png){width=6in}
 
-Here we have shown that statistics for one of the gene sets that is
+Here we have shown the statistics for one of the gene sets that is
 most tightly clustered on UMAP.  However, of the 50 Hallmark gene
 sets 31 cluster with a p-value better than 0.05.
 
@@ -210,7 +212,7 @@ theCombinatoricGenesThemselves = names(combinatoriallyNearbyGenes)
 
 Given a particular gene, it is interesting to look at the annotations
 of nearby genes in the gene Seurat object.  In this context,
-"annotations" might mean GO or Hallmark "nearby" might mean in terms
+"annotations" might mean GO or Hallmark, "nearby" might mean in terms
 of UMAP or PCA coordinates or in the nearest neighbour graph in the
 gene Seurat object.  Here we will look at Hallmark annotations and
 UMAP coordinates.
@@ -232,7 +234,7 @@ annotations of a gene as a vector.
  MycNormalised = annotateGeneAsVector('Myc',hallmark,TRUE)
 ```
 These are named vectors whose names are the Hallmark sets. Myc is a
- 0-1 vector indicated membership.  MycNormalised gives these values
+ 0-1 vector indicating membership.  MycNormalised gives these values
  normalised by the size of the sets in question.  This is appropriate
  when we wish to weight the contributions of nearby genes as they are
  more likely to belong to larger gene sets.

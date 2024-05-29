@@ -238,7 +238,8 @@ Let's do the same for our extended nighbourhoods.
 cellTypesPerCellTypeMatrixExtended = computeCellTypesPerCellTypeMatrix(NBHDByCTMatrixExtended,clusters)
 
 cellTypesPerCellTypeGraphFromCellMatrix(cellTypesPerCellTypeMatrixExtended,
-minWeight = 0.05, colours = colours) ```
+minWeight = 0.05, colours = colours)
+```
 
 We can also calculate p values (upper tail, one-sided) for whether
 cell types are more commonly neighbours than expected by chance. To do
@@ -492,24 +493,6 @@ Here we visualise the least spatially autocorrelated gene.
 ```{r}
 ImageFeaturePlot(smallXenium, "Trbc2")
 ```
-
-We can also compute a p-value for the localisation of gene expression
-using medianComplementPValue() which is described in the vignette
-[CatsCradle](doc/CatsCradleQuickStart.html).
-
-
-```{r eval = FALSE}
-## We need the coordinates as a matrix:
-cellCoords = data.matrix(centroids[,1:2])
-Nwd2 = FetchData(smallXenium,'Nwd2')
-## We need to threshold gene expression:
-Nwd2 = Nwd2[,1] > 0.01
-pValue = medianComplementPValue(coords,Nwd2)
-pValue
-```
-
-Here the p-value is limited by the default number of permutation
-trials used by medianComplementPValue()
 
 ## Ligand receptor analysis
 
