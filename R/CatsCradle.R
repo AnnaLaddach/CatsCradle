@@ -1388,6 +1388,9 @@ medianComplementDistance = function(S,idx)
 #' this returns a list giving the p-value, the actual complement distance
 #' and the random complement distances.
 #' @export
+#' S = data.matrix(FetchData(STranspose,c('umap_1','umap_2')))
+#' idx = colnames(STranspose) %in% hallmark[[1]]
+#' mcpv = medianComplementPValue(S,idx,numTrials=100)
 medianComplementPValue = function(S,idx,numTrials=1000,returnTrials=FALSE)
 {
     actual = medianComplementDistance(S,idx)
