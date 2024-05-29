@@ -137,6 +137,10 @@ extractCells = function(NN)
 #' of the list neighbourhoods and the values are the
 #' maximum distance within each neighbourhood
 #' @export
+#' @examples
+#' cells = unique(c(delaunayNeighbours$nodeA,delaunayNeighbours$nodeB))
+#' nbhds = nbhdsAsEdgesToNbhdsAsList(cells,delaunayNeighbours)
+#' diameters = neighbourhoodDiameter(nbhds[1:100],centroids)
 neighbourhoodDiameter = function(neighbourhoods,centroids)
 {
   rownames(centroids) = centroids$cell
@@ -1083,16 +1087,17 @@ computeEdgeSeurat = function(ligandReceptorResults, centroids, npcs = 10){
 #' memberships of each neighbourhood
 #'
 #' @param cells - The cells whose neighbourhoods to
-#' extract.  Defaults to neighbourhoods$nodeA
+#' extract. 
 #' @param neighbourhoods - neighbourhoods given as a
 #' data frame with columns nodeA and nodeB, for example
 #' the output of collapseNeighbourhoods
 #' @return a named list with memberships of the neighbourhoods
 #' of cells
 #' @export
-#' @examples 
-#' nbhdsList = nbhdsAsEdgesToNbhdsAsList(delaunayNeighbours)
-nbhdsAsEdgesToNbhdsAsList = function(cells=unique(neighbourhoods$nodeA),
+#' @examples
+#' cells = unique(c(delaunayNeighbours$nodeA,delaunayNeighbours$nodeB))
+#' nbhdsList = nbhdsAsEdgesToNbhdsAsList(cells,delaunayNeighbours)
+nbhdsAsEdgesToNbhdsAsList = function(cells,
                                      neighbourhoods)
 {
     nbhdList = list()

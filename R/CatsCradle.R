@@ -1314,6 +1314,7 @@ fetchUMAP = function(f)
 #' @return This returns the distance of the furthest point
 #' in A from its nearest point in B.
 #' @export
+#' @examples
 #' A = matrix(1:8,ncol=2)
 #' B = matrix(3:16,ncol=2)
 #' d_hausdorf = directedHausdorfDistance(A,B)
@@ -1355,6 +1356,7 @@ directedMedianDistance =function(A,B)
 #' @return This returns the median distance from the complement
 #' to the subset
 #' @export
+#' @examples
 #' S = matrix(1:12,ncol=2)
 #' idx = c(rep(FALSE,3),rep(TRUE,3))
 #' compDist = medianComplementDistance(S,idx)
@@ -1388,6 +1390,7 @@ medianComplementDistance = function(S,idx)
 #' this returns a list giving the p-value, the actual complement distance
 #' and the random complement distances.
 #' @export
+#' @examples
 #' S = data.matrix(FetchData(STranspose,c('umap_1','umap_2')))
 #' idx = colnames(STranspose) %in% hallmark[[1]]
 #' mcpv = medianComplementPValue(S,idx,numTrials=100)
