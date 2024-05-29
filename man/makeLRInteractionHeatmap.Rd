@@ -7,7 +7,7 @@
 makeLRInteractionHeatmap(
   ligandReceptorResults,
   clusters,
-  colors = c(),
+  colours = c(),
   pValCutoffClusterPair = 0.05,
   pValCutoffLigRec = 0.05,
   labelClusterPairs = T
@@ -23,9 +23,9 @@ makeLRInteractionHeatmap(
 clusters are a factor
 }}
 
-\item{colors}{\itemize{
-\item a named list of colors where names are clusters. If not
-specified the default pheatmap color scheme will be used.
+\item{colours}{\itemize{
+\item a named list of colours where names are clusters. If not
+specified the default pheatmap colour scheme will be used.
 }}
 
 \item{pValCutoffClusterPair}{\itemize{

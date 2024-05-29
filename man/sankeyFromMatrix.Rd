@@ -30,12 +30,12 @@ the row names and the column names if these overlap
 }}
 
 \item{minus}{\itemize{
-\item color to use for links with negative
+\item colour to use for links with negative
 values
 }}
 
 \item{plus}{\itemize{
-\item color for positive values
+\item colour for positive values
 }}
 
 \item{height}{\itemize{

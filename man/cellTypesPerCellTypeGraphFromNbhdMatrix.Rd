@@ -10,7 +10,7 @@ around cells of each type.}
 cellTypesPerCellTypeGraphFromNbhdMatrix(
   nbhdByCellType,
   clusters,
-  colors = NULL,
+  colours = NULL,
   selfEdges = FALSE,
   minWeight = 0,
   edgeWeighting = 20,
@@ -32,8 +32,8 @@ cell types, and whose entries are counts.
 and whose entries are their seurat_clusters.
 }}
 
-\item{colors}{\itemize{
-\item a named vector of colors used to color the
+\item{colours}{\itemize{
+\item a named vector of colours used to colour the
 vertices of the graph.  The names are the seurat_clusters
 as character strings.
 }}
@@ -76,7 +76,7 @@ This returns a directed igraph whose vertices are
 the cell types and whose arrows indicate "ownership" of
 cells of the target type by neighbourhoods of cells of the
 source type.  Layout is done witht the FR algorithm and
-coordinates are found in G$coords.  If colors were supplied
+coordinates are found in G$coords.  If colours were supplied
 these are found in V(G)$color.  Edge weights and widths are
 found in E(G)$weight and E(G)$width.
 }
