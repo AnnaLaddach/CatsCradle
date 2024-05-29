@@ -1,5 +1,4 @@
 *.rds
 *.gmt
 test.R
-/doc/
 /Meta/
