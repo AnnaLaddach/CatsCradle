@@ -630,30 +630,33 @@ getLigandReceptorNetwork = function(species)
 getLigandReceptorPairsInPanel = function(obj,species,
                                          lrn = getLigandReceptorNetwork(species))
 {
-    stopifnot(species %in% c('mouse','human'))
-
-    ## The panel
-    panel = rownames(obj)
-
-    ## Ligands and receptors:
-    pairs = paste(lrn$from,lrn$to,sep='-')
-    ligands = unique(lrn$from)
-    receptors = unique(lrn$to)
-    ligandsFound = intersect(ligands,panel)
-    receptorsFound = intersect(receptors,panel)
-
-    panelPairs = c()
-    for(a in ligandsFound)
-        for(b in receptorsFound)
-            panelPairs = c(panelPairs,paste(a,b,sep='-'))
-    idx = panelPairs %in% pairs
-    pairsFound = panelPairs[idx]
-
-    a = str_split(pairsFound,'-')
-    pairsFoundDF = data.frame(ligand=unlist(lapply(a,function(x) return(x[1]))),
-                              receptor=unlist(lapply(a,function(x) return(x[2]))))
-
-    return(pairsFoundDF)
+  stopifnot(species %in% c('mouse','human'))
+  
+  ## The panel
+  panel = rownames(obj)
+  panel = str_replace(panel,"-",".")
+  lrn$from = str_replace(lrn$from,"-",".")
+  lrn$to = str_replace(lrn$to,"-",".")
+  
+  ## Ligands and receptors:
+  pairs = paste(lrn$from,lrn$to,sep='-')
+  ligands = unique(lrn$from)
+  receptors = unique(lrn$to)
+  ligandsFound = intersect(ligands,panel)
+  receptorsFound = intersect(receptors,panel)
+  
+  panelPairs = c()
+  for(a in ligandsFound)
+    for(b in receptorsFound)
+      panelPairs = c(panelPairs,paste(a,b,sep='-'))
+  idx = panelPairs %in% pairs
+  pairsFound = panelPairs[idx]
+  
+  a = str_split(pairsFound,'-')
+  pairsFoundDF = data.frame(ligand=unlist(lapply(a,function(x) return(x[1]))),
+                            receptor=unlist(lapply(a,function(x) return(x[2]))))
+  
+  return(pairsFoundDF)
 }
 
 
@@ -720,9 +723,9 @@ getBinarisedMatrix = function(obj, cutoff = 0, layer = 'count'){
   M = data.matrix(t(M))
   cutoff = 0
   M = M > cutoff
+  rownames(M) = str_replace(rownames(M),"-",".")
   return(M)
 }
-
 
 ## ####################################################
 #' This function takes a listing of the neighbouring
