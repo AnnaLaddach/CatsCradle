@@ -9,3 +9,10 @@ In a typical scRNAseq dataset duality exist between cells and the genes they exp
 Even more relationships exist in high resolution spatial transcriptomics datasets, between genes, cells and their position in space. Here we use graph-based representations of cell position, and provide functionality for extending these graphs to account for longer-range interactions.  We also provide functions for identifying and exploring neighbourhoods; in terms of gene expression and cell type composition.  Finally, we provide tools for analysing ligand-receptor interactions, taking spatial information into account. Please see vignette [CatsCradleSpatial](doc/CatsCradleSpatial.html)  for details on how to use CatsCradle to analyse spatial data. 
 
 To dive straight into CatsCradle please see our quickstart vignette [CatsCradleQuickStart](doc/CatsCradleQuickStart.html)! 
+
+## Installation
+
+```
+devtools::install_github("AnnaLaddach/CatsCradle")
+```
+
