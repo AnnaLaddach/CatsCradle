@@ -968,6 +968,7 @@ makeLRInteractionHeatmap = function(ligandReceptorResults,
   rowAnno$sender = factor(rowAnno$sender, levels = levels(clusters))
   rowAnno$receiver = factor(rowAnno$receiver, levels = levels(clusters))
   rownames(rowAnno) = rownames(selectedPValues)
+  rowAnno = rowAnno[,c("receiver","sender")]
   if (length(colours) > 0){
   pheatmap(negLog10PValues, annotation_row = rowAnno, annotation_colors = list("sender" = colours, 
                                                                     "receiver" = colours),
