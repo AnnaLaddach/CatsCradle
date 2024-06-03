@@ -13,6 +13,11 @@ To dive straight into CatsCradle please see our quickstart vignette [CatsCradleQ
 ## Installation
 
 ```
+# Install devtools
+if (!requireNamespace("devtools", quietly = TRUE)) {
+  install.packages("devtools")
+}
+
 devtools::install_github("AnnaLaddach/CatsCradle")
 ```
 
