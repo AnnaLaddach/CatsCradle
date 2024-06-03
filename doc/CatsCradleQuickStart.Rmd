@@ -28,7 +28,7 @@ transcriptomics data.
 A typical analysis of scRNA-seq data using Seurat involves dimensionality reduction 
 (PCA, UMAP, tSNE) and the clustering of cells using the Louvain algorithm. All of
 this is done based on the similarities and differences in the genes
-cells express.  Here we see a UMAP where the points cells, coloured by
+cells express.  Here we see a UMAP where the points are cells, coloured by
 their seurat_clusters.  
 
 ```{r}
@@ -63,8 +63,7 @@ are not necessarily confined to specific gene clusters.  Here we show
 HALLMARK_OXIDATIVE_PHOSPHORYLATION (subset to the genes in our Seurat
 object) superimposed in green and black on the gene cluster UMAP.
 
-visualised in black and outlined in white on 
-the UMAP.
+
 
 ```{r}
 library(ggplot2,quietly=TRUE)
@@ -74,13 +73,13 @@ idx = colnames(STranspose) %in% hallmark[[h]]
 g = DimPlot(STranspose,cols='polychrome') +
     geom_point(data=umap[idx,],aes(x=umap_1,y=umap_2),color='black',size=2.7) +
     geom_point(data=umap[idx,],aes(x=umap_1,y=umap_2),color='green') +
-    ggtitle(paste(h,'on gene clusters'))
+    ggtitle(paste(h,'\non gene clusters'))
 print(g)
 pValue = getSeuratSubsetClusteringPValue(STranspose,idx)
 pValue
 ```
 
-The p-value here this is limited by the default number of randomisation
+The p-value here is limited by the default number of randomisation
 trials in getSubsetClusteringPValue().  Of the 50 Hallmark gene sets,
 31 have clustering p-values less than 0.05.
 
@@ -194,7 +193,7 @@ ImageDimPlot(smallXenium, group.by = c("NBHDClusterExtended"),
 
 ### Aggregate gene expression
 
-As well as expressing cell types, neighbourhoods express also genes.
+As well as expressing cell types, neighbourhoods also express genes.
 We can take the gene expression profile of a neighbourhood to be the
 total aggregate expression of each gene across all cells in the
 neighbourhood.  This produces a genes by neighbourhoods count
@@ -209,7 +208,7 @@ rather than the standard seurat_clusters.
 
 This enables all the usual analyses: dimension reduction and Louvain
 clustering (here giving another clustering of the neighbourhoods). In
-addition, we can find the marker genes giving the transcriptomic
+addition, we can find the marker genes which characterise the transcriptomic
 differences between the neighbourhood types.
 
 ```{r}
@@ -243,7 +242,7 @@ adjustedRandIndex = adj.rand.index(agg@active.ident,
 adjustedRandIndex
 ```
 
-## Ligand Receptor analysis
+## Ligand-receptor analysis
 
 The Delaunay triangulation gives us an opportunity to look at the
 ligand-receptor interactions between neighbouring cells.  We use the

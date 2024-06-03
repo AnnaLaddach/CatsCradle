@@ -65,7 +65,7 @@ object) superimposed in green and black on the gene cluster UMAP.
 
 
 
-```{r, eval=F}
+```{r}
 library(ggplot2,quietly=TRUE)
 h = 'HALLMARK_OXIDATIVE_PHOSPHORYLATION'
 umap = FetchData(STranspose,c('umap_1','umap_2'))

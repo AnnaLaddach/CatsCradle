@@ -69,6 +69,7 @@ triangulation using the centroids of the cells:
 ```{r}
 centroids = GetTissueCoordinates(smallXenium)
 rownames(centroids) = centroids$cell
+clusters = smallXenium@active.ident
 delaunayNeighbours = computeNeighboursDelaunay(centroids)
 head(delaunayNeighbours)
 ```

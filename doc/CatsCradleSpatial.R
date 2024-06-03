@@ -13,6 +13,7 @@ ImageDimPlot(smallXenium, cols = "polychrome", size = 1)
 ## -----------------------------------------------------------------------------
 centroids = GetTissueCoordinates(smallXenium)
 rownames(centroids) = centroids$cell
+clusters = smallXenium@active.ident
 delaunayNeighbours = computeNeighboursDelaunay(centroids)
 head(delaunayNeighbours)
 
