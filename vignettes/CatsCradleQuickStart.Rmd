@@ -73,7 +73,7 @@ idx = colnames(STranspose) %in% hallmark[[h]]
 g = DimPlot(STranspose,cols='polychrome') +
     geom_point(data=umap[idx,],aes(x=umap_1,y=umap_2),color='black',size=2.7) +
     geom_point(data=umap[idx,],aes(x=umap_1,y=umap_2),color='green') +
-    ggtitle(paste(h,'on gene clusters'))
+    ggtitle(paste(h,'\non gene clusters'))
 print(g)
 pValue = getSeuratSubsetClusteringPValue(STranspose,idx)
 pValue

@@ -1022,6 +1022,14 @@ getSeuratSubsetClusteringPValue = function(fPrime,
                                      reduction='UMAP',
                                      numPCs=10)
 {
+    ## Test for non-empty subset:
+    if(isa(geneSubset,'logical'))
+        numInSubset = sum(geneSubset)
+    if(isa(geneSubset,'character'))
+        numInSubset = length(intersect(geneSubset,
+                                       colnames(fPrime)))
+    stopifnot(numInSubset > 0)
+    
     stats = getSeuratSubsetClusteringStatistics(fPrime,
                                                 geneSubset,
                                                 numTrials,
