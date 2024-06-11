@@ -44,6 +44,7 @@ to values of the median complement distance computed for random
 subsets of the same size.
 }
 \examples{
+library(Seurat)
 S = data.matrix(FetchData(STranspose,c('umap_1','umap_2')))
 idx = colnames(STranspose) \%in\% hallmark[[1]]
 mcpv = medianComplementPValue(S,idx,numTrials=100)

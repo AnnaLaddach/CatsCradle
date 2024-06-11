@@ -47,7 +47,7 @@ genes.
 \examples{
 clusterDF = data.frame(gene=colnames(STranspose),
                        geneCluster=STranspose$seurat_clusters)
-geneSet = instersect(hallmark[[1]],colnames(STranspose))
+geneSet = intersect(hallmark[[1]],colnames(STranspose))
 pvalueMatrix = geneSetsVsGeneClustersPValueMatrix(geneSet,
                                               clusterDF,
                                               colnames(STranspose))

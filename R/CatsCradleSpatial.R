@@ -357,7 +357,7 @@ collapseExtendedNBHDs = function(extendedNeighboursList, n = length(extendedNeig
 #' @export
 #' @examples
 #' cellTypesPerCellType = computeCellTypesPerCellTypeMatrix(NBHDByCTMatrix,
-#'                                                      smallXenium$seurat_clusters)
+#'                                                      clusters)
 computeCellTypesPerCellTypeMatrix = function(nbhdByCellType,cellTypes)
 {
   MM = aggregate(nbhdByCellType, list(cellTypes), sum)
@@ -1047,7 +1047,8 @@ makeSummedLRInteractionHeatmap = function(ligandReceptorResults, clusters, type,
 #' centroids of edges between cells. The "expression matrix" is the 
 #' binarised presence/absence of an interaction (ligand receptor pair) on an edge. 
 #' @export
-#' @examples 
+#' @examples
+#' library(Seurat)
 #' edgeSeurat = computeEdgeSeurat(ligandReceptorResults, centroids)
 computeEdgeSeurat = function(ligandReceptorResults, centroids, npcs = 10){
   interactionsOnEdges = ligandReceptorResults$interactionsOnEdges
@@ -1238,6 +1239,7 @@ computeMoransI = function(M,nbhdList){
 #' @return a dataframe containing Moran's I and p values for each feature.
 #' @export
 #' @examples
+#' library(Seurat)
 #' moransI = runMoransI(smallXenium, delaunayNeighbours, assay = "SCT", 
 #' layer = "data", nSim = 10, verbose = FALSE)
 

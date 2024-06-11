@@ -48,16 +48,18 @@ transposeSeuratObject = function(f,active.assay='RNA',
 #' @param clusteringName In many cases, this will be the cell
 #'     clustering, i.e., seurat_clusters, which is the default, but
 #'     for neighbourhood Seurat objects, this can be
-#'     neighbourhood_clusters. 
+#'     neighbourhood_clusters.
+#' @param layer - layer to use for expression values
 #' @return A matrix of the average expression where the rows
 #' correspond to cell clusters and the columns correspond to
 #' gene clusters.
 #' @export
 #' @import stringr
 #' @examples
-#' M = getAverageExpressionMatrix(S,STranspose)
+#' M = getAverageExpressionMatrix(S,STranspose,layer='data')
 getAverageExpressionMatrix = function(f,fPrime, v5 = T,
-                                      clusteringName='seurat_clusters')
+                                      clusteringName='seurat_clusters',
+                                      layer='scale.data')
 {
     f$clustering = as.character(f@meta.data[,clusteringName])
     cellCluster = unique(f$clustering)
@@ -69,9 +71,9 @@ getAverageExpressionMatrix = function(f,fPrime, v5 = T,
     
     ## Get assay data:
     if (v5 == T){
-        X = GetAssayData(f,layer='scale.data')
+        X = GetAssayData(f,layer=layer)
     } else {
-        X = GetAssayData(f,slot='scale')
+        X = GetAssayData(f,slot=layer)
     }
     ## Seems X can be smaller:
     selected = rownames(X)
@@ -107,6 +109,7 @@ getAverageExpressionMatrix = function(f,fPrime, v5 = T,
 #' @param M - a matrix, typically the average expression matrix
 #' @param ccTag - a prefix for the row (cell cluster) names
 #' @param gcTag - a prefix for the column (gene cluster) names
+#' @return The same matrix with fancier row and col names
 #' @export
 #' @examples
 #' averageExpMatrix = tagRowAndColNames(averageExpMatrix,
@@ -193,7 +196,7 @@ geneListPValue = function(A,B,C,background=25000)
 #' @examples
 #' clusterDF = data.frame(gene=colnames(STranspose),
 #'                        geneCluster=STranspose$seurat_clusters)
-#' geneSet = instersect(hallmark[[1]],colnames(STranspose))
+#' geneSet = intersect(hallmark[[1]],colnames(STranspose))
 #' pvalueMatrix = geneSetsVsGeneClustersPValueMatrix(geneSet,
 #'                                               clusterDF,
 #'                                               colnames(STranspose))
@@ -486,6 +489,7 @@ getNearestNeighborListsSeurat = function(f, graph=defaultGraph(f)){
 #' @return the neighboring genes
 #' @export
 #' @examples
+#' library(Seurat)
 #' neighbors = getGeneNeighbors("Ccl6",STranspose)
 #' neighborsAgain = getGeneNeighbors("Ccl6",NN)
 getGeneNeighbors = function(gene,NN)
@@ -1119,6 +1123,7 @@ getSeuratSubsetClusteringStatistics = function(fPrime,
 #' distances and zScore gives its z-score.
 #' @export
 #' @examples
+#' library(Seurat)
 #' S = data.matrix(FetchData(STranspose,c('umap_1','umap_2')))
 #' geneSubset = rownames(S) %in% hallmark[[1]]
 #' geneClustering = runGeometricClusteringTrials(S,geneSubset,100)
@@ -1399,6 +1404,7 @@ medianComplementDistance = function(S,idx)
 #' and the random complement distances.
 #' @export
 #' @examples
+#' library(Seurat)
 #' S = data.matrix(FetchData(STranspose,c('umap_1','umap_2')))
 #' idx = colnames(STranspose) %in% hallmark[[1]]
 #' mcpv = medianComplementPValue(S,idx,numTrials=100)

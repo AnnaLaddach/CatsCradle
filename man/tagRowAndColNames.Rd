@@ -19,6 +19,9 @@ tagRowAndColNames(M, ccTag = "CC_", gcTag = "GC_")
 \item a prefix for the column (gene cluster) names
 }}
 }
+\value{
+The same matrix with fancier row and col names
+}
 \description{
 This gussies up the rownames and colnames of M
 }

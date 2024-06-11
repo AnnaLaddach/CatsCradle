@@ -27,6 +27,7 @@ using either the gene Seurat object or its nearest
 neighbor graph returned from getNearestNeighborListsSeurat
 }
 \examples{
+library(Seurat)
 neighbors = getGeneNeighbors("Ccl6",STranspose)
 neighborsAgain = getGeneNeighbors("Ccl6",NN)
 }

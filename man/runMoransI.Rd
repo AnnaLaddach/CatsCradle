@@ -49,6 +49,7 @@ This function takes a matrix where rows are features and columns are cells,
 and a neighbourhood list, and computes Moran's I.
 }
 \examples{
+library(Seurat)
 moransI = runMoransI(smallXenium, delaunayNeighbours, assay = "SCT", 
 layer = "data", nSim = 10, verbose = FALSE)
 }

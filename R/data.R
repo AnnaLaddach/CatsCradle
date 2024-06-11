@@ -530,3 +530,20 @@
 #' computeEdgeSeurat()
 "edgeSeurat"
 
+## ####################################################
+#' moransILigandReceptor
+#' 
+#' Moran's I for ligand receptor pairs
+#'
+#' @format A data frame showing the spatial autocorrelation of the
+#' 28 ligand receptor pairs
+#'
+#' \describe{
+#' A data frame with rownames giving the  28 ligand-receptor pairs and columns moransI
+#' and pValues
+#' }
+#'
+#' @source Computed using the function runMoransI on the object edgeSeurat and
+#' neighbours edgeNeighbours = computeEdgeGraph(delaunayNeighbours) with 100 trials.
+#' For more informations see the CatsCradleSpatial vignette.
+"moransILigandReceptor"

@@ -34,5 +34,5 @@ cells of each type.
 }
 \examples{
 cellTypesPerCellType = computeCellTypesPerCellTypeMatrix(NBHDByCTMatrix,
-                                                     smallXenium$seurat_clusters)
+                                                     clusters)
 }

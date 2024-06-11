@@ -628,7 +628,7 @@ edgeNeighbours = computeEdgeGraph(delaunayNeighbours)
 ```
 
 Compute Moran's I for the spatial autocorrelation of ligand-receptor interactions.
-```{r}
+```{r, eval=FALSE}
 moransILigandReceptor = runMoransI(edgeSeurat, edgeNeighbours, assay = "RNA", 
                      layer = "counts", nSim = 100)
 ```
