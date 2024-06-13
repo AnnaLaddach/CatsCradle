@@ -21,3 +21,5 @@ if (!requireNamespace("devtools", quietly = TRUE)) {
 devtools::install_github("AnnaLaddach/CatsCradle")
 ```
 
+#### Developed by Anna Laddach and Michael Shapiro in the Pachnis lab at the Francis Crick Institute.
+

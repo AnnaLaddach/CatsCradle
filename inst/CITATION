@@ -9,7 +9,9 @@ url      = 'https://github.com/AnnaLaddach/CatsCradle',
 textVersion = paste('Anna Laddach and Michael Shapiro,',
                     'CatsCradle: an R package for spatial',
                     'single cell transcriptomics and the',
-                    'clustering and annotation of genes',
+                    'clustering and annotation of genes,',
+                    'developed in the Pachnis lab at the',
+                    'Fracis Crick Institute',
                     'https://github.com/AnnaLaddach/CatsCradle')
 )
 
