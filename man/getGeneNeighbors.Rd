@@ -15,7 +15,9 @@ getGeneNeighbors(gene, NN)
 
 \item{NN}{\itemize{
 \item either the gene Seurat object or its nearest
-neighbor graph as found by getNearestNeighborListsSeurat
+neighbor graph as found by getNearestNeighborListsSeurat.
+This can also be a SingleCellExperiment which will be converted
+to a Seurat object
 }}
 }
 \value{

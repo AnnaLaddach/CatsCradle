@@ -4,20 +4,32 @@
 \alias{computeGraphEmbedding}
 \title{This function adds a force directed graph embedding to a seurat object}
 \usage{
-computeGraphEmbedding(seuratObj, graph = defaultGraph(seuratObj))
+computeGraphEmbedding(
+  seuratObj,
+  graph = defaultGraph(seuratObj),
+  returnType = "Seurat"
+)
 }
 \arguments{
 \item{seuratObj}{\itemize{
-\item a seurat object.
+\item a seurat object of SingleCellExperiment to be
+turned into a Seurat object
 }}
 
 \item{graph}{\itemize{
 \item which graph to extract.  Defaults to
 paste0(f@active.assay,'_snn')
 }}
+
+\item{returnType}{\itemize{
+\item Will return a SingleCellExperiment if this is either
+of SCE, SingleCellExperiment or their lower-case equivalents.  Otherwise,
+returns a Seurat object
+}}
 }
 \value{
-a seurat object with a "graph" dimensionality reduction.
+a seurat object with a "graph" dimensionality reduction. Can also
+be a SingleCellExperiment depending on parameter returnType.
 }
 \description{
 This function adds a force directed graph embedding to a seurat object

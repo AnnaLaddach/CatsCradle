@@ -199,17 +199,23 @@ computeNBHDByCTMatrix = function(spatialGraph, cellTypes){
 #' @param n.neighbors - number of neighbors used by UMAP, defaults to 30.
 #' @param transpose - defaults to FALSE.
 #' @param verbose - defaults to TRUE, used to limit trace if FALSE
+#' @param returnType - Will return a SingleCellExperiment if this is either
+#' of SCE, SingleCellExperiment or their lower-case equivalents.  Otherwise,
+#' returns a Seurat object
 #' @return a seurat object based on a neighbourhood by cell type matrix or its 
-#' transpose, containing clusters and UMAP.
+#' transpose, containing clusters and UMAP. This can also be a
+#' SingleCellExperiment depending on the parameter returnType.
 #' @import Seurat
 #' @import SeuratObject
 #' @export
 #' @examples
 #' NBHDByCTSeurat = computeNBHDVsCTSeurat(NBHDByCTMatrix)
+#' NBHDByCTSeurat_sce = computeNBHDVsCTSeurat(NBHDByCTMatrix,returnType='SCE')
 computeNBHDVsCTSeurat= function(dataMatrix, resolution = 0.1, 
                                 npcs = 10, n.neighbors = 30L, 
                                 transpose = FALSE,
-                                verbose=TRUE){
+                                verbose=TRUE,
+                                returnType='Seurat'){
     dataMatrix = t(dataMatrix)
     NBHDSeurat = CreateSeuratObject(dataMatrix)
     NBHDSeurat[['RNA']]$data = NBHDSeurat[['RNA']]$counts
@@ -244,31 +250,38 @@ computeNBHDVsCTSeurat= function(dataMatrix, resolution = 0.1,
     idx = names(NBHDSeurat@meta.data) == 'seurat_clusters'
     names(NBHDSeurat@meta.data)[idx] = 'neighbourhood_clusters'
     
-    return(NBHDSeurat)
+    return(returnAs(NBHDSeurat,returnType))
 }
 
 ## ####################################################
 #' This function adds a force directed graph embedding to a seurat object
 #' 
-#' @param seuratObj - a seurat object. 
+#' @param seuratObj - a seurat object of SingleCellExperiment to be
+#' turned into a Seurat object
 #' @param graph - which graph to extract.  Defaults to
 #' paste0(f@active.assay,'_snn')
-#' @return a seurat object with a "graph" dimensionality reduction.
+#' @param returnType - Will return a SingleCellExperiment if this is either
+#' of SCE, SingleCellExperiment or their lower-case equivalents.  Otherwise,
+#' returns a Seurat object
+#' @return a seurat object with a "graph" dimensionality reduction. Can also
+#' be a SingleCellExperiment depending on parameter returnType.
 #' @import Seurat  
 #' @import igraph
 #' @export
 #' @examples
 #' objWithEmbedding = computeGraphEmbedding(NBHDByCTSeurat)
-computeGraphEmbedding = function(seuratObj, graph=defaultGraph(seuratObj)){
-  graph = seuratObj@graphs[[graph]]
-  igraphGraph = igraph::graph_from_adjacency_matrix(graph)
-  graphLayout = igraph::layout_with_fr(igraphGraph)
-  colnames(graphLayout) = c("graph_1","graph_2")
-  rownames(graphLayout) = colnames(seuratObj)
-  graphDimReduc = CreateDimReducObject(embeddings = graphLayout,   
-                                       key = "graph",   assay = "RNA")
-  seuratObj[["graph"]] = graphDimReduc
-  return(seuratObj)
+computeGraphEmbedding = function(seuratObj, graph=defaultGraph(seuratObj),
+                                 returnType='Seurat'){
+    seuratObj = acceptor(seuratObj)
+    graph = seuratObj@graphs[[graph]]
+    igraphGraph = igraph::graph_from_adjacency_matrix(graph)
+    graphLayout = igraph::layout_with_fr(igraphGraph)
+    colnames(graphLayout) = c("graph_1","graph_2")
+    rownames(graphLayout) = colnames(seuratObj)
+    graphDimReduc = CreateDimReducObject(embeddings = graphLayout,   
+                                         key = "graph",   assay = "RNA")
+    seuratObj[["graph"]] = graphDimReduc
+    return(returnAs(seuratObj,returnType))
 }
 
 
@@ -487,15 +500,15 @@ cellTypesPerCellTypeGraphFromCellMatrix = function(M,
 #' found in E(G)$weight and E(G)$width. 
 #' @export
 cellTypesPerCellTypeGraphFromNbhdMatrix = function(nbhdByCellType,
-                                     clusters,
-                                     colours=NULL,
-                                     selfEdges=FALSE,
-                                     minWeight=0,
-                                     edgeWeighting=20,
-                                     edgeCurved=0.2,
-                                     arrowSize=4,
-                                     arrowWidth=4,
-                                     plotGraph=TRUE)
+                                                   clusters,
+                                                   colours=NULL,
+                                                   selfEdges=FALSE,
+                                                   minWeight=0,
+                                                   edgeWeighting=20,
+                                                   edgeCurved=0.2,
+                                                   arrowSize=4,
+                                                   arrowWidth=4,
+                                                   plotGraph=TRUE)
 {
     M = cellTypesPerCellTypeMatrix(nbhdByCellType,clusters)
     G = cellTypesPerCellTypeGraphFromCellMatrix(M,
@@ -618,7 +631,8 @@ getLigandReceptorNetwork = function(species)
 #' receptor network to those pairs that occur in the
 #' panel
 #'
-#' @param obj - a Seurat object
+#' @param obj - a Seurat object or SingleCellExperiment to
+#' be converted to a Seurat object
 #' @param species - either 'human' or 'mouse'
 #' @param lrn - a ligand-receptor network, i.e., a
 #' data frame with columns from and to.  By default, it
@@ -631,7 +645,9 @@ getLigandReceptorNetwork = function(species)
 getLigandReceptorPairsInPanel = function(obj,species,
                                          lrn = getLigandReceptorNetwork(species))
 {
-  stopifnot(species %in% c('mouse','human'))
+    stopifnot(species %in% c('mouse','human'))
+
+    obj = acceptor(obj)
   
   ## The panel
   panel = rownames(obj)
@@ -714,18 +730,20 @@ permuteMatrix = function(M){
 #' This functions retrieves an expression matrix from a seurat object and 
 #' binarises it.
 #'
-#' @param obj - a Seurat object
+#' @param obj - a Seurat object or SingleCellExperiment to be
+#' turned into a Seurat object
 #' @param cutoff - a cutoff for binarisation. Defaults to 0.
 #' @param layer - layer to fetch data from. Defaults to count.
 #' @return A binarised expression matrix where rows are genes and columns are 
 #' cells.
 getBinarisedMatrix = function(obj, cutoff = 0, layer = 'count'){
-  M = FetchData(obj,rownames(obj),layer='count')
-  M = data.matrix(t(M))
-  cutoff = 0
-  M = M > cutoff
-  rownames(M) = str_replace(rownames(M),"-",".")
-  return(M)
+    obj = acceptor(obj)
+    M = FetchData(obj,rownames(obj),layer='count')
+    M = data.matrix(t(M))
+    cutoff = 0
+    M = M > cutoff
+    rownames(M) = str_replace(rownames(M),"-",".")
+    return(M)
 }
 
 ## ####################################################
@@ -774,13 +792,18 @@ countLRInteractionsPerCell = function(edges,sourceOrTarget)
 #' to the cells of the interaction counts.
 #'
 #' @param interactionCounts - as found by countLRInteractionsPerCell()
-#' @param obj - a Seurat object
-#' @param nbhdObj - a neighbourhood x cell type Seurat object
+#' @param obj - a Seurat object, or SingleCellExperiment to be turned
+#' into a Seurat object
+#' @param nbhdObj - a neighbourhood x cell type Seurat object or a
+#' SingleCellExperiment to be turned into a Seurat object
 #' @return This returns the interaction counts annotated with the
 #' cell type and neighbourhood type of each cell.
 #' @export
 annotateLRInteractionCounts = function(interactionCounts,obj,nbhdObj)
 {
+    obj = acceptor(obj)
+    nbhdObj = acceptor(nbhdObj)
+    
     ## Get nbhd and cell types:
     annotated = data.frame(cell=colnames(obj),
                            cellType=obj$seurat_clusters)
@@ -1042,15 +1065,21 @@ makeSummedLRInteractionHeatmap = function(ligandReceptorResults, clusters, type,
 #' where rownames are cellnames and the first two columns
 #' contain x and y coordinates respectively.
 #' @param npcs - number of pcs used for PCA, defaults to 10
+#' @param returnType Determines whether to return a Seurat object or a
+#' SpatialExperiment.  Will do the later if this is set to either SCE,
+#' SingleCellExperiment or lower case versions of either.
 #' @import Seurat
 #' @return This returns a seurat object where 
 #' each point represents an edge between cells, and spatial coordinates are the 
 #' centroids of edges between cells. The "expression matrix" is the 
-#' binarised presence/absence of an interaction (ligand receptor pair) on an edge. 
+#' binarised presence/absence of an interaction (ligand receptor pair) on an edge.
+#' Depending on the parameter returnType, this can alternatively be returned as
+#' a SpatialExperiment.
 #' @export
 #' @examples
 #' edgeSeurat = computeEdgeSeurat(ligandReceptorResults, centroids)
-computeEdgeSeurat = function(ligandReceptorResults, centroids, npcs = 10){
+computeEdgeSeurat = function(ligandReceptorResults, centroids, npcs = 10,
+                             returnType='Seurat'){
   interactionsOnEdges = ligandReceptorResults$interactionsOnEdges
   rownames(interactionsOnEdges) = paste0(interactionsOnEdges$nodeA, "-", interactionsOnEdges$nodeB)
   interactionsOnEdgesMat = as.matrix(interactionsOnEdges[,5:ncol(interactionsOnEdges)])
@@ -1080,7 +1109,7 @@ computeEdgeSeurat = function(ligandReceptorResults, centroids, npcs = 10){
   )
   
   edgeSeurat[["global"]] = coords
-  return(edgeSeurat)
+  return(returnAs(edgeSeurat,returnType,spatial=TRUE))
 }
 
 
@@ -1123,21 +1152,29 @@ nbhdsAsEdgesToNbhdsAsList = function(cells,
 #' genes and the values are gene expression totals for
 #' the cells in each neighbourhood
 #'
-#' @param f - a Seurat object with layer counts
+#' @param f - a Seurat object with layer counts or a SingleCellExperiment
+#' to be turned into a Seurat object
 #' @param neighbourhoods - Neighbourhoods as given by a
 #' collapsed expanded edge graph, as produced by
 #' collapseNeighbourhoods. In particular, each cell should
 #' appear as nodeA.
 #' @param verbose - used to control trace, defaults to TRUE
-#' @import Seurat
+#' @param returnType - Will return a SingleCellExperiment if this is either
+#' of SCE, SingleCellExperiment or their lower-case equivalents.  Otherwise,
+#' returns a Seurat object or SingleCellExperiment, depending on the
+#' parameter returnType.
 #' @return a Seurat object giving total gene expression
-#' in each neighbourhood.
+#' in each neighbourhood or SingleCellExperiment
+#' @import Seurat
 #' @export
 #' @examples 
 #' agg = aggregateSeuratGeneExpression(smallXenium,extendedNeighbours,
 #' verbose=FALSE)
-aggregateSeuratGeneExpression = function(f,neighbourhoods,verbose=TRUE)
+aggregateSeuratGeneExpression = function(f,neighbourhoods,verbose=TRUE,
+                                         returnType='Seurat')
 {
+    f = acceptor(f)
+    
     cells = colnames(f)
     nbhds = unique(c(neighbourhoods$nodeA,
                      neighbourhoods$nodeB))
@@ -1169,7 +1206,7 @@ aggregateSeuratGeneExpression = function(f,neighbourhoods,verbose=TRUE)
     idx = names(nbhdObj@meta.data) == 'seurat_clusters'
     names(nbhdObj@meta.data)[idx] = 'aggregation_clusters'
     
-    return(nbhdObj)
+    return(returnAs(nbhdObj,returnType))
 }
 
 
@@ -1236,6 +1273,9 @@ computeMoransI = function(M,nbhdList){
 #' Defaults to 100.
 #' @param verbose - whether to print trace, defaults to TRUE
 #' @import Seurat
+#' @import SingleCellExperiment
+#' @import SpatialExperiment
+#' @importFrom S4Vectors SelfHits
 #' @return a dataframe containing Moran's I and p values for each feature.
 #' @export
 #' @examples
@@ -1244,30 +1284,32 @@ computeMoransI = function(M,nbhdList){
 
 runMoransI = function(obj, spatialGraph, assay = "RNA", layer = "data",
                       nSim = 100, verbose = TRUE){
-  spatialGraph = symmetriseNN(spatialGraph)
-  
-  M = as.matrix(LayerData(obj, assay = assay, layer = layer))
-  nbhdList = nbhdsAsEdgesToNbhdsAsList(colnames(M),
-                                       spatialGraph)
-  
-  moransI = computeMoransI(M,nbhdList)
-  results = list()
-  for (i in 1:nSim){
-    permuted = permuteMatrix(M)
-    results[[i]] = computeMoransI(permuted,nbhdList)
-    if (i %% 10 == 0 & verbose){
-      writeLines(as.character(i))
+    obj = acceptor(obj)
+    
+    spatialGraph = symmetriseNN(spatialGraph)
+    
+    M = as.matrix(LayerData(obj, assay = assay, layer = layer))
+    nbhdList = nbhdsAsEdgesToNbhdsAsList(colnames(M),
+                                         spatialGraph)
+    
+    moransI = computeMoransI(M,nbhdList)
+    results = list()
+    for (i in 1:nSim){
+        permuted = permuteMatrix(M)
+        results[[i]] = computeMoransI(permuted,nbhdList)
+        if (i %% 10 == 0 & verbose){
+            writeLines(as.character(i))
+        }
     }
-  }
-  
-  results = do.call(cbind, results)
-  simResults = rowSums(moransI > results) 
-  pValues = abs((simResults - nSim)/nSim) 
-  pValues = pmax(pValues, (1/nSim))
-  results = cbind(moransI, pValues)
-  results = results[order(moransI, decreasing = TRUE),]
-  results = data.frame(results)
-  return(results)
+    
+    results = do.call(cbind, results)
+    simResults = rowSums(moransI > results) 
+    pValues = abs((simResults - nSim)/nSim) 
+    pValues = pmax(pValues, (1/nSim))
+    results = cbind(moransI, pValues)
+    results = results[order(moransI, decreasing = TRUE),]
+    results = data.frame(results)
+    return(results)
 }
 
 
@@ -1300,4 +1342,93 @@ computeEdgeGraph = function(spatialGraph, selfEdges = FALSE){
   }
   
   return(spatialGraphEdges)
+}
+
+
+## ####################################################
+## The following functions are used internally to manage
+## conversions between Seurat objects on the one hand and
+## SingleCellExperiments and SpatialExperiments on the
+## other.
+## ####################################################
+acceptor = function(obj)
+{
+    ## We only convert if we need to:
+    if(isa(obj,'SingleCellExperiment'))
+        return(SCEtoSeurat(obj))
+
+    return(obj)
+}
+
+## ####################################################
+returnAs = function(obj,returnType,spatial=FALSE)
+{
+    if(returnType %in% c('SCE',
+                         'sce',
+                         'SingleCellExperiment',
+                         'singlecellexperiment'))
+        return(SeuratToSCE(obj,spatial))
+
+    return(obj)
+}
+
+## ####################################################
+SCEtoSeurat = function(sce)
+{
+    f = as.Seurat(sce)
+
+    numCells = ncol(sce)
+    for(n in colPairNames(sce))
+    {
+        M = matrix(0,nrow=numCells,ncol=numCells)
+        rownames(M) = colnames(sce)
+        colnames(M) = colnames(sce)
+
+        df = colPair(sce,n)
+        df = as.data.frame(df)
+        M[df$from,df$to] = df$value
+        M[df$to,df$from] = df$value
+        graph = as.Graph(M)
+        f@graphs[[n]] = graph
+    }
+
+    return(f)
+}
+
+## ####################################################
+SeuratToSCE = function(f,spatial)
+{
+    sce = as.SingleCellExperiment(f)
+    for(n in names(f@graphs))
+    {
+        NN = getNearestNeighborListsSeurat(f,n)
+        numPairs = nrow(NN)
+
+        a = 1:ncol(sce)
+        names(a) = colnames(sce)
+        cell1 = a[NN$nodeA]
+        cell2 = a[NN$nodeB]
+
+        names(cell1) = NULL
+        names(cell2) = NULL
+        
+        colPair(sce,n) = SelfHits(cell1,
+                                  cell2,
+                                  nnode=ncol(sce),
+                                  value=NN$weight)
+    }
+
+    if(spatial)
+    {
+        sce = SpatialExperiment(sce)
+
+        ## Copy in the centroids:
+        centroids = GetTissueCoordinates(f)
+        rownames(centroids) = centroids$cell
+        centroids = centroids[,1:2]
+        centroids = data.matrix(centroids)
+
+        spatialCoords(sce) = centroids
+    }
+    return(sce)
 }

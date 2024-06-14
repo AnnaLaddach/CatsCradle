@@ -15,7 +15,8 @@ getLigandReceptorPairsInPanel(
 }
 \arguments{
 \item{obj}{\itemize{
-\item a Seurat object
+\item a Seurat object or SingleCellExperiment to
+be converted to a Seurat object
 }}
 
 \item{species}{\itemize{

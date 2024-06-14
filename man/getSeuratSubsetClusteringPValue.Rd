@@ -18,7 +18,8 @@ getSeuratSubsetClusteringPValue(
 \arguments{
 \item{fPrime}{\itemize{
 \item a transposed Seurat object, i.e. a
-Seurat object of genes
+Seurat object of genes or SingleCellExperiment to
+be converted to a Seurat object
 }}
 
 \item{geneSubset}{\itemize{

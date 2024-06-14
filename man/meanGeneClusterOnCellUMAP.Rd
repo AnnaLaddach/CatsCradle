@@ -8,11 +8,13 @@ meanGeneClusterOnCellUMAP(f, fPrime, geneCluster)
 }
 \arguments{
 \item{f}{\itemize{
-\item a Seurat object of cells
+\item a Seurat object of cells or SingleCellExperiment to
+be converted to a Seurat object
 }}
 
 \item{fPrime}{\itemize{
 \item the corresponding Seurat object of genes
+SingleCellExperiment to be converted to a Seurat object
 }}
 
 \item{geneCluster}{\itemize{

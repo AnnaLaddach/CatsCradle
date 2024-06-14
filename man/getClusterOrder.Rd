@@ -9,6 +9,7 @@ getClusterOrder(f)
 \arguments{
 \item{f}{\itemize{
 \item a Seurat object with meta.data column seurat_clusters
+or SingleCellExperiment to be turned into a Seurat object
 }}
 }
 \value{

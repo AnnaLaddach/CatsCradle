@@ -15,11 +15,13 @@ getGeneClusterAveragesPerCell(
 }
 \arguments{
 \item{f}{\itemize{
-\item the cell Seurat object
+\item the cell Seurat object or SingleCellExperiment to be
+turned into a Seurat object
 }}
 
 \item{fPrime}{\itemize{
-\item the genes Seurat object
+\item the genes Seurat object or SingleCellExperiment to be
+turned into a Seurat object
 }}
 
 \item{cells}{\itemize{
@@ -43,4 +45,5 @@ clusters.
 }
 \examples{
 clusterExpression = getGeneClusterAveragesPerCell(S,STranspose)
+clusterExpression_sce = getGeneClusterAveragesPerCell(S_sce,STranspose_sce)
 }

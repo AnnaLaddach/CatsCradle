@@ -22,7 +22,8 @@ predictAnnotationAllGenes(
 
 \item{fPrime}{\itemize{
 \item a transposed Seurat object (generated with
-transposeSeuratObject())
+transposeSeuratObject()) or SingleCellExperiment to
+be converted to a Seurat object
 }}
 
 \item{radius}{\itemize{

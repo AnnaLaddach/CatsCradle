@@ -15,7 +15,8 @@ getNearbyGenes(
 }
 \arguments{
 \item{fPrime}{\itemize{
-\item a Seurat object of genes
+\item a Seurat object of genes or
+SingleCellExperiment to be converted to a Seurat object
 }}
 
 \item{geneSet}{\itemize{

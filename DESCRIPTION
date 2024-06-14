@@ -34,7 +34,10 @@ Imports: Seurat,
 	 data.table,
 	 abind,
 	 pheatmap,
-	 fossil
+	 fossil,
+	 SingleCellExperiment,
+	 SpatialExperiment,
+	 S4Vectors
 Depends: 
     R (>= 4.0)
 LazyData: true

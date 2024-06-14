@@ -16,11 +16,13 @@ annotateLRInteractionCounts(interactionCounts, obj, nbhdObj)
 }}
 
 \item{obj}{\itemize{
-\item a Seurat object
+\item a Seurat object, or SingleCellExperiment to be turned
+into a Seurat object
 }}
 
 \item{nbhdObj}{\itemize{
-\item a neighbourhood x cell type Seurat object
+\item a neighbourhood x cell type Seurat object or a
+SingleCellExperiment to be turned into a Seurat object
 }}
 }
 \value{

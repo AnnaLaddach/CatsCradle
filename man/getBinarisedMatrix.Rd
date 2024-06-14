@@ -9,7 +9,8 @@ getBinarisedMatrix(obj, cutoff = 0, layer = "count")
 }
 \arguments{
 \item{obj}{\itemize{
-\item a Seurat object
+\item a Seurat object or SingleCellExperiment to be
+turned into a Seurat object
 }}
 
 \item{cutoff}{\itemize{

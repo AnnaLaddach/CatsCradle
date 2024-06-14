@@ -274,6 +274,26 @@ enriched in the interactions between two specific cell types.  For
 further details see the section Ligand receptor analysis in the Cats
 Cradle Spatial vignette [CatsCradleSpatial](doc/CatsCradleSpatial.html).
 
+## CatsCradle, Seurat objects, SingleCellExperiment objects and
+   SpatialExperiment objects 
+
+CatsCradle provides rudimentary support for the Bioconductor classes
+SingleCellExperiment and its derived class SpatialExperiment.
+
+Every function which accepts a Seurat object as input can also accept
+a SingleCellExperiment in its place.  Any function which returns a
+Seurat object can also return a SingleCellExperiment, in one case, a
+SpatialExperiment, through the use of the parameter returnType.  In
+each case, the internals of the functions are manipulating Seurat
+objects.  Conversion to and from these is performed upon entry to and
+return from the function and these coversions are rather lightweight
+in nature.  They have slightly more functionality than as.Seurat and
+as.SingleCellExperiment.  In addition to invoking these functions,
+they carry over the nearest neighbour graphs, and in one case carry
+over the tissue coordinates from a spatial Seurat object to a
+SpatialExperiment object.  Because of the shallow nature of these
+conversions, other information may be lost.
+
 
 
 

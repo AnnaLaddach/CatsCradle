@@ -15,6 +15,19 @@
 "S"
 
 ## ####################################################
+#' S_sce
+#'
+#' A SingleCellExperiment object of 2000 genes by 1445 cells.
+#'
+#' @format A SingleCellExperiment object
+#'
+#' \describe{
+#' A SingleCellExperiment version of S.
+#' }  
+#' @source This was made from S using as.SingleCellExperiment
+"S_sce"
+
+## ####################################################
 #' STranspose
 #'
 #' A Seurat object of 1445 cells by 2000 genes
@@ -26,6 +39,20 @@
 #' }
 #' @source Produced from S by transposeSeuratObject()
 "STranspose"
+
+## ####################################################
+#' STranspose_sce
+#'
+#' A SingleCellExperiment object of 1445 cells by 2000 genes
+#'
+#' @format A SingleCellExperiment object
+#' \describe{
+#' This is a SingleCellExperiment version of STranspose.
+#' }
+#' @source Produced from STranspose using as.SingleCellExperiment
+#' together with ancillary code for copying nearest neighbour
+#' graphs
+"STranspose_sce"
 
 ## ####################################################
 #' averageExpMatrix

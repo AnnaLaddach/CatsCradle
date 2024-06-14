@@ -5,7 +5,9 @@
 #' Create the transpose of a Seurat object
 #'
 #' This takes a Seurat object f and creates a new Seurat object whose
-#' expression matrix is the transpose of that of f.
+#' expression matrix is the transpose of that of f.  This can
+#' also be a SingleCellExperiment which will be converted to a
+#' Seurat object
 #'
 #' @param f - a Seurat object
 #' @param active.assay - the assay to use.  Defaults to 'RNA'
@@ -13,14 +15,22 @@
 #' @param dims - dimensions to use for umap and nearest neighbors,
 #'     defaults to 1:20
 #' @param res - the clustering resolution, defaults to 1
-#' @return A Seurat object
+#' @param returnType - Will return a SingleCellExperiment if this is either
+#' of SCE, SingleCellExperiment or their lower-case equivalents.  Otherwise,
+#' returns a Seurat object
+#' @return A Seurat object or SingleCellExperiment
 #' @export
 #' @import Seurat
 #' @examples
 #' STranspose = transposeSeuratObject(S)
+#' STransposeFromSCE = transposeSeuratObject(S_sce)
+#' STransposeAsSCE = transposeSeuratObject(S,returnType='SCE')
 transposeSeuratObject = function(f,active.assay='RNA',
-                                 npcs=30,dims=1:20,res=1)
+                                 npcs=30,dims=1:20,res=1,
+                                 returnType='Seurat')
 {
+    f = acceptor(f)
+    
     f@active.assay = active.assay
     df = FetchData(f,rownames(f),layer='counts')
     MPrime = as.matrix(df)
@@ -34,15 +44,17 @@ transposeSeuratObject = function(f,active.assay='RNA',
     fPrime = FindNeighbors(fPrime)
     fPrime = FindClusters(fPrime,resolution=res)
     
-    return(fPrime)
+    return(returnAs(fPrime,returnType))
 }
 
 ## ###################################################
 #' This computes average expression of each gene cluster in
 #' each cell cluster and returns the result as a matrix
 #'
-#' @param f - The Seurat object of cells
-#' @param fPrime - The Seurat object of genes
+#' @param f - The Seurat object of cells, or SingleCellExperiment
+#' to be turned into a Seurat object
+#' @param fPrime - The Seurat object of genes,  or SingleCellExperiment
+#' to be turned into a Seurat object
 #' @param v5 - A logical. Are we using Seurat v5? Defaults
 #' to TRUE
 #' @param clusteringName In many cases, this will be the cell
@@ -57,10 +69,14 @@ transposeSeuratObject = function(f,active.assay='RNA',
 #' @import stringr
 #' @examples
 #' M = getAverageExpressionMatrix(S,STranspose,layer='data')
+#' M_sce = getAverageExpressionMatrix(S_sce,STranspose_sce,layer='data')
 getAverageExpressionMatrix = function(f,fPrime, v5 = T,
                                       clusteringName='seurat_clusters',
                                       layer='scale.data')
 {
+    f = acceptor(f)
+    fPrime = acceptor(fPrime)
+    
     f$clustering = as.character(f@meta.data[,clusteringName])
     cellCluster = unique(f$clustering)
     cellCluster = cellCluster[order(as.numeric(cellCluster))]
@@ -387,8 +403,10 @@ sankeyFromMatrix = function(M,disambiguation=c('R_','C_'),
 #' clusters in cells.  By default, it uses all cells and all gene
 #' clusters.
 #'
-#' @param f - the cell Seurat object
-#' @param fPrime - the genes Seurat object
+#' @param f - the cell Seurat object or SingleCellExperiment to be
+#' turned into a Seurat object
+#' @param fPrime - the genes Seurat object or SingleCellExperiment to be
+#' turned into a Seurat object
 #' @param cells - the cells to compute this for
 #' @param geneClusters - the geneClusters to compute average
 #' expression for
@@ -398,11 +416,15 @@ sankeyFromMatrix = function(M,disambiguation=c('R_','C_'),
 #' @export
 #' @examples
 #' clusterExpression = getGeneClusterAveragesPerCell(S,STranspose)
+#' clusterExpression_sce = getGeneClusterAveragesPerCell(S_sce,STranspose_sce)
 getGeneClusterAveragesPerCell = function(f,
                                          fPrime,
                                          cells=colnames(f),
                                          geneClusters=getClusterOrder(fPrime))
 {
+    f = acceptor(f)
+    fPrime = acceptor(fPrime)
+    
     M = matrix(0,nrow=length(cells),ncol=length(geneClusters))
     rownames(M) = cells
     colnames(M) = paste0('cluster_',geneClusters)
@@ -429,12 +451,14 @@ getGeneClusterAveragesPerCell = function(f,
 #' numeric. 
 #'
 #' @param f - a Seurat object with meta.data column seurat_clusters
+#'  or SingleCellExperiment to be turned into a Seurat object
 #' @return A vector of these unique values in order
 #' @export
 #' @examples
 #' geneClusters = getClusterOrder(STranspose)
 getClusterOrder = function(f)
 {
+    f = acceptor(f)
     a = unique(f$seurat_clusters)
     a = a[order(as.numeric(a))]
 
@@ -454,7 +478,8 @@ defaultGraph = function(f)
 #' This function extracts a shared nearest neighbor network
 #' from a Seurat object
 #'
-#' @param f - a Seurat object
+#' @param f - a Seurat object or SingleCellExperiment to
+#' be converted to a Seurat object
 #' @param graph - which graph to extract.  Defaults to
 #' paste0(f@active.assay,'_snn')
 #' @return - This returns dataframe of neighbors:
@@ -465,6 +490,8 @@ defaultGraph = function(f)
 #' @examples
 #' NN = getNearestNeighborListsSeurat(STranspose)
 getNearestNeighborListsSeurat = function(f, graph=defaultGraph(f)){
+
+    f = acceptor(f)
   
     ## convert to TsparseMatrix and extract relevant information
     graph = as(f@graphs[[graph]], "TsparseMatrix") 
@@ -485,7 +512,9 @@ getNearestNeighborListsSeurat = function(f, graph=defaultGraph(f)){
 #'
 #' @param gene - the gene in question
 #' @param NN - either the gene Seurat object or its nearest
-#' neighbor graph as found by getNearestNeighborListsSeurat
+#' neighbor graph as found by getNearestNeighborListsSeurat.
+#' This can also be a SingleCellExperiment which will be converted
+#' to a Seurat object
 #' @return the neighboring genes
 #' @export
 #' @examples
@@ -494,6 +523,9 @@ getNearestNeighborListsSeurat = function(f, graph=defaultGraph(f)){
 #' neighborsAgain = getGeneNeighbors("Ccl6",NN)
 getGeneNeighbors = function(gene,NN)
 {
+    ## Somewhat of a fudge when NN is a NN graph:
+    NN = acceptor(NN)
+    
     if(inherits(NN,'Seurat'))
         NN = getNearestNeighborListsSeurat(NN)
 
@@ -830,7 +862,8 @@ annotateGeneAsVector = function(gene,geneSets,normalise=FALSE)
 #' @param genes - a character vector of genes
 #' @param geneSets - a set of annotations, e.g., hallmark
 #' or GO
-#' @param fPrime - a Seurat object of genes
+#' @param fPrime - a Seurat object of genes SingleCellExperiment 
+#' to be converted to a Seurat object
 #' @param radius - radius for prediction neighborhood
 #' @param metric - reduction or NN, defaults to umap
 #' @param numPCs - used only if reduction is pca, defaults to NULL
@@ -849,6 +882,7 @@ annotateGeneAsVector = function(gene,geneSets,normalise=FALSE)
 #' set.seed(100)
 #' genes = sample(colnames(STranspose),5)
 #' predictions = predictAnnotation(genes,hallmark,STranspose,radius=.5)
+#' predictions_sce = predictAnnotation(genes,hallmark,STranspose_sce,radius=.5)
 predictAnnotation = function(genes,
                              geneSets,
                              fPrime,
@@ -859,6 +893,8 @@ predictAnnotation = function(genes,
                              normaliseByDistance=TRUE,
                              normaliseToUnitVector=TRUE)
 {
+    fPrime = acceptor(fPrime)
+    
     genesAnno = annotateGenesByGeneSet(geneSets)
 
     predictions = list()
@@ -897,7 +933,8 @@ predictAnnotation = function(genes,
 #' neighbours.
 #'
 #' @param gene - gene to annotate
-#' @param fPrime - a Seurat object of genes
+#' @param fPrime - a Seurat object of genes or
+#' SingleCellExperiment to be converted to a Seurat object
 #' @param genesAnno - genes annotated with gene sets
 #' @param radius - radius of neighbours to consider
 #' @param metric - which metric to use to discover
@@ -919,6 +956,8 @@ predictGeneAnnotationImpl = function(gene,fPrime,genesAnno,
                                      radius,metric,numPCs=NULL,
                                      normaliseByDistance=TRUE)
 {
+    fPrime = acceptor(fPrime)
+    
     predictedTerms = list()
 
     ## Use weights only in this case:
@@ -962,7 +1001,8 @@ predictGeneAnnotationImpl = function(gene,fPrime,genesAnno,
 #'
 #' @param geneSets - a set of gene sets, e.g., hallmark
 #' @param fPrime - a transposed Seurat object (generated with 
-#' transposeSeuratObject())
+#' transposeSeuratObject()) or SingleCellExperiment to
+#' be converted to a Seurat object
 #' @param radius - radius of the region to use for prediction
 #' @param metric - reduction or NN, defaults to umap
 #' @param normaliseByGeneSet - normalise by size of each gene set,
@@ -984,6 +1024,8 @@ predictAnnotationAllGenes = function(geneSets,
                                      normaliseByDistance=TRUE,
                                      normaliseToUnitVector=TRUE)
 {
+
+    fPrime = acceptor(fPrime)
     genes = colnames(fPrime)
     
     return(predictAnnotation(genes,
@@ -1003,7 +1045,8 @@ predictAnnotationAllGenes = function(geneSets,
 #' the set.
 #'
 #' @param fPrime - a transposed Seurat object, i.e. a
-#' Seurat object of genes
+#' Seurat object of genes or SingleCellExperiment to
+#' be converted to a Seurat object
 #' @param geneSubset - a subset of the genes which can
 #' be given as a character vector as a logical vector
 #' @param numTrials - the number of random trials to be
@@ -1021,11 +1064,13 @@ predictAnnotationAllGenes = function(geneSets,
 #' geneSubset = intersect(colnames(STranspose),hallmark[[1]])
 #' p = getSeuratSubsetClusteringPValue(STranspose,geneSubset,100)
 getSeuratSubsetClusteringPValue = function(fPrime,
-                                     geneSubset,
-                                     numTrials=1000,
-                                     reduction='UMAP',
-                                     numPCs=10)
+                                           geneSubset,
+                                           numTrials=1000,
+                                           reduction='UMAP',
+                                           numPCs=10)
 {
+    fPrime = acceptor(fPrime)
+    
     ## Test for non-empty subset:
     if(isa(geneSubset,'logical'))
         numInSubset = sum(geneSubset)
@@ -1051,7 +1096,8 @@ getSeuratSubsetClusteringPValue = function(fPrime,
 #' the set.
 #'
 #' @param fPrime - a transposed Seurat object, i.e. a
-#' Seurat object of genes
+#' Seurat object of genes or SingleCellExperiment to
+#' be converted to a Seurat object
 #' @param geneSubset - a subset of the genes which can
 #' be given as a character vector as a logical vector
 #' @param numTrials - the number of random trials to be
@@ -1078,6 +1124,8 @@ getSeuratSubsetClusteringStatistics = function(fPrime,
                                                reduction='UMAP',
                                                numPCs=10)
 {
+    fPrime = acceptor(fPrime)
+    
     if(reduction == 'UMAP')
         S = fetchUMAP(fPrime)
 
@@ -1187,7 +1235,8 @@ medianComplementDistance = function(S,geneSubset)
 #' This finds the genes near a give subset using either
 #' a dimensional reduction or the nearest neighbor graph
 #'
-#' @param fPrime - a Seurat object of genes
+#' @param fPrime - a Seurat object of genes or
+#' SingleCellExperiment to be converted to a Seurat object
 #' @param geneSet - set of genes
 #' @param metric - the metric to use, one of umap, tsne,
 #' pca or nearest neighbor
@@ -1206,6 +1255,8 @@ getNearbyGenes = function(fPrime,geneSet,radius,metric='umap',
                        numPCs=NULL,weights=FALSE)
 {
     stopifnot(metric %in% c('umap','tsne','pca','NN'))
+
+    fPrime = acceptor(fPrime)
 
     ## ####################################################
     ## Combinatorial with weights:
@@ -1283,8 +1334,10 @@ nearbyGenesWeighted = function(fPrime,gene)
 #' This function paints gene expression for a
 #' given gene cluster on cell umap.
 #'
-#' @param f - a Seurat object of cells
+#' @param f - a Seurat object of cells or SingleCellExperiment to
+#' be converted to a Seurat object
 #' @param fPrime - the corresponding Seurat object of genes
+#' SingleCellExperiment to be converted to a Seurat object
 #' @param geneCluster - a gene cluster of fPrime
 #' @return This returns a ggplot object
 #' @import ggplot2
@@ -1293,6 +1346,9 @@ nearbyGenesWeighted = function(fPrime,gene)
 #' g = meanGeneClusterOnCellUMAP(S,STranspose,geneCluster=0)
 meanGeneClusterOnCellUMAP = function(f,fPrime,geneCluster)
 {
+    f = acceptor(f)
+    fPrime = acceptor(fPrime)
+    
     plotDF = fetchUMAP(f)
     idx = fPrime$seurat_clusters == geneCluster
     genes = colnames(fPrime)[idx]
@@ -1311,6 +1367,8 @@ meanGeneClusterOnCellUMAP = function(f,fPrime,geneCluster)
 fetchUMAP = function(f)
 {
     umapIsCalled = names(f@reductions$umap)
+    if(is.null(umapIsCalled))
+        umapIsCalled = names(f@reductions$UMAP)
     df = FetchData(f,umapIsCalled)
 
     return(df)

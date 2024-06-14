@@ -7,7 +7,12 @@ each point represents an edge between cells, and spatial coordinates are the
 centroids of edges between cells. The "expression matrix" is the
 binarised presence/absence of an interaction (ligand receptor pair) on an edge.}
 \usage{
-computeEdgeSeurat(ligandReceptorResults, centroids, npcs = 10)
+computeEdgeSeurat(
+  ligandReceptorResults,
+  centroids,
+  npcs = 10,
+  returnType = "Seurat"
+)
 }
 \arguments{
 \item{ligandReceptorResults}{\itemize{
@@ -23,12 +28,18 @@ contain x and y coordinates respectively.
 \item{npcs}{\itemize{
 \item number of pcs used for PCA, defaults to 10
 }}
+
+\item{returnType}{Determines whether to return a Seurat object or a
+SpatialExperiment.  Will do the later if this is set to either SCE,
+SingleCellExperiment or lower case versions of either.}
 }
 \value{
 This returns a seurat object where
 each point represents an edge between cells, and spatial coordinates are the
 centroids of edges between cells. The "expression matrix" is the
 binarised presence/absence of an interaction (ligand receptor pair) on an edge.
+Depending on the parameter returnType, this can alternatively be returned as
+a SpatialExperiment.
 }
 \description{
 This function takes interactionResults and creates a seurat object where

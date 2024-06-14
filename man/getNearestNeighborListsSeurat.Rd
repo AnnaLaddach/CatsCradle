@@ -9,7 +9,8 @@ getNearestNeighborListsSeurat(f, graph = defaultGraph(f))
 }
 \arguments{
 \item{f}{\itemize{
-\item a Seurat object
+\item a Seurat object or SingleCellExperiment to
+be converted to a Seurat object
 }}
 
 \item{graph}{\itemize{

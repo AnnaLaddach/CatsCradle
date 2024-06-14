@@ -15,11 +15,13 @@ getAverageExpressionMatrix(
 }
 \arguments{
 \item{f}{\itemize{
-\item The Seurat object of cells
+\item The Seurat object of cells, or SingleCellExperiment
+to be turned into a Seurat object
 }}
 
 \item{fPrime}{\itemize{
-\item The Seurat object of genes
+\item The Seurat object of genes,  or SingleCellExperiment
+to be turned into a Seurat object
 }}
 
 \item{v5}{\itemize{
@@ -47,4 +49,5 @@ each cell cluster and returns the result as a matrix
 }
 \examples{
 M = getAverageExpressionMatrix(S,STranspose,layer='data')
+M_sce = getAverageExpressionMatrix(S_sce,STranspose_sce,layer='data')
 }

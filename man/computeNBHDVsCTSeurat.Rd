@@ -11,7 +11,8 @@ computeNBHDVsCTSeurat(
   npcs = 10,
   n.neighbors = 30L,
   transpose = FALSE,
-  verbose = TRUE
+  verbose = TRUE,
+  returnType = "Seurat"
 )
 }
 \arguments{
@@ -39,10 +40,17 @@ transpose.
 \item{verbose}{\itemize{
 \item defaults to TRUE, used to limit trace if FALSE
 }}
+
+\item{returnType}{\itemize{
+\item Will return a SingleCellExperiment if this is either
+of SCE, SingleCellExperiment or their lower-case equivalents.  Otherwise,
+returns a Seurat object
+}}
 }
 \value{
 a seurat object based on a neighbourhood by cell type matrix or its
-transpose, containing clusters and UMAP.
+transpose, containing clusters and UMAP. This can also be a
+SingleCellExperiment depending on the parameter returnType.
 }
 \description{
 This function creates a seurat object using a neighbourhood by cell type
@@ -50,4 +58,5 @@ matrix
 }
 \examples{
 NBHDByCTSeurat = computeNBHDVsCTSeurat(NBHDByCTMatrix)
+NBHDByCTSeurat_sce = computeNBHDVsCTSeurat(NBHDByCTMatrix,returnType='SCE')
 }
