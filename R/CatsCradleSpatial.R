@@ -1084,7 +1084,7 @@ computeEdgeSeurat = function(ligandReceptorResults, centroids, npcs = 10,
   rownames(interactionsOnEdges) = paste0(interactionsOnEdges$nodeA, "-", interactionsOnEdges$nodeB)
   interactionsOnEdgesMat = as.matrix(interactionsOnEdges[,5:ncol(interactionsOnEdges)])
   interactionsOnEdgesMat= 1 * interactionsOnEdgesMat
-  edgeSeurat = CreateSeuratObject(t(interactionsOnEdgesMat), meta = interactionsOnEdges[,1:5])
+  edgeSeurat = CreateSeuratObject(t(interactionsOnEdgesMat), meta = interactionsOnEdges[,1:4])
   edgeCoords = as.data.frame(cbind(centroids[interactionsOnEdges$nodeA, 1:2], 
                                   centroids[interactionsOnEdges$nodeB, 1:2]))
   
