@@ -654,4 +654,31 @@ View ligand-receptor interaction with the lowest spatial autocorrelation (Moran'
 ImageFeaturePlot(edgeSeurat, "Sst-Gpr17")
 ```
 
-## 
+## Quality control of Delaunay neighbours
+
+We use Delaunay triangulation to estimate neighbour to neighbour
+contact between cells.  However, a cell which happens to sit next to a
+tissue void is likely to have one or more Delaunay neighbours which
+are cells that sit on the other side of this void.  We hope to detect
+these spurious edges based on their lengths.  However, the distances
+between cell centroids tend to depend on the types of the neighbouring
+cells.  Accordingly, we have supplied functions to annotate edges with
+their distances and cell types; compute estimates for edge-length
+cutoffs based on cell type pair; plot the distributions of lengths
+together with proposed cutoffs; and subset the edges based on
+cutoffs.
+
+### edgeLengthsAndCellTypePairs
+
+This functions annotates edges with their lengths and the cell types
+of the two cells in question.
+
+```{r}
+ annEdges =
+    edgeLengthsByCellTypePairs(delaunayNeighbours,clusters,centroids)
+ head(annEdges)
+ ```
+
+
+
+

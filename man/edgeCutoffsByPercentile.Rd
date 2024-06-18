@@ -9,7 +9,7 @@ edgeCutoffsByPercentile(annEdges, percentileCutoff)
 \arguments{
 \item{annEdges}{\itemize{
 \item a data frame with columns nodeA, nodeB, length
-and cellPairType as produced by edgeLengthsAndCellPairTypes.
+and cellTypePair as produced by edgeLengthsAndCellTypePairs.
 }}
 
 \item{percentileCutof}{\itemize{
@@ -25,6 +25,6 @@ This finds edge cutoffs by percentile
 }
 \examples{
 annEdges =
-    edgeLengthsAndCellPairTypes(delaunayNeighbours,clusters,centroids)
+    edgeLengthsAndCellTypePairs(delaunayNeighbours,clusters,centroids)
 cutoffDF = edgeCutoffsByPercentile(annEdges,percentileCutoff=95)
 }

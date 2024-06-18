@@ -9,13 +9,13 @@ cullEdges(annEdges, cutoffSpec)
 \arguments{
 \item{annEdges}{\itemize{
 \item a data frame with columns nodeA, nodeB, length
-and cellPairType as produced by edgeLengthsAndCellPairTypes.
+and cellTypePair as produced by edgeLengthsAndCellTypePairs.
 }}
 
 \item{cutoffSpec}{\itemize{
 \item This can be either a numeric value which will
 be applied across all edges as an upper limit or a data frame
-with columns cellPairType and cutoff as produced by any of the
+with columns cellTypePair and cutoff as produced by any of the
 edgeCutoffsBy functions
 }}
 }
@@ -27,7 +27,7 @@ This subsets edges by our chosen critera
 }
 \examples{
 annEdges =
-    edgeLengthsAndCellPairTypes(delaunayNeighbours,clusters,centroids)
+    edgeLengthsAndCellTypePairs(delaunayNeighbours,clusters,centroids)
 tolerance = 5
 nbins = 15
 cutoffDFWater = edgeCutoffsByWatershed(annEdges,

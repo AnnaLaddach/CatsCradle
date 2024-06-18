@@ -9,7 +9,7 @@ edgeCutoffsByZScore(annEdges, zCutoff)
 \arguments{
 \item{annEdges}{\itemize{
 \item a data frame with columns nodeA, nodeB, length
-and cellPairType as produced by edgeLengthsAndCellPairTypes.
+and cellTypePair as produced by edgeLengthsAndCellTypePairs.
 }}
 
 \item{zCutof}{\itemize{
@@ -25,6 +25,6 @@ This finds edge cutoffs by z-score
 }
 \examples{
 annEdges =
-    edgeLengthsAndCellPairTypes(delaunayNeighbours,clusters,centroids)
+    edgeLengthsAndCellTypePairs(delaunayNeighbours,clusters,centroids)
 cutoffDF = edgeCutoffsByZScore(annEdges,zCutoff=1.5)
 }

@@ -14,10 +14,10 @@ cutoff.
 }
 \description{
 @param annEdges - a data frame with columns nodeA, nodeB, length
-and cellPairType as produced by edgeLengthsAndCellPairTypes.
+and cellTypePair as produced by edgeLengthsAndCellTypePairs.
 }
 \examples{
 annEdges =
-    edgeLengthsAndCellPairTypes(delaunayNeighbours,clusters,centroids)
+    edgeLengthsAndCellTypePairs(delaunayNeighbours,clusters,centroids)
 cutoffDF = edgeCutoffsByClustering(annEdges)
 }

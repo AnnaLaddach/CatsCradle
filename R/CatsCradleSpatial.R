@@ -1450,7 +1450,7 @@ SeuratToSCE = function(f,spatial)
 #'     lengths and the cell type pair.
 #' @export
 #' @examples
-#' annEdges = edgeLengthsByCellTypePairs(delaunayNeighbours,
+#' annEdges = edgeLengthsAndCellTypePairs(delaunayNeighbours,
 #'                    clusters,centroids)
 edgeLengthsAndCellTypePairs = function(edges,clusters,centroids)
 {edgeCutoffsByPercentile
@@ -1487,13 +1487,13 @@ edgeLengthsAndCellTypePairs = function(edges,clusters,centroids)
 #' clustering with k  = 2
 #'
 #'  @param annEdges - a data frame with columns nodeA, nodeB, length
-#'     and cellPairType as produced by edgeLengthsAndCellPairTypes.
+#'     and cellTypePair as produced by edgeLengthsAndCellTypePairs.
 #' @return This returns a data frame with columns cellTypePair and
 #'     cutoff. 
 #' @export
 #' @examples
 #' annEdges =
-#'     edgeLengthsAndCellPairTypes(delaunayNeighbours,clusters,centroids)
+#'     edgeLengthsAndCellTypePairs(delaunayNeighbours,clusters,centroids)
 #' cutoffDF = edgeCutoffsByClustering(annEdges)
 edgeCutoffsByClustering = function(annEdges)
 {
@@ -1528,14 +1528,14 @@ edgeCutoffsByClustering = function(annEdges)
 #' This finds edge cutoffs by percentile
 #'
 #'@param annEdges - a data frame with columns nodeA, nodeB, length
-#'     and cellPairType as produced by edgeLengthsAndCellPairTypes.
+#'     and cellTypePair as produced by edgeLengthsAndCellTypePairs.
 #' @param percentileCutof - a numeric
 #' @return This returns a data frame with columns cellTypePair and
 #'     cutoff.
 #' @export
 #' @examples
 #' annEdges =
-#'     edgeLengthsAndCellPairTypes(delaunayNeighbours,clusters,centroids)
+#'     edgeLengthsAndCellTypePairs(delaunayNeighbours,clusters,centroids)
 #' cutoffDF = edgeCutoffsByPercentile(annEdges,percentileCutoff=95)
 edgeCutoffsByPercentile = function(annEdges,
                                    percentileCutoff)
@@ -1565,14 +1565,14 @@ edgeCutoffsByPercentile = function(annEdges,
 #' This finds edge cutoffs by z-score
 #'
 #'@param annEdges - a data frame with columns nodeA, nodeB, length
-#'     and cellPairType as produced by edgeLengthsAndCellPairTypes.
+#'     and cellTypePair as produced by edgeLengthsAndCellTypePairs.
 #' @param zCutof - a numeric
 #' @return This returns a data frame with columns cellTypePair and
 #'     cutoff.
 #' @export
 #' @examples
 #' annEdges =
-#'     edgeLengthsAndCellPairTypes(delaunayNeighbours,clusters,centroids)
+#'     edgeLengthsAndCellTypePairs(delaunayNeighbours,clusters,centroids)
 #' cutoffDF = edgeCutoffsByZScore(annEdges,zCutoff=1.5)
 edgeCutoffsByZScore = function(annEdges,zCutoff)
 {
@@ -1586,7 +1586,17 @@ edgeCutoffsByZScore = function(annEdges,zCutoff)
 
         cutoff[ctp] = mean(lengths) + zCutoff * std(lengths)
     }
-    cutoffDF = data.frame(cellTypePair=names(cutoff),
+    cutoffDF = da
+use_data(S,
+         overwrite=TRUE,
+         compress='bzip2')
+use_data(STranspose,
+         overwrite=TRUE,
+         compress='bzip2')
+
+
+                         
+ta.frame(cellTypePair=names(cutoff),
                           cutoff)
 
     return(cutoffDF)       
@@ -1600,7 +1610,7 @@ edgeCutoffsByZScore = function(annEdges,zCutoff)
 #' histogram containing the median.
 #'
 #' @param annEdges - a data frame with columns nodeA, nodeB, length
-#'     and cellPairType as produced by edgeLengthsAndCellPairTypes.
+#'     and cellTypePair as produced by edgeLengthsAndCellTypePairs.
 #' @param tolerance - the tolerance parameter for the watershed
 #'     algorithm.
 #' @param nbins - the number of bins for the histogram
@@ -1610,7 +1620,7 @@ edgeCutoffsByZScore = function(annEdges,zCutoff)
 #' @export
 #' @examples
 #' annEdges =
-#'     edgeLengthsAndCellPairTypes(delaunayNeighbours,clusters,centroids)
+#'     edgeLengthsAndCellTypePairs(delaunayNeighbours,clusters,centroids)
 #' cutoffDF = edgeCutoffsByWatershed(annEdges)
 edgeCutoffsByWatershed = function(annEdges,tolerance=10,nbins=15)
 {
@@ -1678,7 +1688,7 @@ edgeLengthPlot = function(annEdges,
     ## All:
     if(is.null(whichPairs))
     {
-        useThesPairs = unique(annEdges$cellPairType)
+        useThesPairs = unique(annEdges$cellTypePair)
     }
 
     ## Sufficiently large:
@@ -1731,16 +1741,16 @@ edgeLengthPlot = function(annEdges,
 #' This subsets edges by our chosen critera
 #'
 #' @param annEdges - a data frame with columns nodeA, nodeB, length
-#'     and cellPairType as produced by edgeLengthsAndCellPairTypes.
+#'     and cellTypePair as produced by edgeLengthsAndCellTypePairs.
 #' @param cutoffSpec - This can be either a numeric value which will
 #'     be applied across all edges as an upper limit or a data frame
-#'     with columns cellPairType and cutoff as produced by any of the
+#'     with columns cellTypePair and cutoff as produced by any of the
 #'     edgeCutoffsBy functions
 #' @return This returns a subset of the annotated edges
 #' @export
 #' @examples
 #' annEdges =
-#'     edgeLengthsAndCellPairTypes(delaunayNeighbours,clusters,centroids)
+#'     edgeLengthsAndCellTypePairs(delaunayNeighbours,clusters,centroids)
 #' tolerance = 5
 #' nbins = 15
 #' cutoffDFWater = edgeCutoffsByWatershed(annEdges,

@@ -37,7 +37,8 @@ Imports: Seurat,
 	 fossil,
 	 SingleCellExperiment,
 	 SpatialExperiment,
-	 S4Vectors
+	 S4Vectors,
+	 EBImage
 Depends: 
     R (>= 4.0)
 LazyData: true

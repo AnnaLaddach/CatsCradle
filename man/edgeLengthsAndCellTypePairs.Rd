@@ -30,6 +30,6 @@ This function annotates edges with their distance and
 the types of cells they connect
 }
 \examples{
-annEdges = edgeLengthsByCellTypePairs(delaunayNeighbours,
+annEdges = edgeLengthsAndCellTypePairs(delaunayNeighbours,
                    clusters,centroids)
 }
