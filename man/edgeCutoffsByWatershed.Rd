@@ -7,7 +7,7 @@ the histogram of edge lengths for each cell type pair and
 then using the watershed algorithm to find the hump of the
 histogram containing the median.}
 \usage{
-edgeCutoffsByWatershed(annEdges, tolerance = 10, nbins = 15)
+edgeCutoffsByWatershed(annEdges, nbins = 15, tolerance = 10)
 }
 \arguments{
 \item{annEdges}{\itemize{
@@ -15,13 +15,13 @@ edgeCutoffsByWatershed(annEdges, tolerance = 10, nbins = 15)
 and cellTypePair as produced by edgeLengthsAndCellTypePairs.
 }}
 
+\item{nbins}{\itemize{
+\item the number of bins for the histogram
+}}
+
 \item{tolerance}{\itemize{
 \item the tolerance parameter for the watershed
 algorithm.
-}}
-
-\item{nbins}{\itemize{
-\item the number of bins for the histogram
 }}
 }
 \value{

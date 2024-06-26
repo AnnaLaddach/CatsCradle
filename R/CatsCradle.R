@@ -410,6 +410,7 @@ sankeyFromMatrix = function(M,disambiguation=c('R_','C_'),
 #' @param cells - the cells to compute this for
 #' @param geneClusters - the geneClusters to compute average
 #' expression for
+#' @param layer - the data layer to use, defaults to 'data'
 #' @return A matrix where the rows correspond to cells, the columns
 #' correspond to geneClusters and the entries give average expression
 #' for each cluster in each cell
@@ -420,7 +421,8 @@ sankeyFromMatrix = function(M,disambiguation=c('R_','C_'),
 getGeneClusterAveragesPerCell = function(f,
                                          fPrime,
                                          cells=colnames(f),
-                                         geneClusters=getClusterOrder(fPrime))
+                                         geneClusters=getClusterOrder(fPrime),
+                                         layer='data')
 {
     f = acceptor(f)
     fPrime = acceptor(fPrime)
@@ -434,7 +436,7 @@ getGeneClusterAveragesPerCell = function(f,
         cluster = geneClusters[i]
         idx = fPrime$seurat_clusters == cluster
         theseGenes = colnames(fPrime)[idx]
-        expression = data.matrix(FetchData(f,theseGenes))
+        expression = data.matrix(FetchData(f,theseGenes,layer=layer))
         expression = expression[rownames(expression) %in% cells,]
 
         M[,i] = rowMeans(expression)

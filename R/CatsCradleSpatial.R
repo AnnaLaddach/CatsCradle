@@ -1436,7 +1436,7 @@ SeuratToSCE = function(f,spatial)
 
 ## ####################################################
 ## Functions for quality control of neighbouring cells
-
+## ####################################################
 
 ## ####################################################
 #' This function annotates edges with their distance and
@@ -1453,7 +1453,7 @@ SeuratToSCE = function(f,spatial)
 #' annEdges = edgeLengthsAndCellTypePairs(delaunayNeighbours,
 #'                    clusters,centroids)
 edgeLengthsAndCellTypePairs = function(edges,clusters,centroids)
-{edgeCutoffsByPercentile
+{
     centr = data.matrix(centroids[,1:2])
     delta = centr[edges$nodeA,] - centr[edges$nodeB,]
 
@@ -1586,17 +1586,7 @@ edgeCutoffsByZScore = function(annEdges,zCutoff)
 
         cutoff[ctp] = mean(lengths) + zCutoff * std(lengths)
     }
-    cutoffDF = da
-use_data(S,
-         overwrite=TRUE,
-         compress='bzip2')
-use_data(STranspose,
-         overwrite=TRUE,
-         compress='bzip2')
-
-
-                         
-ta.frame(cellTypePair=names(cutoff),
+    cutoffDF = data.frame(cellTypePair=names(cutoff),
                           cutoff)
 
     return(cutoffDF)       
@@ -1622,7 +1612,7 @@ ta.frame(cellTypePair=names(cutoff),
 #' annEdges =
 #'     edgeLengthsAndCellTypePairs(delaunayNeighbours,clusters,centroids)
 #' cutoffDF = edgeCutoffsByWatershed(annEdges)
-edgeCutoffsByWatershed = function(annEdges,tolerance=10,nbins=15)
+edgeCutoffsByWatershed = function(annEdges,nbins=15,tolerance=10)
 {
     cellTypePairs = unique(annEdges$cellTypePair)
     cutoff = c()
@@ -1631,7 +1621,7 @@ edgeCutoffsByWatershed = function(annEdges,tolerance=10,nbins=15)
     {
         lengths = annEdges$length[annEdges$cellTypePair == ctp]
         
-        a = hist(lengths,nbins)
+        a = hist(lengths,nbins,plot=FALSE)
         d = a$density
         d = matrix(d,nrow=1)
         res = watershed(d,tolerance)
@@ -1639,10 +1629,21 @@ edgeCutoffsByWatershed = function(annEdges,tolerance=10,nbins=15)
         med = median(lengths)
         ## Where median occurs:
         idx = a$mids >= med
-        clusteredAs = res[min(which(idx))]
-        upTo = max(which(res == clusteredAs))
-        
-        cutoff[ctp] = a$mid[upTo+1]
+
+        ## Maybe there are no bins beyond the median:
+        if(sum(idx) == 0)
+        {
+            delta = a$mids[2] - a$mids[1]
+            cutoff[ctp] = a$mids[length(a$mids)] + delta
+            next
+        }
+        clusteredAs = res[min(which(idx),na.rm=TRUE)]
+        upTo = max(which(res == clusteredAs),na.rm=TRUE)
+
+        if(length(a$mid) == upTo)
+            cutoff[ctp] = a$mid[upTo]
+        else
+            cutoff[ctp] = a$mid[upTo+1]
     }
     cutoffDF = data.frame(cellTypePair=names(cutoff),
                           cutoff)
@@ -1675,7 +1676,8 @@ edgeCutoffsByWatershed = function(annEdges,tolerance=10,nbins=15)
 #' @examples
 #' annEdges = edgeLengthsAndCellTypePairs(delaunayNeighbours,
 #'                    clusters,centroids)
-#' g = edgeLengthHistogram(annEdges,minEdges=40)
+#' cutoffDF = edgeCutoffsByPercentile(annEdges,95)
+#' g = edgeLengthPlot(annEdges,cutoffDF,whichPairs=60)
 edgeLengthPlot = function(annEdges,
                           cutoffDF,
                           whichPairs,
