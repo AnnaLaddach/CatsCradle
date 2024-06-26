@@ -16,6 +16,9 @@ knitr::opts_chunk$set(
     comment = "#>"
 )
 ```
+![](CatsCradleLogo.png){width=2in}
+
+
 ## Introduction
 
 CatsCradle provides two types of functionality for analysing single

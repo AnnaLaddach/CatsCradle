@@ -45,5 +45,6 @@ optionally plots a cutoff for each pair of types.
 \examples{
 annEdges = edgeLengthsAndCellTypePairs(delaunayNeighbours,
                    clusters,centroids)
-g = edgeLengthHistogram(annEdges,minEdges=40)
+cutoffDF = edgeCutoffsByPercentile(annEdges,95)
+g = edgeLengthPlot(annEdges,cutoffDF,whichPairs=60)
 }

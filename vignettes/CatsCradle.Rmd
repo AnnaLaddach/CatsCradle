@@ -16,6 +16,9 @@ knitr::opts_chunk$set(
 )
 ```
 
+![](CatsCradleLogo.png){width=2in}
+
+
 ## Introduction
 
 Here we describe the functionality in this package concerned with

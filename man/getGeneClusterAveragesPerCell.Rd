@@ -10,7 +10,8 @@ getGeneClusterAveragesPerCell(
   f,
   fPrime,
   cells = colnames(f),
-  geneClusters = getClusterOrder(fPrime)
+  geneClusters = getClusterOrder(fPrime),
+  layer = "data"
 )
 }
 \arguments{
@@ -31,6 +32,10 @@ turned into a Seurat object
 \item{geneClusters}{\itemize{
 \item the geneClusters to compute average
 expression for
+}}
+
+\item{layer}{\itemize{
+\item the data layer to use, defaults to 'data'
 }}
 }
 \value{
