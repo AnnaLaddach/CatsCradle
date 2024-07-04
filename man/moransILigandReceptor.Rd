@@ -5,14 +5,6 @@
 \alias{moransILigandReceptor}
 \title{moransILigandReceptor}
 \format{
-A data fame containing Moran's I for ligand receptor pairs and
-related pvalues.
-
-\describe{
-Moran's I values calculated for the ligand receptor pairs in edgeSeurat.
-Pvalues derived using 100 permutations.
-}
-
 A data frame showing the spatial autocorrelation of the
 28 ligand receptor pairs
 
@@ -22,21 +14,14 @@ and pValues
 }
 }
 \source{
-Created from edgeSeurat and edgeNeighbours by using runMoransI()
-
 Computed using the function runMoransI on the object edgeSeurat and
 neighbours edgeNeighbours = computeEdgeGraph(delaunayNeighbours) with 100 trials.
 For more informations see the CatsCradleSpatial vignette.
 }
 \usage{
 moransILigandReceptor
-
-moransILigandReceptor
 }
 \description{
-A data fame containing Moran's I for the spatial distribution of the presence
-of ligand receptor pairs on edges.
-
-Moran's I for ligand receptor pairs
+Moran's I for the ligand receptor pairs
 }
 \keyword{datasets}

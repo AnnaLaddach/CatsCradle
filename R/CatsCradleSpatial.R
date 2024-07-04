@@ -138,7 +138,7 @@ extractCells = function(NN)
 #' maximum distance within each neighbourhood
 #' @export
 #' @examples
-#' cells = unique(c(delaunayNeighbours$nodeA,delaunayNeighbours$nodeB))
+#' cells = unique(c(delaunayNeighbours[,'nodeA'],delaunayNeighbours[,'nodeB']))
 #' nbhds = nbhdsAsEdgesToNbhdsAsList(cells,delaunayNeighbours)
 #' diameters = neighbourhoodDiameter(nbhds[1:100],centroids)
 neighbourhoodDiameter = function(neighbourhoods,centroids)
@@ -415,9 +415,10 @@ computeCellTypesPerCellTypeMatrix = function(nbhdByCellType,cellTypes)
 #' the cell types and whose arrows indicate "ownership" of
 #' cells of the target type by neighbourhoods of cells of the
 #' source type.  Layout is done witht the FR algorithm and
-#' coordinates are found in G$coords.  If colours were supplied
-#' these are found in V(G)$color.  Edge weights and widths are
-#' found in E(G)$weight and E(G)$width.
+#' coordinates are found in the coords attribute of G.  If colours
+#' were supplied these are found in color attribute of V(G).  Edge
+#' weights and widths are found in the weight and width attributes
+#' of E(G).
 #' @export
 #' @examples
 #' G = cellTypesPerCellTypeGraphFromCellMatrix(cellTypesPerCellTypeMatrix, 
@@ -496,9 +497,10 @@ cellTypesPerCellTypeGraphFromCellMatrix = function(M,
 #' the cell types and whose arrows indicate "ownership" of
 #' cells of the target type by neighbourhoods of cells of the
 #' source type.  Layout is done witht the FR algorithm and
-#' coordinates are found in G$coords.  If colours were supplied
-#' these are found in V(G)$color.  Edge weights and widths are
-#' found in E(G)$weight and E(G)$width. 
+#' coordinates are found in the coords attribute of G.  If colours
+#' were supplied these are found in the color attribute of V(G).
+#' Edge weights and widths are found in the weight and width
+#' attributes of E(G).
 #' @export
 cellTypesPerCellTypeGraphFromNbhdMatrix = function(nbhdByCellType,
                                                    clusters,
@@ -1131,7 +1133,7 @@ computeEdgeSeurat = function(ligandReceptorResults, centroids, npcs = 10,
 #' of cells
 #' @export
 #' @examples
-#' cells = unique(c(delaunayNeighbours$nodeA,delaunayNeighbours$nodeB))
+#' cells = unique(c(delaunayNeighbours[,'nodeA'],delaunayNeighbours[,'nodeB']))
 #' nbhdsList = nbhdsAsEdgesToNbhdsAsList(cells,delaunayNeighbours)
 nbhdsAsEdgesToNbhdsAsList = function(cells,
                                      neighbourhoods)
@@ -1246,9 +1248,6 @@ aggregateFeatureMatrix = function(M, nbhdList, aggregateFunction)
 #' @param M - a matrix where column names are cells and row names are features.
 #' @param nbhdList - a named list with memberships of the neighbourhoods
 #' of cells
-## #' @param aggregateFunction - a function to aggregate expression (e.g. rowSums,
-#' rowMeans)
-
 #' @return a matrix giving aggregated gene expression for a cell's neighbourhood.
 #' @export
 computeMoransI = function(M,nbhdList){
@@ -1486,7 +1485,7 @@ edgeLengthsAndCellTypePairs = function(edges,clusters,centroids)
 #' the lengths of the edges for each cell type pair using k-means
 #' clustering with k  = 2
 #'
-#'  @param annEdges - a data frame with columns nodeA, nodeB, length
+#' @param annEdges - a data frame with columns nodeA, nodeB, length
 #'     and cellTypePair as produced by edgeLengthsAndCellTypePairs.
 #' @return This returns a data frame with columns cellTypePair and
 #'     cutoff. 
@@ -1529,7 +1528,7 @@ edgeCutoffsByClustering = function(annEdges)
 #'
 #'@param annEdges - a data frame with columns nodeA, nodeB, length
 #'     and cellTypePair as produced by edgeLengthsAndCellTypePairs.
-#' @param percentileCutof - a numeric
+#' @param percentileCutoff - a numeric
 #' @return This returns a data frame with columns cellTypePair and
 #'     cutoff.
 #' @export
@@ -1566,7 +1565,7 @@ edgeCutoffsByPercentile = function(annEdges,
 #'
 #'@param annEdges - a data frame with columns nodeA, nodeB, length
 #'     and cellTypePair as produced by edgeLengthsAndCellTypePairs.
-#' @param zCutof - a numeric
+#' @param zCutoff - a numeric
 #' @return This returns a data frame with columns cellTypePair and
 #'     cutoff.
 #' @export
@@ -1668,7 +1667,7 @@ edgeCutoffsByWatershed = function(annEdges,nbins=15,tolerance=10)
 #'     we plot all pairs.  If this is a numeric, we plot only pairs
 #'     that have at least this many edges.  If this is a character
 #'     vector, we plot the pairs in this list.
-#' @param xlim - limits the extent of the plots. Defaults to 100.  Can
+#' @param xLim - limits the extent of the plots. Defaults to 100.  Can
 #'     be set to NULL.
 #' @param legend - Show legend, defaults to FALSE
 #' @return This returns a ggplot object

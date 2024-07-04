@@ -71,9 +71,10 @@ This returns a directed igraph whose vertices are
 the cell types and whose arrows indicate "ownership" of
 cells of the target type by neighbourhoods of cells of the
 source type.  Layout is done witht the FR algorithm and
-coordinates are found in G$coords.  If colours were supplied
-these are found in V(G)$color.  Edge weights and widths are
-found in E(G)$weight and E(G)$width.
+coordinates are found in the coords attribute of G.  If colours
+were supplied these are found in color attribute of V(G).  Edge
+weights and widths are found in the weight and width attributes
+of E(G).
 }
 \description{
 This function converts a matrix as found by

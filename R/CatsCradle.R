@@ -211,7 +211,7 @@ geneListPValue = function(A,B,C,background=25000)
 #' @export
 #' @examples
 #' clusterDF = data.frame(gene=colnames(STranspose),
-#'                        geneCluster=STranspose$seurat_clusters)
+#'                        geneCluster=STranspose[,'seurat_clusters'])
 #' geneSet = intersect(hallmark[[1]],colnames(STranspose))
 #' pvalueMatrix = geneSetsVsGeneClustersPValueMatrix(geneSet,
 #'                                               clusterDF,
@@ -632,7 +632,6 @@ randomiseNodeIndices = function(neighborListDf, n = 100, useWeights = F){
 #' @param NN - a nearest neighbor graph.  This is in the form
 #' of a data frame  as returned by getNearestNeighborListsSeurat.
 #' Its coloumns include nodeA and nodeB.
-#'
 #' @return TRUE or FALSE
 #' @export
 #' @examples
@@ -1101,7 +1100,7 @@ getSeuratSubsetClusteringPValue = function(fPrime,
 #' Seurat object of genes or SingleCellExperiment to
 #' be converted to a Seurat object
 #' @param geneSubset - a subset of the genes which can
-#' be given as a character vector as a logical vector
+#' be given as a character vector or as a logical vector
 #' @param numTrials - the number of random trials to be
 #' carried out for randomised testing. Defaults to 1000.
 #' @param reduction - can be 'UMAP' or 'PCA', defaults

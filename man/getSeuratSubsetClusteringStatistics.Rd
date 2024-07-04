@@ -24,7 +24,7 @@ be converted to a Seurat object
 
 \item{geneSubset}{\itemize{
 \item a subset of the genes which can
-be given as a character vector as a logical vector
+be given as a character vector or as a logical vector
 }}
 
 \item{numTrials}{\itemize{

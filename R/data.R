@@ -426,29 +426,6 @@
 "cellTypesPerCellTypePValues"
 
 
-
-## ####################################################
-#' cellTypesPerCellTypeMatrixExtended
-#'
-#' For each cell type, this matrix shows the fraction
-#' of the extended neighbourhoods of that cell type composed of
-#' each cell type.
-#'
-#' @format A matrix whose rows and columns correspond to
-#' cell types.
-#'
-#' \describe{
-#' Each row of this matrix corresponds to a cell type.  On
-#' that row we see the proportions of all neighbourhoods
-#' surrounding cells of that cell type as regards the cell types
-#' they contain.  In particular, each row sums to 1.
-#' }
-#'
-#' @source This is created from NBHDByCTMatrixExtended and the clusters
-#' using cellTypesPerCellTypeMatrix()
-"cellTypesPerCellTypeMatrix"
-
-
 ## ####################################################
 #' colours
 #'
@@ -522,24 +499,6 @@
 
 
 ## ####################################################
-#' moransILigandReceptor
-#'
-#' A data fame containing Moran's I for the spatial distribution of the presence 
-#' of ligand receptor pairs on edges.
-#'
-#' @format A data fame containing Moran's I for ligand receptor pairs and 
-#' related pvalues.
-#'
-#' \describe{
-#' Moran's I values calculated for the ligand receptor pairs in edgeSeurat. 
-#' Pvalues derived using 100 permutations.
-#' }
-#'
-#' @source Created from edgeSeurat and edgeNeighbours by using runMoransI()
-"moransILigandReceptor"
-
-
-## ####################################################
 #' ligandReceptorResults
 #'
 #' The result of performLigandReceptorAnalysis(smallXenium, delaunayNeighbours, 
@@ -603,7 +562,7 @@
 ## ####################################################
 #' moransILigandReceptor
 #' 
-#' Moran's I for ligand receptor pairs
+#' Moran's I for the ligand receptor pairs
 #'
 #' @format A data frame showing the spatial autocorrelation of the
 #' 28 ligand receptor pairs
@@ -617,3 +576,5 @@
 #' neighbours edgeNeighbours = computeEdgeGraph(delaunayNeighbours) with 100 trials.
 #' For more informations see the CatsCradleSpatial vignette.
 "moransILigandReceptor"
+
+

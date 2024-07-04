@@ -15,7 +15,6 @@ computeMoransI(M, nbhdList)
 \item{nbhdList}{\itemize{
 \item a named list with memberships of the neighbourhoods
 of cells
-rowMeans)
 }}
 }
 \value{
