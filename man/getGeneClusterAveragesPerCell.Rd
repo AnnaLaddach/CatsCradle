@@ -10,16 +10,19 @@ getGeneClusterAveragesPerCell(
   f,
   fPrime,
   cells = colnames(f),
-  geneClusters = getClusterOrder(fPrime)
+  geneClusters = getClusterOrder(fPrime),
+  layer = "data"
 )
 }
 \arguments{
 \item{f}{\itemize{
-\item the cell Seurat object
+\item the cell Seurat object or SingleCellExperiment to be
+turned into a Seurat object
 }}
 
 \item{fPrime}{\itemize{
-\item the genes Seurat object
+\item the genes Seurat object or SingleCellExperiment to be
+turned into a Seurat object
 }}
 
 \item{cells}{\itemize{
@@ -29,6 +32,10 @@ getGeneClusterAveragesPerCell(
 \item{geneClusters}{\itemize{
 \item the geneClusters to compute average
 expression for
+}}
+
+\item{layer}{\itemize{
+\item the data layer to use, defaults to 'data'
 }}
 }
 \value{
@@ -42,5 +49,10 @@ clusters in cells.  By default, it uses all cells and all gene
 clusters.
 }
 \examples{
+getExample = make.getExample()
+STranspose = getExample('STranspose')
+S_sce = getExample('S_sce')
+STranspose_sce = getExample('STranspose_sce')
 clusterExpression = getGeneClusterAveragesPerCell(S,STranspose)
+clusterExpression_sce = getGeneClusterAveragesPerCell(S_sce,STranspose_sce)
 }

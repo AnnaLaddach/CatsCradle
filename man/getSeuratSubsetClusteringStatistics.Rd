@@ -18,12 +18,13 @@ getSeuratSubsetClusteringStatistics(
 \arguments{
 \item{fPrime}{\itemize{
 \item a transposed Seurat object, i.e. a
-Seurat object of genes
+Seurat object of genes or SingleCellExperiment to
+be converted to a Seurat object
 }}
 
 \item{geneSubset}{\itemize{
 \item a subset of the genes which can
-be given as a character vector as a logical vector
+be given as a character vector or as a logical vector
 }}
 
 \item{numTrials}{\itemize{
@@ -58,6 +59,7 @@ based on the median distance from its complement to
 the set.
 }
 \examples{
+STranspose = make.getExample()('STranspose')
 geneSubset = intersect(colnames(STranspose),hallmark[[1]])
 stats = getSeuratSubsetClusteringStatistics(STranspose,geneSubset,100)
 }

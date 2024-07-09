@@ -17,6 +17,8 @@ knitr::opts_chunk$set(
 )
 ```
 
+![](CatsCradleLogo.png){width=2in}
+
 
 ## Introduction
 
@@ -252,7 +254,7 @@ symmetric.
 
 ```{r}
 cellTypesPerCellTypePValues = computeNeighbourEnrichment(delaunayNeighbours, 
-                                                     clusters, verbose = F)
+                                                     clusters, verbose = FALSE)
 ```
 
 
@@ -394,7 +396,7 @@ the low number of observations we need to set a lower value for n.neighbours.
 ```{r}
 CTByNBHDSeurat = 
   computeNBHDVsCTSeurat(t(NBHDByCTMatrix), npcs = 10, 
-                        transpose = T, resolution = 1, n.neighbors = 5,
+                        transpose = TRUE, resolution = 1, n.neighbors = 5,
 			verbose=FALSE)
 
 CTByNBHDSeurat$cellType = colnames(CTByNBHDSeurat)
@@ -628,19 +630,19 @@ edgeNeighbours = computeEdgeGraph(delaunayNeighbours)
 ```
 
 Compute Moran's I for the spatial autocorrelation of ligand-receptor interactions.
-```{r}
+```{r, eval=FALSE}
 moransILigandReceptor = runMoransI(edgeSeurat, edgeNeighbours, assay = "RNA", 
                      layer = "counts", nSim = 100)
 ```
 
 View most spatially autocorrelated ligand-receptor interactions.
 ```{r}
-head(moransILigRec)
+head(moransILigandReceptor)
 ```
 
 View least spatially autocorrelated ligand-receptor interactions.
 ```{r}
-tail(moransILigRec)
+tail(moransILigandReceptor)
 ```
 
 
@@ -653,4 +655,133 @@ View ligand-receptor interaction with the lowest spatial autocorrelation (Moran'
 ```{r}
 ImageFeaturePlot(edgeSeurat, "Sst-Gpr17")
 ```
+
+## Quality control of Delaunay neighbours
+
+We use Delaunay triangulation to estimate neighbour to neighbour
+contact between cells.  However, a cell which happens to sit next to a
+tissue void is likely to have one or more Delaunay neighbours which
+are cells that sit on the other side of this void.  We hope to detect
+these spurious edges based on their lengths.  However, the distances
+between neighbouring cells' centroids tend to depend on the types of
+the neighbouring cells.  Accordingly, we have supplied functions to
+annotate edges with their distances and cell types; compute estimates
+for edge-length cutoffs based on cell type pair; plot the
+distributions of lengths together with proposed cutoffs; and subset
+the edges based on cutoffs.
+
+### edgeLengthsAndCellTypePairs
+
+This functions annotates edges with their lengths and the cell types
+of the two cells in question.
+
+```{r}
+annEdges =
+edgeLengthsAndCellTypePairs(delaunayNeighbours,clusters,centroids)
+head(annEdges)
+```
+
+### Visualising the edge lengths
+
+Here we visualise the distribution of edge lengths together with
+proposed cutoffs.  We will say more in a moment about how these
+proposed cutoffs are calculated.
+
+```{r}
+cutoffDF = edgeCutoffsByPercentile(annEdges,percentileCutof=95)
+g = edgeLengthPlot(annEdges,cutoffDF,whichPairs=60)
+print(g)
+```
+
+In this case, there are 111 types of edges based on the cell types of
+the cells they connect.  By setting whichPairs=60, we are restricting
+to those types for which there are at least 60 such edges.  Here we
+are also using a default xlim of 100.  Passing the value NULL for
+cutoffDF will produce a plot without these cutoffs.
+
+### Estimating edge length cutoffs
+
+We offer several methods for estimating edge length cutoffs.  We
+recommend visual inspection before settling on any specific set of
+results. Each of these returns a data frame with two columns,
+cellTypePair and cutoff.  As we have just seen this can be used for
+the plotting function and it can also be used for culling the edges.
+Since these results are returned as a data frame, they can be tuned
+"by hand" by modifying the cutoff value for any individual cell type
+pair.
+
+#### edgeCutoffsByClustering
+
+```{r}
+cutoffDF = edgeCutoffsByClustering(annEdges)
+```
+
+
+This method works well in a small percentage of cases.  For each cell
+type pair it performs k-means clustering of the lengths with k=2 and
+produces a cutoff halfway between the two clusters.  This works well
+when there really are two clusters of edges, those between truly
+neighbouring cells and those across tissue voids.  However, in the
+case where all the edges are between neighbouring cells, this will
+produce a spurious cutoff.
+
+#### edgeCutoffsByPercentile
+
+
+```{r}
+cutoffDF = edgeCutoffsByPercentile(annEdges,percentileCutoff=95)
+```
+
+
+This method produces cutoffs based on a chosen percentile applied
+across all cell type pairs.  It has the advantages that its results
+are easily comprehensible in terms of the chosen parameter.  The user
+my want to "mix and match" using different percentiles for different
+cell type pairs.
+
+#### edgeCutoffsByZScore
+
+
+```{r}
+cutoffDF = edgeCutoffsByZScore(annEdges,zCutoff=1.5)
+```
+
+
+Very similar to the previous method, using z-score instead of
+percentile.
+
+#### edgeCutoffsByWatershed
+
+
+```{r}
+cutoffDF = edgeCutoffsByWatershed(annEdges,nbins=15,tolerance=10)
+```
+
+For each cell type pair, this function first computes a histogram of
+the distances.  It then uses watershed segmentation to discover the
+"humps" of this histogram.  The most important of these will be the
+one containing the median of the distances.  This reports as a cutoff
+the midpoint of the first histogram bin which is past this main hump.
+The parameter nbins specifies the number of bins for the histogram.
+The parameter tolerance controls the sensitivity of the watershed
+algorithm.  
+
+#### cullEdges
+
+```{r}
+cutoffDF = edgeCutoffsByWatershed(annEdges,nbins=15,tolerance=10)
+culledEdges = cullEdges(annEdges,cutoffDF)
+nrow(annEdges)
+nrow(culledEdges)
+```
+
+This subsets the edges according to the parameter cutoffSpec.  This
+can be a cutoff data frame as produced by any of the edgeCutoff
+functions or can be a single number in which case all the cell type
+pairs will be trimmed to the same cutoff.
+
+
+
+
+
 

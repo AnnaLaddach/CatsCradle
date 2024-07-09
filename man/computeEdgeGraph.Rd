@@ -29,5 +29,6 @@ edges become nodes and A-B edges (in the original graph) become connected to
 all A- edges and all B- edges.
 }
 \examples{
+delaunayNeighbours = make.getExample()('delaunayNeighbours')
 edgeNeighbours = computeEdgeGraph(delaunayNeighbours)
 }

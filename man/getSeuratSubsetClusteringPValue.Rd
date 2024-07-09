@@ -18,7 +18,8 @@ getSeuratSubsetClusteringPValue(
 \arguments{
 \item{fPrime}{\itemize{
 \item a transposed Seurat object, i.e. a
-Seurat object of genes
+Seurat object of genes or SingleCellExperiment to
+be converted to a Seurat object
 }}
 
 \item{geneSubset}{\itemize{
@@ -53,6 +54,7 @@ based on the median distance from its complement to
 the set.
 }
 \examples{
+STranspose = make.getExample()('STranspose')
 geneSubset = intersect(colnames(STranspose),hallmark[[1]])
 p = getSeuratSubsetClusteringPValue(STranspose,geneSubset,100)
 }

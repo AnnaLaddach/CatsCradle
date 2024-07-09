@@ -26,5 +26,6 @@ This function takes a nearest neighbour graph and a radius
 and calculates nth degree neighbour graphs where max(n) == radius
 }
 \examples{
+delaunayNeighbours = make.getExample()('delaunayNeighbours')
 extendedNeighboursList = getExtendedNBHDs(delaunayNeighbours, 4)
 }

@@ -30,7 +30,8 @@ or GO
 }}
 
 \item{fPrime}{\itemize{
-\item a Seurat object of genes
+\item a Seurat object of genes SingleCellExperiment
+to be converted to a Seurat object
 }}
 
 \item{radius}{\itemize{
@@ -73,7 +74,9 @@ and a CatsCradle object by considering the annotations of
 its neighboring genes.
 }
 \examples{
+STranspose = make.getExample()('STranspose')
 set.seed(100)
 genes = sample(colnames(STranspose),5)
 predictions = predictAnnotation(genes,hallmark,STranspose,radius=.5)
+predictions_sce = predictAnnotation(genes,hallmark,STranspose_sce,radius=.5)
 }

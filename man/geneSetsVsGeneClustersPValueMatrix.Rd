@@ -45,9 +45,11 @@ their overlaps when compared to a set of background
 genes.
 }
 \examples{
+getExamples = make.getExamples()
+STranspose = getExample('STranspose')
 clusterDF = data.frame(gene=colnames(STranspose),
-                       geneCluster=STranspose$seurat_clusters)
-geneSet = instersect(hallmark[[1]],colnames(STranspose))
+                       geneCluster=STranspose[,'seurat_clusters'])
+geneSet = intersect(hallmark[[1]],colnames(STranspose))
 pvalueMatrix = geneSetsVsGeneClustersPValueMatrix(geneSet,
                                               clusterDF,
                                               colnames(STranspose))

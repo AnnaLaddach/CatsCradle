@@ -1,5 +1,5 @@
 Package: CatsCradle
-Title: This package discovers gene clusters in Seurat data
+Title: This package provides methods for analysing spatial transcriptomics data and for discovering gene clusters.
 Version: 0.99.0
 Authors@R:
     person(given = "Anna",

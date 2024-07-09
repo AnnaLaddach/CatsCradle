@@ -50,6 +50,9 @@ neighbour graphs where edges are randomised but the degree of each node is
 preserved.
 }
 \examples{
+getExample = make.getExample()
+delaunayNeighbours = getExample('delaunayNeighbours')
+clusters = getExample('clusters')
 cellTypesPerCellTypePValues = computeNeighbourEnrichment(delaunayNeighbours, 
 clusters, nSim = 10, verbose = FALSE)
 }

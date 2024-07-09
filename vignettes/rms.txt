@@ -1,0 +1,11 @@
+rm actualVsRandomisedPredictions.png
+rm aggregationVsCelltypeNbhdClustering.png
+rm catsCradle.png
+rm cellClustersOnUMAP.png
+rm cellClustersVsGeneClusters.png
+rm combinatorialNearbyGenes.png
+rm g2mClusteringStats.png
+rm geneClustersOnUMAP.png
+rm hallmarkClusteringPValues.png
+rm hallmark_g2m_onUMAP.png
+rm nearbyGenes.png

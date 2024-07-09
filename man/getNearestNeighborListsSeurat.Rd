@@ -9,7 +9,8 @@ getNearestNeighborListsSeurat(f, graph = defaultGraph(f))
 }
 \arguments{
 \item{f}{\itemize{
-\item a Seurat object
+\item a Seurat object or SingleCellExperiment to
+be converted to a Seurat object
 }}
 
 \item{graph}{\itemize{
@@ -30,5 +31,6 @@ This function extracts a shared nearest neighbor network
 from a Seurat object
 }
 \examples{
+STranspose = make.getExample()('STranspose')
 NN = getNearestNeighborListsSeurat(STranspose)
 }

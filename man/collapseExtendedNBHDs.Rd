@@ -32,5 +32,6 @@ nearest neighbourhood graph where all neighbours of degree <= n in the
 original graph are considered first neighbours.
 }
 \examples{
+extendedNeighboursList = make.getExample()('extendedNeighboursList')
 extendedNeighbours = collapseExtendedNBHDs(extendedNeighboursList, 4)
 }

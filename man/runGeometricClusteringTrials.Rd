@@ -39,6 +39,8 @@ or as a logical vector.  It returns statistics on the
 mean distance of the complement to the subset.
 }
 \examples{
+library(Seurat)
+STranspose = make.getExample()('STranspose')
 S = data.matrix(FetchData(STranspose,c('umap_1','umap_2')))
 geneSubset = rownames(S) \%in\% hallmark[[1]]
 geneClustering = runGeometricClusteringTrials(S,geneSubset,100)

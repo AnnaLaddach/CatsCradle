@@ -8,11 +8,17 @@ columns are the neighbourhoods, the rows are are the
 genes and the values are gene expression totals for
 the cells in each neighbourhood}
 \usage{
-aggregateSeuratGeneExpression(f, neighbourhoods, verbose = TRUE)
+aggregateSeuratGeneExpression(
+  f,
+  neighbourhoods,
+  verbose = TRUE,
+  returnType = "Seurat"
+)
 }
 \arguments{
 \item{f}{\itemize{
-\item a Seurat object with layer counts
+\item a Seurat object with layer counts or a SingleCellExperiment
+to be turned into a Seurat object
 }}
 
 \item{neighbourhoods}{\itemize{
@@ -25,10 +31,17 @@ appear as nodeA.
 \item{verbose}{\itemize{
 \item used to control trace, defaults to TRUE
 }}
+
+\item{returnType}{\itemize{
+\item Will return a SingleCellExperiment if this is either
+of SCE, SingleCellExperiment or their lower-case equivalents.  Otherwise,
+returns a Seurat object or SingleCellExperiment, depending on the
+parameter returnType.
+}}
 }
 \value{
 a Seurat object giving total gene expression
-in each neighbourhood.
+in each neighbourhood or SingleCellExperiment
 }
 \description{
 This function takes a Seurat object and a list of
@@ -38,6 +51,7 @@ genes and the values are gene expression totals for
 the cells in each neighbourhood
 }
 \examples{
+extendedNeighbours = make.getExample()('extendedNeighbours')
 agg = aggregateSeuratGeneExpression(smallXenium,extendedNeighbours,
 verbose=FALSE)
 }

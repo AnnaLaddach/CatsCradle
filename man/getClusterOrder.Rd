@@ -9,6 +9,7 @@ getClusterOrder(f)
 \arguments{
 \item{f}{\itemize{
 \item a Seurat object with meta.data column seurat_clusters
+or SingleCellExperiment to be turned into a Seurat object
 }}
 }
 \value{
@@ -20,5 +21,6 @@ has been converted from a factor to a character or a
 numeric.
 }
 \examples{
+STranspose = make.getExample()('STranspose')
 geneClusters = getClusterOrder(STranspose)
 }

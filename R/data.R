@@ -15,6 +15,19 @@
 "S"
 
 ## ####################################################
+#' S_sce
+#'
+#' A SingleCellExperiment object of 2000 genes by 1445 cells.
+#'
+#' @format A SingleCellExperiment object
+#'
+#' \describe{
+#' A SingleCellExperiment version of S.
+#' }  
+#' @source This was made from S using as.SingleCellExperiment
+"S_sce"
+
+## ####################################################
 #' STranspose
 #'
 #' A Seurat object of 1445 cells by 2000 genes
@@ -26,6 +39,20 @@
 #' }
 #' @source Produced from S by transposeSeuratObject()
 "STranspose"
+
+## ####################################################
+#' STranspose_sce
+#'
+#' A SingleCellExperiment object of 1445 cells by 2000 genes
+#'
+#' @format A SingleCellExperiment object
+#' \describe{
+#' This is a SingleCellExperiment version of STranspose.
+#' }
+#' @source Produced from STranspose using as.SingleCellExperiment
+#' together with ancillary code for copying nearest neighbour
+#' graphs
+"STranspose_sce"
 
 ## ####################################################
 #' averageExpMatrix
@@ -356,6 +383,29 @@
 #' using cellTypesPerCellTypeMatrix()
 "cellTypesPerCellTypeMatrix"
 
+## ####################################################
+#' cellTypesPerCellTypeMatrixExtended
+#'
+#' For each cell type, this matrix shows the fraction
+#' of the neighbourhoods of that cell type composed of
+#' each cell type. This uses the extended neighbourhoods
+#' of combinatorial radius 4
+#'
+#' @format A matrix whose rows and columns correspond to
+#' cell types.
+#'
+#' \describe{
+#' Each row of this matrix corresponds to a cell type.  On
+#' that row we see the proportions of all neighbourhoods
+#' surrounding cells of that cell type as regards the cell types
+#' they contain.  In particular, each row sums to 1.  This uses
+#' the extended neighbourhoods of combinatorial radius 4.
+#' }
+#'
+#' @source This is created from NBHDByCTMatrixExtended and the
+#' clusters using cellTypesPerCellTypeMatrix()
+"cellTypesPerCellTypeMatrixExtended"
+
 
 ## ####################################################
 #' cellTypesPerCellTypePValues
@@ -374,29 +424,6 @@
 #' @source This is created from delaunayNeighbours and the clusters
 #' using computeNeighbourEnrichment()
 "cellTypesPerCellTypePValues"
-
-
-
-## ####################################################
-#' cellTypesPerCellTypeMatrixExtended
-#'
-#' For each cell type, this matrix shows the fraction
-#' of the extended neighbourhoods of that cell type composed of
-#' each cell type.
-#'
-#' @format A matrix whose rows and columns correspond to
-#' cell types.
-#'
-#' \describe{
-#' Each row of this matrix corresponds to a cell type.  On
-#' that row we see the proportions of all neighbourhoods
-#' surrounding cells of that cell type as regards the cell types
-#' they contain.  In particular, each row sums to 1.
-#' }
-#'
-#' @source This is created from NBHDByCTMatrixExtended and the clusters
-#' using cellTypesPerCellTypeMatrix()
-"cellTypesPerCellTypeMatrix"
 
 
 ## ####################################################
@@ -434,6 +461,26 @@
 "CTByNBHDSeurat"
 
 
+
+## ####################################################
+#' CTByNBHDSeuratExtended
+#'
+#' A Seurat object computed from the transpose of NBHDByCTMatrixExtended.
+#' Think of cell types "expressing" (being found in) neighbourhoods.
+#'
+#' @format A Seurat object consisting of 16 samples (cell types) and 
+#' 4261 features (the neighbourhoods).
+#'
+#' \describe{
+#' This is a Seurat object created by taking t(NBHDByCTMatrixExtended)
+#' as the counts.
+#' }
+#'
+#' @source Created from t(NBHDByCTMatrixExtended) by
+#' computeNBHDVsCTSeurat()
+"CTByNBHDSeuratExtended"
+
+
 ## ####################################################
 #' moransI
 #'
@@ -449,24 +496,6 @@
 #' @source Created from smallXenium and delaunayNeighbours by using
 #' runMoransI()
 "moransI"
-
-
-## ####################################################
-#' moransILigandReceptor
-#'
-#' A data fame containing Moran's I for the spatial distribution of the presence 
-#' of ligand receptor pairs on edges.
-#'
-#' @format A data fame containing Moran's I for ligand receptor pairs and 
-#' related pvalues.
-#'
-#' \describe{
-#' Moran's I values calculated for the ligand receptor pairs in edgeSeurat. 
-#' Pvalues derived using 100 permutations.
-#' }
-#'
-#' @source Created from edgeSeurat and edgeNeighbours by using runMoransI()
-"moransILigandReceptor"
 
 
 ## ####################################################
@@ -529,4 +558,23 @@
 #' @source Created from ligandReceptorResults by
 #' computeEdgeSeurat()
 "edgeSeurat"
+
+## ####################################################
+#' moransILigandReceptor
+#' 
+#' Moran's I for the ligand receptor pairs
+#'
+#' @format A data frame showing the spatial autocorrelation of the
+#' 28 ligand receptor pairs
+#'
+#' \describe{
+#' A data frame with rownames giving the  28 ligand-receptor pairs and columns moransI
+#' and pValues
+#' }
+#'
+#' @source Computed using the function runMoransI on the object edgeSeurat and
+#' neighbours edgeNeighbours = computeEdgeGraph(delaunayNeighbours) with 100 trials.
+#' For more informations see the CatsCradleSpatial vignette.
+"moransILigandReceptor"
+
 

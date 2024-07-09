@@ -27,6 +27,9 @@ cell types are columns. The values in the matrix indicate the
 number of cells of a given type within a neighbourhood.
 }
 \examples{
+getExample = make.getExample()
+clusters = getExample('clusters')
+delaunayNeighbours = getExample('delaunayNeighbours')
 NBHDByCTMatrix = computeNBHDByCTMatrix(delaunayNeighbours,
                                          clusters)
 }

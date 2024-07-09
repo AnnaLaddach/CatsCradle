@@ -1,0 +1,106 @@
+---
+title: "CatsCradle Example Data"
+author: "Anna Laddach and Michael Shapiro"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+    %\VignetteIndexEntry{CatsCradleQuickStart}
+    %\VignetteEngine{knitr::rmarkdown}
+    %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE, warning = FALSE}
+knitr::opts_chunk$set(
+    collapse = TRUE,
+    fig.dim = c(6,6),
+    comment = "#>"
+)
+```
+![](CatsCradleLogo.png){width=2in}
+
+
+## CatsCradle Example Data
+
+CatsCradle has a slightly unusual way of delivering example data.  In
+order to save space we have tried to minimise the number and size of
+the .rda data.  We have limited these to objects which are necessary
+to compute other objects (e.g., certain Seurat objects), objects which
+are necessary to the functioning of the package (e.g., human and
+mouse ligand receptor networks), and objects which take a long time to
+compute (e.g., ligandReceptorResults).  These package variables are
+documented in the usual way and are loaded when invoked.
+
+Other variables are computed from these as needed.  The function which
+computes these additional objects also stores them internally for
+quick retrieval when they are subsequently requested.  The retrieval
+function must be created before it can be used.  It only needs to be
+created once in each session.
+
+
+On the first invocation this computes STranspose:
+
+```{r}
+library(CatsCradle)
+getExample = make.getExample()
+STranspose = getExample('STranspose')
+```
+
+On subsequent invocations it retrieves it:
+
+```{r}
+STranspose = getExample('STranspose')
+```
+
+getExample() also retrieves package variables.
+
+```{r}
+smallXenium = getExample('smallXenium')
+```
+
+A complete list of the example objects available via the function
+exampleObjects().  Here we document some of the more prominent of
+these.
+
+* __S__ - A Seurat object of cells.  It includes a UMAP of the
+cells and annotated clustering into cell types.  This is a package
+variable.
+* __STranpose__ - A Seurat object of genes.  This is created from S by
+transposeSeuratObject().
+* __S_sce__ - S as a SingleCellExperiment
+* __STranspose_sce__ - STranspose as a SingleCellExperiment
+* __NN__ - A nearest neighbours graph from STranspose.  This is a data
+frame with columns nodeA, nodeB, and weight, where nodeA and nodeB are
+genes.
+* __smallXenium__ - A spatial Seurat object subset from the Xenium
+object used in 
+https://satijalab.org/seurat/articles/seurat5_spatial_vignette_2.
+This is a package variable.
+* __clusters__ - Annotated cell type clustering for the cells of
+smallXenium.
+* __centroids__ - The centroids of the cells of smallXenium
+* __delaunayNeighbours__  - A data frame giving neighbour-neighbour
+relations for the cells of smallXenium as estimated by Delaunay
+triangulation with columns nodeA and nodeB.
+* __extendedNeighours__ - A data frame giving extended
+neighbour-neighbour relations for the cells of smallXenium.  Here
+cells are "neighbours" if they are within four edges of each other in
+the Delaunay triangulation.
+* __euclideanNeighbours__ - Neighbour-neighbour relations between the
+cells of smallXenium based on the Euclidean distance of their
+centroids.
+* __NBHDByCTMatrix__ - For each neighbourhood, we count the number of
+cells it contains of each cell type. Neighbourhoods "express" cell
+types.
+* __NBHDByCTSeurat__ - A Seurat object whose underlying counts are
+NBHDByCTMatrix. 
+* __cellTypesPerCellTypeMatrix__ - A matrix which reports on the
+Delaunay neighbourhoods.  For each cell type, it examines the
+neighbourhoods around cells of that type and reports their average
+composition as to the cell types they contain.
+* __cellTypesPerCellTypePValues__ This gives the statistical
+significance for the enrichment of cell types in the neighbourhoods of
+each cell type.
+
+
+
+

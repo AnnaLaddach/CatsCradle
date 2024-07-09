@@ -27,7 +27,10 @@ centroids of the cells and finds their diameters, i.e.,
 for each neighbourhood, the maximum distance between.
 }
 \examples{
-cells = unique(c(delaunayNeighbours$nodeA,delaunayNeighbours$nodeB))
+getExample = make.getExample()
+centroids = getExample('centroids')
+delaunayNeighbours = getExample('delaunayNeighbours')
+cells = unique(c(delaunayNeighbours[,'nodeA'],delaunayNeighbours[,'nodeB']))
 nbhds = nbhdsAsEdgesToNbhdsAsList(cells,delaunayNeighbours)
 diameters = neighbourhoodDiameter(nbhds[1:100],centroids)
 }

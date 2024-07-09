@@ -22,7 +22,8 @@ predictGeneAnnotationImpl(
 }}
 
 \item{fPrime}{\itemize{
-\item a Seurat object of genes
+\item a Seurat object of genes or
+SingleCellExperiment to be converted to a Seurat object
 }}
 
 \item{genesAnno}{\itemize{
@@ -60,6 +61,7 @@ the functions of a gene based on the functions of its
 neighbours.
 }
 \examples{
+STranspose = make.getExample('STranspose')
 genesAnno = annotateGenesByGeneSet(hallmark)
 predictions = predictGeneAnnotationImpl('Myc',STranspose,genesAnno,
 radius=.5,metric='umap')

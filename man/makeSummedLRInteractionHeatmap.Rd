@@ -38,6 +38,7 @@ This function takes ligandReceptorResults and plots a heatmap of the total
 number of ligand receptor interactions between clusters.
 }
 \examples{
+clusters = make.getExample()('clusters')
 cellTypePerCellTypeLigRecMatrix = 
 makeSummedLRInteractionHeatmap(ligandReceptorResults, clusters, "mean")
 }

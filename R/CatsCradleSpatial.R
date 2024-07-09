@@ -11,6 +11,7 @@
 #' @import Rfast
 #' @export
 #' @examples
+#' centroids = make.getExample()('centroids')
 #' delaunayNeighbours = computeNeighboursDelaunay(centroids)
 computeNeighboursDelaunay = function(centroids){
 
@@ -64,6 +65,7 @@ computeNeighboursDelaunay = function(centroids){
 #' @import Rfast
 #' @export
 #' @examples
+#' centroids = make.getExample()('centroids')
 #' euclideanNeighbours = computeNeighboursEuclidean(centroids,20)
 computeNeighboursEuclidean = function(centroids, threshold){
   centroids = centroids[,c(1,2)]
@@ -138,7 +140,10 @@ extractCells = function(NN)
 #' maximum distance within each neighbourhood
 #' @export
 #' @examples
-#' cells = unique(c(delaunayNeighbours$nodeA,delaunayNeighbours$nodeB))
+#' getExample = make.getExample()
+#' centroids = getExample('centroids')
+#' delaunayNeighbours = getExample('delaunayNeighbours')
+#' cells = unique(c(delaunayNeighbours[,'nodeA'],delaunayNeighbours[,'nodeB']))
 #' nbhds = nbhdsAsEdgesToNbhdsAsList(cells,delaunayNeighbours)
 #' diameters = neighbourhoodDiameter(nbhds[1:100],centroids)
 neighbourhoodDiameter = function(neighbourhoods,centroids)
@@ -172,6 +177,9 @@ neighbourhoodDiameter = function(neighbourhoods,centroids)
 #' @return a matrix of neighbourhoods by cell types
 #' @export
 #' @examples
+#' getExample = make.getExample()
+#' clusters = getExample('clusters')
+#' delaunayNeighbours = getExample('delaunayNeighbours')
 #' NBHDByCTMatrix = computeNBHDByCTMatrix(delaunayNeighbours,
 #'                                          clusters)
 computeNBHDByCTMatrix = function(spatialGraph, cellTypes){
@@ -199,16 +207,24 @@ computeNBHDByCTMatrix = function(spatialGraph, cellTypes){
 #' @param n.neighbors - number of neighbors used by UMAP, defaults to 30.
 #' @param transpose - defaults to FALSE.
 #' @param verbose - defaults to TRUE, used to limit trace if FALSE
+#' @param returnType - Will return a SingleCellExperiment if this is either
+#' of SCE, SingleCellExperiment or their lower-case equivalents.  Otherwise,
+#' returns a Seurat object
 #' @return a seurat object based on a neighbourhood by cell type matrix or its 
-#' transpose, containing clusters and UMAP.
+#' transpose, containing clusters and UMAP. This can also be a
+#' SingleCellExperiment depending on the parameter returnType.
 #' @import Seurat
+#' @import SeuratObject
 #' @export
 #' @examples
+#' NBHDByCTMatrix = make.getExample()('NBHDByCTMatrix')
 #' NBHDByCTSeurat = computeNBHDVsCTSeurat(NBHDByCTMatrix)
+#' NBHDByCTSeurat_sce = computeNBHDVsCTSeurat(NBHDByCTMatrix,returnType='SCE')
 computeNBHDVsCTSeurat= function(dataMatrix, resolution = 0.1, 
                                 npcs = 10, n.neighbors = 30L, 
                                 transpose = FALSE,
-                                verbose=TRUE){
+                                verbose=TRUE,
+                                returnType='Seurat'){
     dataMatrix = t(dataMatrix)
     NBHDSeurat = CreateSeuratObject(dataMatrix)
     NBHDSeurat[['RNA']]$data = NBHDSeurat[['RNA']]$counts
@@ -243,31 +259,39 @@ computeNBHDVsCTSeurat= function(dataMatrix, resolution = 0.1,
     idx = names(NBHDSeurat@meta.data) == 'seurat_clusters'
     names(NBHDSeurat@meta.data)[idx] = 'neighbourhood_clusters'
     
-    return(NBHDSeurat)
+    return(returnAs(NBHDSeurat,returnType))
 }
 
 ## ####################################################
 #' This function adds a force directed graph embedding to a seurat object
 #' 
-#' @param seuratObj - a seurat object. 
+#' @param seuratObj - a seurat object of SingleCellExperiment to be
+#' turned into a Seurat object
 #' @param graph - which graph to extract.  Defaults to
 #' paste0(f@active.assay,'_snn')
-#' @return a seurat object with a "graph" dimensionality reduction.
+#' @param returnType - Will return a SingleCellExperiment if this is either
+#' of SCE, SingleCellExperiment or their lower-case equivalents.  Otherwise,
+#' returns a Seurat object
+#' @return a seurat object with a "graph" dimensionality reduction. Can also
+#' be a SingleCellExperiment depending on parameter returnType.
 #' @import Seurat  
 #' @import igraph
 #' @export
 #' @examples
+#' NBHDByCTSeurat = make.getExample()('NBHDByCTSeurat')
 #' objWithEmbedding = computeGraphEmbedding(NBHDByCTSeurat)
-computeGraphEmbedding = function(seuratObj, graph=defaultGraph(seuratObj)){
-  graph = seuratObj@graphs[[graph]]
-  igraphGraph = igraph::graph_from_adjacency_matrix(graph)
-  graphLayout = igraph::layout_with_fr(igraphGraph)
-  colnames(graphLayout) = c("graph_1","graph_2")
-  rownames(graphLayout) = colnames(seuratObj)
-  graphDimReduc = CreateDimReducObject(embeddings = graphLayout,   
-                                       key = "graph",   assay = "RNA")
-  seuratObj[["graph"]] = graphDimReduc
-  return(seuratObj)
+computeGraphEmbedding = function(seuratObj, graph=defaultGraph(seuratObj),
+                                 returnType='Seurat'){
+    seuratObj = acceptor(seuratObj)
+    graph = seuratObj@graphs[[graph]]
+    igraphGraph = igraph::graph_from_adjacency_matrix(graph)
+    graphLayout = igraph::layout_with_fr(igraphGraph)
+    colnames(graphLayout) = c("graph_1","graph_2")
+    rownames(graphLayout) = colnames(seuratObj)
+    graphDimReduc = CreateDimReducObject(embeddings = graphLayout,   
+                                         key = "graph",   assay = "RNA")
+    seuratObj[["graph"]] = graphDimReduc
+    return(returnAs(seuratObj,returnType))
 }
 
 
@@ -284,6 +308,7 @@ computeGraphEmbedding = function(seuratObj, graph=defaultGraph(seuratObj)){
 #' @import data.table
 #' @export
 #' @examples
+#' delaunayNeighbours = make.getExample()('delaunayNeighbours')
 #' extendedNeighboursList = getExtendedNBHDs(delaunayNeighbours, 4)
 getExtendedNBHDs = function(spatialGraph, n){
   spatialGraph = data.table(spatialGraph)
@@ -328,12 +353,14 @@ getExtendedNBHDs = function(spatialGraph, n){
 #'     are connected.
 #' @export
 #' @examples
+#' extendedNeighboursList = make.getExample()('extendedNeighboursList')
 #' extendedNeighbours = collapseExtendedNBHDs(extendedNeighboursList, 4)
 collapseExtendedNBHDs = function(extendedNeighboursList, n = length(extendedNeighboursList)){
   
-  collapsedGraph = as.data.frame(do.call(rbind,extendedNeighboursList[1:n]))
-
-  return(collapsedGraph)
+    collapsedGraph = as.data.frame(do.call(rbind,extendedNeighboursList[1:n]))
+    collapsedGraph = desymmetriseNN(collapsedGraph)
+    
+    return(collapsedGraph)
 }
 
 
@@ -356,8 +383,11 @@ collapseExtendedNBHDs = function(extendedNeighboursList, n = length(extendedNeig
 #' @import dplyr
 #' @export
 #' @examples
+#' getExample = make.getExample()
+#' NBHDByCTMatrix = getExample('NBHDByCTMatrix')
+#' clusters = getExample('clusters')
 #' cellTypesPerCellType = computeCellTypesPerCellTypeMatrix(NBHDByCTMatrix,
-#'                                                      smallXenium$seurat_clusters)
+#'                                                      clusters)
 computeCellTypesPerCellTypeMatrix = function(nbhdByCellType,cellTypes)
 {
   MM = aggregate(nbhdByCellType, list(cellTypes), sum)
@@ -400,11 +430,15 @@ computeCellTypesPerCellTypeMatrix = function(nbhdByCellType,cellTypes)
 #' the cell types and whose arrows indicate "ownership" of
 #' cells of the target type by neighbourhoods of cells of the
 #' source type.  Layout is done witht the FR algorithm and
-#' coordinates are found in G$coords.  If colours were supplied
-#' these are found in V(G)$color.  Edge weights and widths are
-#' found in E(G)$weight and E(G)$width.
+#' coordinates are found in the coords attribute of G.  If colours
+#' were supplied these are found in color attribute of V(G).  Edge
+#' weights and widths are found in the weight and width attributes
+#' of E(G).
 #' @export
 #' @examples
+#' getExample = make.getExample()
+#' cellTypesPerCellTypeMatrix = getExample('cellTypesPerCellTypeMatrix')
+#' colours = getExample('colours')
 #' G = cellTypesPerCellTypeGraphFromCellMatrix(cellTypesPerCellTypeMatrix, 
 #' minWeight = 0.05, colours = colours)
 cellTypesPerCellTypeGraphFromCellMatrix = function(M,
@@ -481,20 +515,21 @@ cellTypesPerCellTypeGraphFromCellMatrix = function(M,
 #' the cell types and whose arrows indicate "ownership" of
 #' cells of the target type by neighbourhoods of cells of the
 #' source type.  Layout is done witht the FR algorithm and
-#' coordinates are found in G$coords.  If colours were supplied
-#' these are found in V(G)$color.  Edge weights and widths are
-#' found in E(G)$weight and E(G)$width. 
+#' coordinates are found in the coords attribute of G.  If colours
+#' were supplied these are found in the color attribute of V(G).
+#' Edge weights and widths are found in the weight and width
+#' attributes of E(G).
 #' @export
 cellTypesPerCellTypeGraphFromNbhdMatrix = function(nbhdByCellType,
-                                     clusters,
-                                     colours=NULL,
-                                     selfEdges=FALSE,
-                                     minWeight=0,
-                                     edgeWeighting=20,
-                                     edgeCurved=0.2,
-                                     arrowSize=4,
-                                     arrowWidth=4,
-                                     plotGraph=TRUE)
+                                                   clusters,
+                                                   colours=NULL,
+                                                   selfEdges=FALSE,
+                                                   minWeight=0,
+                                                   edgeWeighting=20,
+                                                   edgeCurved=0.2,
+                                                   arrowSize=4,
+                                                   arrowWidth=4,
+                                                   plotGraph=TRUE)
 {
     M = cellTypesPerCellTypeMatrix(nbhdByCellType,clusters)
     G = cellTypesPerCellTypeGraphFromCellMatrix(M,
@@ -561,6 +596,9 @@ randomiseGraph = function(spatialGraph, maxTries = 1000){
 #' @import abind
 #' @export
 #' @examples
+#' getExample = make.getExample()
+#' delaunayNeighbours = getExample('delaunayNeighbours')
+#' clusters = getExample('clusters')
 #' cellTypesPerCellTypePValues = computeNeighbourEnrichment(delaunayNeighbours, 
 #' clusters, nSim = 10, verbose = FALSE)
 computeNeighbourEnrichment = function(spatialGraph, cellTypes, nSim = 1000,
@@ -617,7 +655,8 @@ getLigandReceptorNetwork = function(species)
 #' receptor network to those pairs that occur in the
 #' panel
 #'
-#' @param obj - a Seurat object
+#' @param obj - a Seurat object or SingleCellExperiment to
+#' be converted to a Seurat object
 #' @param species - either 'human' or 'mouse'
 #' @param lrn - a ligand-receptor network, i.e., a
 #' data frame with columns from and to.  By default, it
@@ -625,12 +664,14 @@ getLigandReceptorNetwork = function(species)
 #' @return This returns a data frame with columns ligand and
 #' receptor
 #' @export
-#' @examples 
+#' @examples
 #' lrPairs = getLigandReceptorPairsInPanel(smallXenium, "mouse")
 getLigandReceptorPairsInPanel = function(obj,species,
                                          lrn = getLigandReceptorNetwork(species))
 {
-  stopifnot(species %in% c('mouse','human'))
+    stopifnot(species %in% c('mouse','human'))
+
+    obj = acceptor(obj)
   
   ## The panel
   panel = rownames(obj)
@@ -713,18 +754,20 @@ permuteMatrix = function(M){
 #' This functions retrieves an expression matrix from a seurat object and 
 #' binarises it.
 #'
-#' @param obj - a Seurat object
+#' @param obj - a Seurat object or SingleCellExperiment to be
+#' turned into a Seurat object
 #' @param cutoff - a cutoff for binarisation. Defaults to 0.
 #' @param layer - layer to fetch data from. Defaults to count.
 #' @return A binarised expression matrix where rows are genes and columns are 
 #' cells.
 getBinarisedMatrix = function(obj, cutoff = 0, layer = 'count'){
-  M = FetchData(obj,rownames(obj),layer='count')
-  M = data.matrix(t(M))
-  cutoff = 0
-  M = M > cutoff
-  rownames(M) = str_replace(rownames(M),"-",".")
-  return(M)
+    obj = acceptor(obj)
+    M = FetchData(obj,rownames(obj),layer='count')
+    M = data.matrix(t(M))
+    cutoff = 0
+    M = M > cutoff
+    rownames(M) = str_replace(rownames(M),"-",".")
+    return(M)
 }
 
 ## ####################################################
@@ -773,13 +816,18 @@ countLRInteractionsPerCell = function(edges,sourceOrTarget)
 #' to the cells of the interaction counts.
 #'
 #' @param interactionCounts - as found by countLRInteractionsPerCell()
-#' @param obj - a Seurat object
-#' @param nbhdObj - a neighbourhood x cell type Seurat object
+#' @param obj - a Seurat object, or SingleCellExperiment to be turned
+#' into a Seurat object
+#' @param nbhdObj - a neighbourhood x cell type Seurat object or a
+#' SingleCellExperiment to be turned into a Seurat object
 #' @return This returns the interaction counts annotated with the
 #' cell type and neighbourhood type of each cell.
 #' @export
 annotateLRInteractionCounts = function(interactionCounts,obj,nbhdObj)
 {
+    obj = acceptor(obj)
+    nbhdObj = acceptor(nbhdObj)
+    
     ## Get nbhd and cell types:
     annotated = data.frame(cell=colnames(obj),
                            cellType=obj$seurat_clusters)
@@ -847,6 +895,9 @@ annotateLRInteractionCounts = function(interactionCounts,obj,nbhdObj)
 #' frequently between 2 clusters than expected.
 #' @export
 #' @examples
+#' getExample = make.getExample()
+#' delaunayNeighbours = getExample('delaunayNeighbours')
+#' clusters = getExample('clusters')
 #' performLigandReceptorAnalysis(smallXenium, delaunayNeighbours, 
 #'                                       "mouse", clusters, nSim = 10,
 #'                                        verbose=FALSE)
@@ -949,6 +1000,9 @@ performLigandReceptorAnalysis = function(obj, spatialGraph, species, clusters,
 #' @return matrix of -log10(pvalues) that underlies the heatmap.
 #' @export
 #' @examples
+#' getExample = make.getExample()
+#' clusters = getExample('clusters')
+#' colours = getExample('colours')
 #' ligRecMatrix = makeLRInteractionHeatmap(ligandReceptorResults, 
 #' clusters, colours = colours, labelClusterPairs = FALSE)
 makeLRInteractionHeatmap = function(ligandReceptorResults,
@@ -992,7 +1046,8 @@ makeLRInteractionHeatmap = function(ligandReceptorResults,
 #' @import pheatmap
 #' @return matrix of total ligand receptor interactions that underlies the heatmap.
 #' @export
-#' @examples 
+#' @examples
+#' clusters = make.getExample()('clusters')
 #' cellTypePerCellTypeLigRecMatrix = 
 #' makeSummedLRInteractionHeatmap(ligandReceptorResults, clusters, "mean")
 makeSummedLRInteractionHeatmap = function(ligandReceptorResults, clusters, type, logScale = TRUE){ 
@@ -1041,20 +1096,27 @@ makeSummedLRInteractionHeatmap = function(ligandReceptorResults, clusters, type,
 #' where rownames are cellnames and the first two columns
 #' contain x and y coordinates respectively.
 #' @param npcs - number of pcs used for PCA, defaults to 10
+#' @param returnType Determines whether to return a Seurat object or a
+#' SpatialExperiment.  Will do the later if this is set to either SCE,
+#' SingleCellExperiment or lower case versions of either.
 #' @import Seurat
 #' @return This returns a seurat object where 
 #' each point represents an edge between cells, and spatial coordinates are the 
 #' centroids of edges between cells. The "expression matrix" is the 
-#' binarised presence/absence of an interaction (ligand receptor pair) on an edge. 
+#' binarised presence/absence of an interaction (ligand receptor pair) on an edge.
+#' Depending on the parameter returnType, this can alternatively be returned as
+#' a SpatialExperiment.
 #' @export
-#' @examples 
+#' @examples
+#' centroids = make.getExample()('centroids')
 #' edgeSeurat = computeEdgeSeurat(ligandReceptorResults, centroids)
-computeEdgeSeurat = function(ligandReceptorResults, centroids, npcs = 10){
+computeEdgeSeurat = function(ligandReceptorResults, centroids, npcs = 10,
+                             returnType='Seurat'){
   interactionsOnEdges = ligandReceptorResults$interactionsOnEdges
   rownames(interactionsOnEdges) = paste0(interactionsOnEdges$nodeA, "-", interactionsOnEdges$nodeB)
   interactionsOnEdgesMat = as.matrix(interactionsOnEdges[,5:ncol(interactionsOnEdges)])
   interactionsOnEdgesMat= 1 * interactionsOnEdgesMat
-  edgeSeurat = CreateSeuratObject(t(interactionsOnEdgesMat), meta = interactionsOnEdges[,1:5])
+  edgeSeurat = CreateSeuratObject(t(interactionsOnEdgesMat), meta = interactionsOnEdges[,1:4])
   edgeCoords = as.data.frame(cbind(centroids[interactionsOnEdges$nodeA, 1:2], 
                                   centroids[interactionsOnEdges$nodeB, 1:2]))
   
@@ -1079,7 +1141,7 @@ computeEdgeSeurat = function(ligandReceptorResults, centroids, npcs = 10){
   )
   
   edgeSeurat[["global"]] = coords
-  return(edgeSeurat)
+  return(returnAs(edgeSeurat,returnType,spatial=TRUE))
 }
 
 
@@ -1100,7 +1162,8 @@ computeEdgeSeurat = function(ligandReceptorResults, centroids, npcs = 10){
 #' of cells
 #' @export
 #' @examples
-#' cells = unique(c(delaunayNeighbours$nodeA,delaunayNeighbours$nodeB))
+#' delaunayNeighbours = make.getExample()('delaunayNeighbours')
+#' cells = unique(c(delaunayNeighbours[,'nodeA'],delaunayNeighbours[,'nodeB']))
 #' nbhdsList = nbhdsAsEdgesToNbhdsAsList(cells,delaunayNeighbours)
 nbhdsAsEdgesToNbhdsAsList = function(cells,
                                      neighbourhoods)
@@ -1122,21 +1185,30 @@ nbhdsAsEdgesToNbhdsAsList = function(cells,
 #' genes and the values are gene expression totals for
 #' the cells in each neighbourhood
 #'
-#' @param f - a Seurat object with layer counts
+#' @param f - a Seurat object with layer counts or a SingleCellExperiment
+#' to be turned into a Seurat object
 #' @param neighbourhoods - Neighbourhoods as given by a
 #' collapsed expanded edge graph, as produced by
 #' collapseNeighbourhoods. In particular, each cell should
 #' appear as nodeA.
 #' @param verbose - used to control trace, defaults to TRUE
-#' @import Seurat
+#' @param returnType - Will return a SingleCellExperiment if this is either
+#' of SCE, SingleCellExperiment or their lower-case equivalents.  Otherwise,
+#' returns a Seurat object or SingleCellExperiment, depending on the
+#' parameter returnType.
 #' @return a Seurat object giving total gene expression
-#' in each neighbourhood.
+#' in each neighbourhood or SingleCellExperiment
+#' @import Seurat
 #' @export
-#' @examples 
+#' @examples
+#' extendedNeighbours = make.getExample()('extendedNeighbours')
 #' agg = aggregateSeuratGeneExpression(smallXenium,extendedNeighbours,
 #' verbose=FALSE)
-aggregateSeuratGeneExpression = function(f,neighbourhoods,verbose=TRUE)
+aggregateSeuratGeneExpression = function(f,neighbourhoods,verbose=TRUE,
+                                         returnType='Seurat')
 {
+    f = acceptor(f)
+    
     cells = colnames(f)
     nbhds = unique(c(neighbourhoods$nodeA,
                      neighbourhoods$nodeB))
@@ -1168,7 +1240,7 @@ aggregateSeuratGeneExpression = function(f,neighbourhoods,verbose=TRUE)
     idx = names(nbhdObj@meta.data) == 'seurat_clusters'
     names(nbhdObj@meta.data)[idx] = 'aggregation_clusters'
     
-    return(nbhdObj)
+    return(returnAs(nbhdObj,returnType))
 }
 
 
@@ -1207,9 +1279,6 @@ aggregateFeatureMatrix = function(M, nbhdList, aggregateFunction)
 #' @param M - a matrix where column names are cells and row names are features.
 #' @param nbhdList - a named list with memberships of the neighbourhoods
 #' of cells
-## #' @param aggregateFunction - a function to aggregate expression (e.g. rowSums,
-#' rowMeans)
-
 #' @return a matrix giving aggregated gene expression for a cell's neighbourhood.
 #' @export
 computeMoransI = function(M,nbhdList){
@@ -1235,38 +1304,44 @@ computeMoransI = function(M,nbhdList){
 #' Defaults to 100.
 #' @param verbose - whether to print trace, defaults to TRUE
 #' @import Seurat
+#' @import SingleCellExperiment
+#' @import SpatialExperiment
+#' @importFrom S4Vectors SelfHits
 #' @return a dataframe containing Moran's I and p values for each feature.
 #' @export
 #' @examples
+#' delaunayNeighbours = make.getExample()('delaunayNeighbours')
 #' moransI = runMoransI(smallXenium, delaunayNeighbours, assay = "SCT", 
 #' layer = "data", nSim = 10, verbose = FALSE)
 
 runMoransI = function(obj, spatialGraph, assay = "RNA", layer = "data",
                       nSim = 100, verbose = TRUE){
-  spatialGraph = symmetriseNN(spatialGraph)
-  
-  M = as.matrix(LayerData(obj, assay = assay, layer = layer))
-  nbhdList = nbhdsAsEdgesToNbhdsAsList(colnames(M),
-                                       spatialGraph)
-  
-  moransI = computeMoransI(M,nbhdList)
-  results = list()
-  for (i in 1:nSim){
-    permuted = permuteMatrix(M)
-    results[[i]] = computeMoransI(permuted,nbhdList)
-    if (i %% 10 == 0 & verbose){
-      writeLines(as.character(i))
+    obj = acceptor(obj)
+    
+    spatialGraph = symmetriseNN(spatialGraph)
+    
+    M = as.matrix(LayerData(obj, assay = assay, layer = layer))
+    nbhdList = nbhdsAsEdgesToNbhdsAsList(colnames(M),
+                                         spatialGraph)
+    
+    moransI = computeMoransI(M,nbhdList)
+    results = list()
+    for (i in 1:nSim){
+        permuted = permuteMatrix(M)
+        results[[i]] = computeMoransI(permuted,nbhdList)
+        if (i %% 10 == 0 & verbose){
+            writeLines(as.character(i))
+        }
     }
-  }
-  
-  results = do.call(cbind, results)
-  simResults = rowSums(moransI > results) 
-  pValues = abs((simResults - nSim)/nSim) 
-  pValues = pmax(pValues, (1/nSim))
-  results = cbind(moransI, pValues)
-  results = results[order(moransI, decreasing = TRUE),]
-  results = data.frame(results)
-  return(results)
+    
+    results = do.call(cbind, results)
+    simResults = rowSums(moransI > results) 
+    pValues = abs((simResults - nSim)/nSim) 
+    pValues = pmax(pValues, (1/nSim))
+    results = cbind(moransI, pValues)
+    results = results[order(moransI, decreasing = TRUE),]
+    results = data.frame(results)
+    return(results)
 }
 
 
@@ -1284,6 +1359,7 @@ runMoransI = function(obj, spatialGraph, assay = "RNA", layer = "data",
 #' @import data.table
 #' @export
 #' @examples
+#' delaunayNeighbours = make.getExample()('delaunayNeighbours')
 #' edgeNeighbours = computeEdgeGraph(delaunayNeighbours)
 
 computeEdgeGraph = function(spatialGraph, selfEdges = FALSE){
@@ -1300,3 +1376,474 @@ computeEdgeGraph = function(spatialGraph, selfEdges = FALSE){
   
   return(spatialGraphEdges)
 }
+
+
+## ####################################################
+## The following functions are used internally to manage
+## conversions between Seurat objects on the one hand and
+## SingleCellExperiments and SpatialExperiments on the
+## other.
+## ####################################################
+acceptor = function(obj)
+{
+    ## We only convert if we need to:
+    if(isa(obj,'SingleCellExperiment'))
+        return(SCEtoSeurat(obj))
+
+    return(obj)
+}
+
+## ####################################################
+returnAs = function(obj,returnType,spatial=FALSE)
+{
+    if(returnType %in% c('SCE',
+                         'sce',
+                         'SingleCellExperiment',
+                         'singlecellexperiment'))
+        return(SeuratToSCE(obj,spatial))
+
+    return(obj)
+}
+
+## ####################################################
+SCEtoSeurat = function(sce)
+{
+    f = as.Seurat(sce)
+
+    numCells = ncol(sce)
+    for(n in colPairNames(sce))
+    {
+        M = matrix(0,nrow=numCells,ncol=numCells)
+        rownames(M) = colnames(sce)
+        colnames(M) = colnames(sce)
+
+        df = colPair(sce,n)
+        df = as.data.frame(df)
+        M[df$from,df$to] = df$value
+        M[df$to,df$from] = df$value
+        graph = as.Graph(M)
+        f@graphs[[n]] = graph
+    }
+
+    return(f)
+}
+
+## ####################################################
+SeuratToSCE = function(f,spatial)
+{
+    sce = as.SingleCellExperiment(f)
+    for(n in names(f@graphs))
+    {
+        NN = getNearestNeighborListsSeurat(f,n)
+        numPairs = nrow(NN)
+
+        a = 1:ncol(sce)
+        names(a) = colnames(sce)
+        cell1 = a[NN$nodeA]
+        cell2 = a[NN$nodeB]
+
+        names(cell1) = NULL
+        names(cell2) = NULL
+        
+        colPair(sce,n) = SelfHits(cell1,
+                                  cell2,
+                                  nnode=ncol(sce),
+                                  value=NN$weight)
+    }
+
+    if(spatial)
+    {
+        sce = SpatialExperiment(sce)
+
+        ## Copy in the centroids:
+        centroids = GetTissueCoordinates(f)
+        rownames(centroids) = centroids$cell
+        centroids = centroids[,1:2]
+        centroids = data.matrix(centroids)
+
+        spatialCoords(sce) = centroids
+    }
+    return(sce)
+}
+
+## ####################################################
+## Functions for quality control of neighbouring cells
+## ####################################################
+
+## ####################################################
+#' This function annotates edges with their distance and
+#' the types of cells they connect
+#'
+#' @param edges - A data frame with columns nodeA and nodeB giving the
+#'     cells of each edge
+#' @param clusters - the clusters of each cell
+#' @param centroids - the centroids of each cell
+#' @return a data frame giving the edges (as nodeA and nodeB), their
+#'     lengths and the cell type pair.
+#' @export
+#' @examples
+#' getExample = make.getExample()
+#' centroids = getExample('centroids')
+#' clusters = getExample('clusters')
+#' delaunayNeighbours = getExample('delaunayNeighbours')
+#' annEdges = edgeLengthsAndCellTypePairs(delaunayNeighbours,
+#'                    clusters,centroids)
+edgeLengthsAndCellTypePairs = function(edges,clusters,centroids)
+{
+    centr = data.matrix(centroids[,1:2])
+    delta = centr[edges$nodeA,] - centr[edges$nodeB,]
+
+    getLength = function(i)
+    {
+        return(Norm(delta[i,]))
+    }
+
+    theRun = 1:nrow(delta)
+    edges$length = unlist(lapply(theRun,getLength))
+
+    getClusterPair = function(i)
+    {
+        thePair = c(clusters[edges$nodeA[i]],
+                    clusters[edges$nodeB[i]])
+        thePair = thePair[order(thePair)]
+        tag = paste(thePair,collapse='_')
+
+        return(tag)
+    }
+
+    edges$cellTypePair = unlist(lapply(theRun,getClusterPair))
+    
+    return(edges)                      
+}
+
+
+## ####################################################
+#' This finds proposed cutoffs for edge lengths by clustering
+#' the lengths of the edges for each cell type pair using k-means
+#' clustering with k  = 2
+#'
+#' @param annEdges - a data frame with columns nodeA, nodeB, length
+#'     and cellTypePair as produced by edgeLengthsAndCellTypePairs.
+#' @return This returns a data frame with columns cellTypePair and
+#'     cutoff. 
+#' @export
+#' @examples
+#' getExample = make.getExample()
+#' centroids = getExample('centroids')
+#' clusters = getExample('clusters')
+#' delaunayNeighbours = getExample('delaunayNeighbours')
+#' annEdges =
+#'     edgeLengthsAndCellTypePairs(delaunayNeighbours,clusters,centroids)
+#' cutoffDF = edgeCutoffsByClustering(annEdges)
+edgeCutoffsByClustering = function(annEdges)
+{
+    cellTypePairs = unique(annEdges$cellTypePair)
+    cutoff = c()
+    for(ctp in cellTypePairs)
+    {
+        idx = annEdges$cellTypePair == ctp
+        lengths = annEdges$length[idx]
+        centers = c(min(lengths),max(lengths))
+        if(length(lengths) <= 2)
+        {
+            cutoff[ctp] = mean(lengths)
+            next
+        }
+        km = kmeans(lengths,2)
+
+        A = lengths[km$cluster == 1]
+        B = lengths[km$cluster == 2]
+
+        if(max(A) < min(B))
+            cutoff[ctp] = (max(A) + min(B)) / 2
+        else
+            cutoff[ctp] = (max(B) + min(A)) / 2
+    }
+    df = data.frame(cellTypePair=names(cutoff),cutoff)
+
+    return(df)
+}
+
+## ####################################################
+#' This finds edge cutoffs by percentile
+#'
+#'@param annEdges - a data frame with columns nodeA, nodeB, length
+#'     and cellTypePair as produced by edgeLengthsAndCellTypePairs.
+#' @param percentileCutoff - a numeric
+#' @return This returns a data frame with columns cellTypePair and
+#'     cutoff.
+#' @export
+#' @examples
+#' getExample = make.getExample()
+#' centroids = getExample('centroids')
+#' clusters = getExample('clusters')
+#' delaunayNeighbours = getExample('delaunayNeighbours')
+#' annEdges =
+#'     edgeLengthsAndCellTypePairs(delaunayNeighbours,clusters,centroids)
+#' cutoffDF = edgeCutoffsByPercentile(annEdges,percentileCutoff=95)
+edgeCutoffsByPercentile = function(annEdges,
+                                   percentileCutoff)
+{
+    cellTypePairs = unique(annEdges$cellTypePair)
+
+    cutoff = c()
+    for(ctp in cellTypePairs)
+    {
+        idx = annEdges$cellTypePair == ctp
+        lengths = annEdges$length[idx]
+        lengths = lengths[order(lengths)]
+        num = length(lengths)
+        n = ceil(percentileCutoff * num / 100)
+        n = max(1,n)
+        n = min(n,num)
+        cutoff[ctp] = lengths[n]
+    }
+    cutoffDF = data.frame(cellTypePair=names(cutoff),
+                          cutoff)
+
+    return(cutoffDF)
+}
+
+
+## ####################################################
+#' This finds edge cutoffs by z-score
+#'
+#'@param annEdges - a data frame with columns nodeA, nodeB, length
+#'     and cellTypePair as produced by edgeLengthsAndCellTypePairs.
+#' @param zCutoff - a numeric
+#' @return This returns a data frame with columns cellTypePair and
+#'     cutoff.
+#' @export
+#' @examples
+#' getExample = make.getExample()
+#' centroids = getExample('centroids')
+#' clusters = getExample('clusters')
+#' delaunayNeighbours = getExample('delaunayNeighbours') 
+#' annEdges =
+#'     edgeLengthsAndCellTypePairs(delaunayNeighbours,clusters,centroids)
+#' cutoffDF = edgeCutoffsByZScore(annEdges,zCutoff=1.5)
+edgeCutoffsByZScore = function(annEdges,zCutoff)
+{
+    cellTypePairs = unique(annEdges$cellTypePair)
+
+    cutoff = c()
+    for(ctp in cellTypePairs)
+    {
+        idx = annEdges$cellTypePair == ctp
+        lengths = annEdges$length[idx]
+
+        cutoff[ctp] = mean(lengths) + zCutoff * std(lengths)
+    }
+    cutoffDF = data.frame(cellTypePair=names(cutoff),
+                          cutoff)
+
+    return(cutoffDF)       
+}
+
+
+## ####################################################
+#' This finds proposed cutoffs for edge lengths by computing
+#' the histogram of edge lengths for each cell type pair and
+#' then using the watershed algorithm to find the hump of the
+#' histogram containing the median.
+#'
+#' @param annEdges - a data frame with columns nodeA, nodeB, length
+#'     and cellTypePair as produced by edgeLengthsAndCellTypePairs.
+#' @param tolerance - the tolerance parameter for the watershed
+#'     algorithm.
+#' @param nbins - the number of bins for the histogram
+#' @return This returns a data frame with columns cellTypePair and
+#'     cutoff.
+#' @importFrom EBImage watershed
+#' @export
+#' @examples
+#' getExample = make.getExample()
+#' centroids = getExample('centroids')
+#' clusters = getExample('clusters')
+#' delaunayNeighbours = getExample('delaunayNeighbours') 
+#' annEdges =
+#'     edgeLengthsAndCellTypePairs(delaunayNeighbours,clusters,centroids)
+#' cutoffDF = edgeCutoffsByWatershed(annEdges)
+edgeCutoffsByWatershed = function(annEdges,nbins=15,tolerance=10)
+{
+    cellTypePairs = unique(annEdges$cellTypePair)
+    cutoff = c()
+
+    for(ctp in cellTypePairs)
+    {
+        lengths = annEdges$length[annEdges$cellTypePair == ctp]
+        
+        a = hist(lengths,nbins,plot=FALSE)
+        d = a$density
+        d = matrix(d,nrow=1)
+        res = watershed(d,tolerance)
+
+        med = median(lengths)
+        ## Where median occurs:
+        idx = a$mids >= med
+
+        ## Maybe there are no bins beyond the median:
+        if(sum(idx) == 0)
+        {
+            delta = a$mids[2] - a$mids[1]
+            cutoff[ctp] = a$mids[length(a$mids)] + delta
+            next
+        }
+        clusteredAs = res[min(which(idx),na.rm=TRUE)]
+        upTo = max(which(res == clusteredAs),na.rm=TRUE)
+
+        if(length(a$mid) == upTo)
+            cutoff[ctp] = a$mid[upTo]
+        else
+            cutoff[ctp] = a$mid[upTo+1]
+    }
+    cutoffDF = data.frame(cellTypePair=names(cutoff),
+                          cutoff)
+
+    return(cutoffDF)
+}
+
+
+## ####################################################
+#' edgeLengthPlot
+#'
+#' This plots histograms of the edge lengths broken out
+#' by the cell types of the cells they connect.  It
+#' optionally plots a cutoff for each pair of types.
+#'
+#' @param annEdges - A data frame as produced by
+#'     edgeLengthsAndCellTypePairs
+#' @param cutoffDF - A data frame with columns cellTypePair and
+#'     cutoff. This defaults to NULL in which case no cutoffs will be
+#'     plotted. 
+#' @param whichPairs - Which cellTypePairs to plot.  If this is NULL,
+#'     we plot all pairs.  If this is a numeric, we plot only pairs
+#'     that have at least this many edges.  If this is a character
+#'     vector, we plot the pairs in this list.
+#' @param xLim - limits the extent of the plots. Defaults to 100.  Can
+#'     be set to NULL.
+#' @param legend - Show legend, defaults to FALSE
+#' @return This returns a ggplot object
+#' @export
+#' @examples
+#' getExample = make.getExample()
+#' centroids = getExample('centroids')
+#' clusters = getExample('clusters')
+#' delaunayNeighbours = getExample('delaunayNeighbours') 
+#' annEdges = edgeLengthsAndCellTypePairs(delaunayNeighbours,
+#'                    clusters,centroids)
+#' cutoffDF = edgeCutoffsByPercentile(annEdges,95)
+#' g = edgeLengthPlot(annEdges,cutoffDF,whichPairs=60)
+edgeLengthPlot = function(annEdges,
+                          cutoffDF,
+                          whichPairs,
+                          xLim=100,
+                          legend=FALSE)
+{
+    ## ####################################################
+    ## What to plot:
+
+    ## All:
+    if(is.null(whichPairs))
+    {
+        useThesPairs = unique(annEdges$cellTypePair)
+    }
+
+    ## Sufficiently large:
+    if(isa(whichPairs,'numeric'))
+    {
+        a = table(annEdges$cellTypePair)
+        b = as.numeric(a)
+        names(b) = names(a)
+        useThesePairs = names(b[b >= whichPairs])
+    }
+
+    ## A pre-chosen set:
+    if(isa(whichPairs,'character'))
+    {
+        useThesePairs = whichPairs
+    }
+
+    ## Make the plots:
+    idx = annEdges$cellTypePair %in% useThesePairs
+    plotDF = annEdges[idx,]
+
+    g = ggplot(plotDF,aes(x=length,fill=cellTypePair)) +
+        geom_density() +
+        facet_wrap(~cellTypePair)
+
+    ## Do we want a legend:
+    if(! legend)
+        g = g + theme(legend.position='none')
+
+    ## Do we want an xlim?
+    if(! is.null(xlim))
+        g = g + xlim(0,xLim)
+
+    ## Do we want cutoffs?
+    ## No. We're done:
+    if(is.null(cutoffDF))
+        return(g)
+
+    ## Yes.  Plot cutoffs:
+    idx = cutoffDF$cellTypePair %in% useThesePairs
+    g = g +
+        geom_vline(data=cutoffDF[idx,],aes(xintercept=cutoff)) +
+        facet_wrap(~cellTypePair)
+
+    return(g)
+}
+
+
+## ####################################################
+#' This subsets edges by our chosen critera
+#'
+#' @param annEdges - a data frame with columns nodeA, nodeB, length
+#'     and cellTypePair as produced by edgeLengthsAndCellTypePairs.
+#' @param cutoffSpec - This can be either a numeric value which will
+#'     be applied across all edges as an upper limit or a data frame
+#'     with columns cellTypePair and cutoff as produced by any of the
+#'     edgeCutoffsBy functions
+#' @return This returns a subset of the annotated edges
+#' @export
+#' @examples
+#' getExample = make.getExample()
+#' centroids = getExample('centroids')
+#' clusters = getExample('clusters')
+#' delaunayNeighbours = getExample('delaunayNeighbours') 
+#' annEdges =
+#'     edgeLengthsAndCellTypePairs(delaunayNeighbours,clusters,centroids)
+#' tolerance = 5
+#' nbins = 15
+#' cutoffDFWater = edgeCutoffsByWatershed(annEdges,
+#'                                       tolerance=tolerance,
+#'                                       nbins=nbins)
+#' culledEdges = cullEdges(annEdges,cutoffDFWater)
+cullEdges = function(annEdges,cutoffSpec)
+{
+    if(isa(cutoffSpec,'numeric'))
+    {
+        idx = annEdges$length <= cutoffSpec
+        annEdges = annEdges[idx,]
+
+        return(annEdges)
+    }
+
+    ## Otherwise cutoffSpec is a data frame:
+    for(i in 1:nrow(cutoffSpec))
+    {
+        idx = annEdges$cellTypePair == cutoffSpec$cellTypePair[i] &
+            annEdges$length <= cutoffSpec$cutoff[i]
+
+        a = annEdges[idx,]
+
+        if(i == 1)
+            culledEdges = a
+        else
+            culledEdges = rbind(culledEdges,a)
+    }
+
+    return(culledEdges)
+}
+
+

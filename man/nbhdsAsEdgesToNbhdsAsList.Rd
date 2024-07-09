@@ -28,6 +28,7 @@ by edges and turns it into a named list giving the
 memberships of each neighbourhood
 }
 \examples{
-cells = unique(c(delaunayNeighbours$nodeA,delaunayNeighbours$nodeB))
+delaunayNeighbours = make.getExample()('delaunayNeighbours')
+cells = unique(c(delaunayNeighbours[,'nodeA'],delaunayNeighbours[,'nodeB']))
 nbhdsList = nbhdsAsEdgesToNbhdsAsList(cells,delaunayNeighbours)
 }

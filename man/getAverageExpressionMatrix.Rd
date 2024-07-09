@@ -9,16 +9,19 @@ getAverageExpressionMatrix(
   f,
   fPrime,
   v5 = T,
-  clusteringName = "seurat_clusters"
+  clusteringName = "seurat_clusters",
+  layer = "scale.data"
 )
 }
 \arguments{
 \item{f}{\itemize{
-\item The Seurat object of cells
+\item The Seurat object of cells, or SingleCellExperiment
+to be turned into a Seurat object
 }}
 
 \item{fPrime}{\itemize{
-\item The Seurat object of genes
+\item The Seurat object of genes,  or SingleCellExperiment
+to be turned into a Seurat object
 }}
 
 \item{v5}{\itemize{
@@ -30,6 +33,10 @@ to TRUE
 clustering, i.e., seurat_clusters, which is the default, but
 for neighbourhood Seurat objects, this can be
 neighbourhood_clusters.}
+
+\item{layer}{\itemize{
+\item layer to use for expression values
+}}
 }
 \value{
 A matrix of the average expression where the rows
@@ -41,5 +48,10 @@ This computes average expression of each gene cluster in
 each cell cluster and returns the result as a matrix
 }
 \examples{
-M = getAverageExpressionMatrix(S,STranspose)
+getExample = make.getExample()
+STranspose = getExample('STranspose')
+M = getAverageExpressionMatrix(S,STranspose,layer='data')
+S_sce = getExample('S_sce')
+STranspose_sce = getExample('STranspose_sce')
+M_sce = getAverageExpressionMatrix(S_sce,STranspose_sce,layer='data')
 }

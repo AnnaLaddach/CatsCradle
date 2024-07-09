@@ -8,11 +8,13 @@ meanGeneClusterOnCellUMAP(f, fPrime, geneCluster)
 }
 \arguments{
 \item{f}{\itemize{
-\item a Seurat object of cells
+\item a Seurat object of cells or SingleCellExperiment to
+be converted to a Seurat object
 }}
 
 \item{fPrime}{\itemize{
 \item the corresponding Seurat object of genes
+SingleCellExperiment to be converted to a Seurat object
 }}
 
 \item{geneCluster}{\itemize{
@@ -27,5 +29,6 @@ This function paints gene expression for a
 given gene cluster on cell umap.
 }
 \examples{
+STranspose = make.getExample()('STranspose')
 g = meanGeneClusterOnCellUMAP(S,STranspose,geneCluster=0)
 }
