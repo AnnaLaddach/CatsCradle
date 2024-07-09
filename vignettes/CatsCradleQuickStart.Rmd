@@ -163,6 +163,7 @@ neighbourhoods around type A.
 ```{r}
 NBHDByCTMatrixExtended = getExample('NBHDByCTMatrixExtended')
 clusters = getExample('clusters')
+colours = getExample('colours')
 cellTypesPerCellTypeMatrixExtended = computeCellTypesPerCellTypeMatrix(NBHDByCTMatrixExtended,clusters)
 
 cellTypesPerCellTypeGraphFromCellMatrix(cellTypesPerCellTypeMatrixExtended, minWeight = 0.05, colours = colours)

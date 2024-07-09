@@ -4,7 +4,7 @@ author: "Anna Laddach and Michael Shapiro"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-    %\VignetteIndexEntry{CatsCradleQuickStart}
+    %\VignetteIndexEntry{CatsCradleExampleData}
     %\VignetteEngine{knitr::rmarkdown}
     %\VignetteEncoding{UTF-8}
 ---
@@ -40,7 +40,7 @@ created once in each session.
 On the first invocation this computes STranspose:
 
 ```{r}
-library(CatsCradle)
+library(CatsCradle,quietly=TRUE)
 getExample = make.getExample()
 STranspose = getExample('STranspose')
 ```

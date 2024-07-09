@@ -6,8 +6,8 @@ knitr::opts_chunk$set(
 )
 
 ## -----------------------------------------------------------------------------
-library(Seurat)
-library(CatsCradle)
+library(Seurat,quietly=TRUE)
+library(CatsCradle,quietly=TRUE)
 ImageDimPlot(smallXenium, cols = "polychrome", size = 1)
 
 ## -----------------------------------------------------------------------------
@@ -64,7 +64,7 @@ cellTypesPerCellTypeGraphFromCellMatrix(cellTypesPerCellTypeMatrix,
                                     minWeight = 0.05, colours = colours)
 
 ## -----------------------------------------------------------------------------
-library(pheatmap)
+library(pheatmap,quietly=TRUE)
 pheatmap(cellTypesPerCellTypeMatrix)
 
 ## -----------------------------------------------------------------------------
@@ -75,7 +75,7 @@ minWeight = 0.05, colours = colours)
 
 ## -----------------------------------------------------------------------------
 cellTypesPerCellTypePValues = computeNeighbourEnrichment(delaunayNeighbours, 
-                                                     clusters, verbose = F)
+                                                     clusters, verbose = FALSE)
 
 ## -----------------------------------------------------------------------------
 cellTypesPerCellTypePValuesNegLog = -log10(cellTypesPerCellTypePValues)
@@ -145,7 +145,7 @@ sankeyFromMatrix(CTByNBHDClusterExtended)
 ## -----------------------------------------------------------------------------
 CTByNBHDSeurat = 
   computeNBHDVsCTSeurat(t(NBHDByCTMatrix), npcs = 10, 
-                        transpose = T, resolution = 1, n.neighbors = 5,
+                        transpose = TRUE, resolution = 1, n.neighbors = 5,
 			verbose=FALSE)
 
 CTByNBHDSeurat$cellType = colnames(CTByNBHDSeurat)
@@ -254,19 +254,47 @@ ImageFeaturePlot(edgeSeurat, features = "Pdyn-Npy2r")
 ## -----------------------------------------------------------------------------
 edgeNeighbours = computeEdgeGraph(delaunayNeighbours)
 
-## -----------------------------------------------------------------------------
-moransILigandReceptor = runMoransI(edgeSeurat, edgeNeighbours, assay = "RNA", 
-                     layer = "counts", nSim = 100)
+## ----eval=FALSE---------------------------------------------------------------
+#  moransILigandReceptor = runMoransI(edgeSeurat, edgeNeighbours, assay = "RNA",
+#                       layer = "counts", nSim = 100)
 
 ## -----------------------------------------------------------------------------
-head(moransILigRec)
+head(moransILigandReceptor)
 
 ## -----------------------------------------------------------------------------
-tail(moransILigRec)
+tail(moransILigandReceptor)
 
 ## -----------------------------------------------------------------------------
 ImageFeaturePlot(edgeSeurat, "Penk-Htr1f")
 
 ## -----------------------------------------------------------------------------
 ImageFeaturePlot(edgeSeurat, "Sst-Gpr17")
+
+## -----------------------------------------------------------------------------
+annEdges =
+edgeLengthsAndCellTypePairs(delaunayNeighbours,clusters,centroids)
+head(annEdges)
+
+## -----------------------------------------------------------------------------
+cutoffDF = edgeCutoffsByPercentile(annEdges,percentileCutof=95)
+g = edgeLengthPlot(annEdges,cutoffDF,whichPairs=60)
+print(g)
+
+## -----------------------------------------------------------------------------
+cutoffDF = edgeCutoffsByClustering(annEdges)
+
+## -----------------------------------------------------------------------------
+cutoffDF = edgeCutoffsByPercentile(annEdges,percentileCutoff=95)
+
+## -----------------------------------------------------------------------------
+cutoffDF = edgeCutoffsByZScore(annEdges,zCutoff=1.5)
+
+## -----------------------------------------------------------------------------
+cutoffDF = edgeCutoffsByWatershed(annEdges,nbins=15,tolerance=10)
+
+## -----------------------------------------------------------------------------
+cutoffDF = edgeCutoffsByWatershed(annEdges,nbins=15,tolerance=10)
+culledEdges = cullEdges(annEdges,cutoffDF)
+nrow(annEdges)
+nrow(culledEdges)
 

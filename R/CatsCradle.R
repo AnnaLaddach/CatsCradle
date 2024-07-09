@@ -23,6 +23,7 @@
 #' @import Seurat
 #' @examples
 #' STranspose = transposeSeuratObject(S)
+#' getExample = make.getExample()
 #' S_sce = getExample('S_sce')
 #' STransposeFromSCE = transposeSeuratObject(S_sce)
 #' STransposeAsSCE = transposeSeuratObject(S,returnType='SCE')
@@ -215,10 +216,10 @@ geneListPValue = function(A,B,C,background=25000)
 #' @import stats
 #' @export
 #' @examples
-#' getExamples = make.getExamples()
+#' getExample = make.getExample()
 #' STranspose = getExample('STranspose')
 #' clusterDF = data.frame(gene=colnames(STranspose),
-#'                        geneCluster=STranspose[,'seurat_clusters'])
+#'                        geneCluster=STranspose@meta.data[,'seurat_clusters'])
 #' geneSet = intersect(hallmark[[1]],colnames(STranspose))
 #' pvalueMatrix = geneSetsVsGeneClustersPValueMatrix(geneSet,
 #'                                               clusterDF,
@@ -903,7 +904,9 @@ annotateGeneAsVector = function(gene,geneSets,normalise=FALSE)
 #' in geneSets
 #' @export
 #' @examples
-#' STranspose = make.getExample()('STranspose')
+#' getExample = make.getExample()
+#' STranspose = getExample('STranspose')
+#' STranspose_sce = getExample('STranspose_sce')
 #' set.seed(100)
 #' genes = sample(colnames(STranspose),5)
 #' predictions = predictAnnotation(genes,hallmark,STranspose,radius=.5)
@@ -974,7 +977,7 @@ predictAnnotation = function(genes,
 #' are the relative wieghts of the contributions.
 #' @export 
 #' @examples
-#' STranspose = make.getExample('STranspose')
+#' STranspose = make.getExample()('STranspose')
 #' genesAnno = annotateGenesByGeneSet(hallmark)
 #' predictions = predictGeneAnnotationImpl('Myc',STranspose,genesAnno,
 #' radius=.5,metric='umap')

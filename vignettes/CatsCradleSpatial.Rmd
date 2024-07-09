@@ -4,7 +4,7 @@ author: "Anna Laddach and Michael Shapiro"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-    %\VignetteIndexEntry{CatsCradleSpatial02}
+    %\VignetteIndexEntry{CatsCradleSpatialVignette}
     %\VignetteEngine{knitr::rmarkdown}
     %\VignetteEncoding{UTF-8}
 ---
@@ -38,8 +38,8 @@ followed by minimal manual curation. Please note these assignments are
 not definitive and are for illustratory purporses only.
 
 ```{r}
-library(Seurat)
-library(CatsCradle)
+library(Seurat,quietly=TRUE)
+library(CatsCradle,quietly=TRUE)
 ImageDimPlot(smallXenium, cols = "polychrome", size = 1)
 ```
 
@@ -231,7 +231,7 @@ are not necessarily equal, and this accounts for the assymmetry in the
 fractions. 
 
 ```{r}
-library(pheatmap)
+library(pheatmap,quietly=TRUE)
 pheatmap(cellTypesPerCellTypeMatrix)
 ```
 

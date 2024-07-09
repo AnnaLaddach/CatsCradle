@@ -52,6 +52,7 @@ Seurat object
 }
 \examples{
 STranspose = transposeSeuratObject(S)
+getExample = make.getExample()
 S_sce = getExample('S_sce')
 STransposeFromSCE = transposeSeuratObject(S_sce)
 STransposeAsSCE = transposeSeuratObject(S,returnType='SCE')

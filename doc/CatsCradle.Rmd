@@ -16,6 +16,9 @@ knitr::opts_chunk$set(
 )
 ```
 
+![](CatsCradleLogo.png){width=2in}
+
+
 ## Introduction
 
 Here we describe the functionality in this package concerned with
@@ -49,9 +52,9 @@ The Louvain clustering of the genes is now encoded in
 STranspose$seurat_clusters. As with the cells, we can observe these
 clusters on UMAP, tSNE or PCA.
 
-![cell clusters on umap](cellClustersOnUMAP.png){width=6in}
+![cell clusters on umap](cellClustersOnUMAP.jpg){width=6in}
 
-![gene clusters on umap](geneClustersOnUMAP.png){width=6in}
+![gene clusters on umap](geneClustersOnUMAP.jpg){width=6in}
 
 We have never seen a use case in which there was a reason to query the
 identities of the individual cells in a UMAP plot.  However, this
@@ -92,7 +95,7 @@ pheatmap(averageExpMatrix,
       cellwidth=10)
 ```
 
-![heatmap](cellClustersVsGeneClusters.png){width=6in}
+![heatmap](cellClustersVsGeneClusters.jpg){width=6in}
 
 Another way of seeing the relationship between cell clusters and gene
 clusters is in a Sankey graph.  This is a bi-partite graph whose
@@ -117,7 +120,7 @@ The print command opens this in a browser.  This allows one to query
 the individual vertices and edges. This can be saved with the
 saveWidget command as above.
 
-![Sankey graph](catsCradle.png){width=6in}
+![Sankey graph](catsCradle.jpg){width=6in}
 
 
 
@@ -132,7 +135,7 @@ association with cluster 4 and with the border between clusters 0 and
 3.  In our experience, proliferation associated gene sets are among
 the most strongly clustered.
 
-![Hallmark G2M](hallmark_g2m_onUMAP.png){width=6in}
+![Hallmark G2M](hallmark_g2m_onUMAP.jpg){width=6in}
 
 ## Determining statistical significance of clustering
 
@@ -170,13 +173,13 @@ distances and its z-score.  Here we report a p-value of
 0.001. However, as can be seen from the figure, the actual p-value is
 lower by many orders of magnitude.
 
-![clustering statistics](g2mClusteringStats.png){width=6in}
+![clustering statistics](g2mClusteringStats.jpg){width=6in}
 
 Here we have shown the statistics for one of the gene sets that is
 most tightly clustered on UMAP.  However, of the 50 Hallmark gene
 sets 31 cluster with a p-value better than 0.05.
 
-![Hallmark clustering statistics](hallmarkClusteringPValues.png){width=6in}
+![Hallmark clustering statistics](hallmarkClusteringPValues.jpg){width=6in}
 
 ## Nearby genes
 
@@ -204,9 +207,9 @@ theCombinatoricGenesThemselves = names(combinatoriallyNearbyGenes)
 
 ```
 
-![finding geometrically nearby genes](nearbyGenes.png){width=6in}
+![finding geometrically nearby genes](nearbyGenes.jpg){width=6in}
 
-![finding combinatorially nearby genes](combinatorialNearbyGenes.png){width=6in}
+![finding combinatorially nearby genes](combinatorialNearbyGenes.jpg){width=6in}
 
 ## Predicting gene function
 
@@ -258,7 +261,7 @@ take their dot prodcts as a measure of their closeness.  Comparing the
 actual dot products for these 922 genes to those produced by 1000
 randomised predictions produces the following comparison.
 
-![comparing real and randomised predictions](actualVsRandomisedPredictions.png){width=6in}
+![comparing real and randomised predictions](actualVsRandomisedPredictions.jpg){width=6in}
 
 
 

@@ -1429,7 +1429,7 @@ SCEtoSeurat = function(sce)
 }
 
 ## ####################################################
-SeuratToSCE = function(f,spatial)
+SeuratToSCE = function(f,spatial=FALSE)
 {
     sce = as.SingleCellExperiment(f)
     for(n in names(f@graphs))

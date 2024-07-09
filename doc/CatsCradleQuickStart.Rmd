@@ -16,6 +16,9 @@ knitr::opts_chunk$set(
     comment = "#>"
 )
 ```
+![](CatsCradleLogo.png){width=2in}
+
+
 ## Introduction
 
 CatsCradle provides two types of functionality for analysing single
@@ -44,6 +47,8 @@ on the basis of the similarities and differences in the cells they are
 expressed in.
 
 ```{r}
+getExample = make.getExample()
+STranspose = getExample('STranspose')
 DimPlot(STranspose,cols='polychrome')
 ```
 
@@ -133,6 +138,7 @@ neighbours.  This is an undirected graph in which each cell has an
 edge connecting it to each of these neighbours.
 
 ```{r}
+delaunayNeighbours = getExample('delaunayNeighbours')
 head(delaunayNeighbours,10)
 ```
 
@@ -155,6 +161,9 @@ cells of type B compose at least 5 percent of the cells in
 neighbourhoods around type A.
 
 ```{r}
+NBHDByCTMatrixExtended = getExample('NBHDByCTMatrixExtended')
+clusters = getExample('clusters')
+colours = getExample('colours')
 cellTypesPerCellTypeMatrixExtended = computeCellTypesPerCellTypeMatrix(NBHDByCTMatrixExtended,clusters)
 
 cellTypesPerCellTypeGraphFromCellMatrix(cellTypesPerCellTypeMatrixExtended, minWeight = 0.05, colours = colours)
@@ -185,6 +194,7 @@ spatial object and visualize the neighbourhood clusters on the tissue
 coordinates. (Again, we are using extended neighbourhoods.)
 
 ```{r}
+NBHDByCTSeuratExtended = getExample('NBHDByCTSeuratExtended')
 smallXenium$NBHDClusterExtended= 
   NBHDByCTSeuratExtended@active.ident
 ImageDimPlot(smallXenium, group.by = c("NBHDClusterExtended"), 
@@ -212,6 +222,7 @@ addition, we can find the marker genes which characterise the transcriptomic
 differences between the neighbourhood types.
 
 ```{r}
+extendedNeighbours = getExample('extendedNeighbours')
 agg = aggregateSeuratGeneExpression(smallXenium,extendedNeighbours,
                                     verbose=FALSE)
 smallXenium$aggregateNBHDClusters = agg@active.ident
@@ -227,7 +238,7 @@ are subsumed into cell type neighbourhood cluster 0.  More generally,
 we see that clustering based on aggregate gene expression tends to
 subdivide that based on the cell types in each neighbourhood.
 
-![comparing neighbourhood clusterings](aggregationVsCelltypeNbhdClustering.png){width=6in}
+![comparing neighbourhood clusterings](aggregationVsCelltypeNbhdClustering.jpg){width=6in}
 
 Another way of comparing clusterings is via the adjusted Rand
 index. This compares two classifications of the same set of objects.
@@ -273,6 +284,26 @@ tells whether a given ligand-receptor pair is statistically significantly
 enriched in the interactions between two specific cell types.  For
 further details see the section Ligand receptor analysis in the Cats
 Cradle Spatial vignette [CatsCradleSpatial](doc/CatsCradleSpatial.html).
+
+## CatsCradle, Seurat objects, SingleCellExperiment objects and
+   SpatialExperiment objects 
+
+CatsCradle provides rudimentary support for the Bioconductor classes
+SingleCellExperiment and its derived class SpatialExperiment.
+
+Every function which accepts a Seurat object as input can also accept
+a SingleCellExperiment in its place.  Any function which returns a
+Seurat object can also return a SingleCellExperiment, in one case, a
+SpatialExperiment, through the use of the parameter returnType.  In
+each case, the internals of the functions are manipulating Seurat
+objects.  Conversion to and from these is performed upon entry to and
+return from the function and these coversions are rather lightweight
+in nature.  They have slightly more functionality than as.Seurat and
+as.SingleCellExperiment.  In addition to invoking these functions,
+they carry over the nearest neighbour graphs, and in one case carry
+over the tissue coordinates from a spatial Seurat object to a
+SpatialExperiment object.  Because of the shallow nature of these
+conversions, other information may be lost.
 
 
 

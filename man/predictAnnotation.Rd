@@ -74,7 +74,9 @@ and a CatsCradle object by considering the annotations of
 its neighboring genes.
 }
 \examples{
-STranspose = make.getExample()('STranspose')
+getExample = make.getExample()
+STranspose = getExample('STranspose')
+STranspose_sce = getExample('STranspose_sce')
 set.seed(100)
 genes = sample(colnames(STranspose),5)
 predictions = predictAnnotation(genes,hallmark,STranspose,radius=.5)

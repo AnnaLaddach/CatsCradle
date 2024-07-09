@@ -11,6 +11,8 @@ library(CatsCradle,quietly=TRUE)
 DimPlot(S,cols='polychrome')
 
 ## -----------------------------------------------------------------------------
+getExample = make.getExample()
+STranspose = getExample('STranspose')
 DimPlot(STranspose,cols='polychrome')
 
 ## -----------------------------------------------------------------------------
@@ -30,20 +32,26 @@ pValue
 ImageDimPlot(smallXenium,cols='polychrome')
 
 ## -----------------------------------------------------------------------------
+delaunayNeighbours = getExample('delaunayNeighbours')
 head(delaunayNeighbours,10)
 
 ## -----------------------------------------------------------------------------
+NBHDByCTMatrixExtended = getExample('NBHDByCTMatrixExtended')
+clusters = getExample('clusters')
+colours = getExample('colours')
 cellTypesPerCellTypeMatrixExtended = computeCellTypesPerCellTypeMatrix(NBHDByCTMatrixExtended,clusters)
 
 cellTypesPerCellTypeGraphFromCellMatrix(cellTypesPerCellTypeMatrixExtended, minWeight = 0.05, colours = colours)
 
 ## -----------------------------------------------------------------------------
+NBHDByCTSeuratExtended = getExample('NBHDByCTSeuratExtended')
 smallXenium$NBHDClusterExtended= 
   NBHDByCTSeuratExtended@active.ident
 ImageDimPlot(smallXenium, group.by = c("NBHDClusterExtended"), 
              size = 1, cols = "polychrome")
 
 ## -----------------------------------------------------------------------------
+extendedNeighbours = getExample('extendedNeighbours')
 agg = aggregateSeuratGeneExpression(smallXenium,extendedNeighbours,
                                     verbose=FALSE)
 smallXenium$aggregateNBHDClusters = agg@active.ident
