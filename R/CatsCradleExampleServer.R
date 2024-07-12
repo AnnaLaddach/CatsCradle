@@ -24,9 +24,7 @@ make.getExample = function()
                         moransILigandReceptor=moransILigandReceptor,
                         hallmark=hallmark,
                         humanLRN=humanLRN,
-                        mouseLRN=mouseLRN,
-                        averageExpMatrix=averageExpMatrix)
-    
+                        mouseLRN=mouseLRN)
     
     
     getExample = function(whichOne)
@@ -217,9 +215,13 @@ make.getExample = function()
             answer = computeNeighbourEnrichment(delaunayNeighbours, 
                                                 clusters, verbose = FALSE)
         }
-        
-        
-        
+
+        if(whichOne == 'averageExpMatrix')
+        {
+            STranspose = makeExample('STranspose')
+            answer = getAverageExpressionMatrix(S,STranspose,layer='data')
+        }
+                
         ## Save and return:
         alreadyFound[[whichOne]] <<- answer
         

@@ -32,20 +32,22 @@ transposeSeuratObject = function(f,active.assay='RNA',
                                  returnType='Seurat')
 {
     f = acceptor(f)
-    
-    f@active.assay = active.assay
-    df = FetchData(f,rownames(f),layer='counts')
-    MPrime = as.matrix(df)
-   
-    fPrime = CreateSeuratObject(MPrime)
-    fPrime = NormalizeData(fPrime)
+
+    data = f[[active.assay]]$data
+    data = t(data)
+    rownames(data) = str_replace_all(rownames(data),'_','-')
+
+    fPrime = CreateSeuratObject(data,assay=active.assay)
+    fPrime[[active.assay]]$data = data
+    ## fPrime[[active.assay]]$counts = NULL
+
     fPrime = ScaleData(fPrime)
-    fPrime = FindVariableFeatures(fPrime)    
+    fPrime = FindVariableFeatures(fPrime,assay=active.assay)
     fPrime = RunPCA(fPrime,npcs=npcs)
     fPrime = RunUMAP(fPrime,reduction='pca',dims=dims)
     fPrime = FindNeighbors(fPrime)
     fPrime = FindClusters(fPrime,resolution=res)
-    
+
     return(returnAs(fPrime,returnType))
 }
 

@@ -5,22 +5,14 @@
 \title{This returns the names of available example objects.}
 \usage{
 exampleObjects()
-
-exampleObjects()
 }
 \value{
 A character vector of the names of available
 example data objects
-
-A character vector of the names of the available
-example objects
 }
 \description{
 This returns the names of available example objects.
-
-A listing of the names of the available example objects.
 }
 \examples{
-availableObjects = exampleObjects()
 availableObjects = exampleObjects()
 }

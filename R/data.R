@@ -15,21 +15,6 @@
 "S"
 
 ## ####################################################
-#' averageExpMatrix
-#'
-#' The average expression matrix for cell clusters of S
-#' and gene clusters of STranspose.
-#'
-#' @format A 30 x 13 matrix
-#' \describe{
-#' This gives the average gene expression for each of the
-#' gene clusters in each of the cell clusters.
-#' }
-#' @source Produced from S and STranspose by
-#' getAverageExpression()
-"averageExpMatrix"
-
-## ####################################################
 #' hallmark
 #'
 #' The mouse hallmark gene sets.
