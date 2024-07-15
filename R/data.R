@@ -2,13 +2,15 @@
 ## ####################################################
 #' S
 #'
-#' A Seurat object of 2000 genes by 1445 cells.
+#' A Seurat object of 2000 genes by 540 cells.
 #'
 #' @format A Seurat object
 #'
 #' \describe{
 #' A Seurat object of cells.  It includes a UMAP of the
-#' cells and annotated clustering into cell types.
+#' cells and annotated clustering into cell types. It has
+#' been severely reduced in size to accommodate Bioconductor
+#' size restrictions.
 #' }  
 #' @source This is subset from the data associated with
 #'     https://www.nature.com/articles/s41586-021-04006-z

@@ -21,5 +21,7 @@ This converts an average gene expression matrix to a
 data frame.
 }
 \examples{
+getExample = make.getExample()
+averageExpMatrix = getExample('averageExpMatrix')
 averageExpDF = getAverageExpressionDF(averageExpMatrix)
 }

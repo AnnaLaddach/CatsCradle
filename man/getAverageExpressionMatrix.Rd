@@ -51,7 +51,4 @@ each cell cluster and returns the result as a matrix
 getExample = make.getExample()
 STranspose = getExample('STranspose')
 M = getAverageExpressionMatrix(S,STranspose,layer='data')
-S_sce = getExample('S_sce')
-STranspose_sce = getExample('STranspose_sce')
-M_sce = getAverageExpressionMatrix(S_sce,STranspose_sce,layer='data')
 }

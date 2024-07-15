@@ -23,9 +23,6 @@
 #' @import Seurat
 #' @examples
 #' STranspose = transposeSeuratObject(S)
-#' getExample = make.getExample()
-#' S_sce = getExample('S_sce')
-#' STransposeFromSCE = transposeSeuratObject(S_sce)
 #' STransposeAsSCE = transposeSeuratObject(S,returnType='SCE')
 transposeSeuratObject = function(f,active.assay='RNA',
                                  npcs=30,dims=1:20,res=1,
@@ -75,9 +72,6 @@ transposeSeuratObject = function(f,active.assay='RNA',
 #' getExample = make.getExample()
 #' STranspose = getExample('STranspose')
 #' M = getAverageExpressionMatrix(S,STranspose,layer='data')
-#' S_sce = getExample('S_sce')
-#' STranspose_sce = getExample('STranspose_sce')
-#' M_sce = getAverageExpressionMatrix(S_sce,STranspose_sce,layer='data')
 getAverageExpressionMatrix = function(f,fPrime, v5 = T,
                                       clusteringName='seurat_clusters',
                                       layer='scale.data')
@@ -136,6 +130,8 @@ getAverageExpressionMatrix = function(f,fPrime, v5 = T,
 #' @return The same matrix with fancier row and col names
 #' @export
 #' @examples
+#' getExample = make.getExample()
+#' averageExpMatrix = getExample('averageExpMatrix')
 #' averageExpMatrix = tagRowAndColNames(averageExpMatrix,
 #'                                      'cellCluster_','geneCluster_')
 tagRowAndColNames = function(M,ccTag='CC_',gcTag='GC_')
@@ -156,6 +152,8 @@ tagRowAndColNames = function(M,ccTag='CC_',gcTag='GC_')
 #' @import reshape2
 #' @export
 #' @examples
+#' getExample = make.getExample()
+#' averageExpMatrix = getExample('averageExpMatrix')
 #' averageExpDF = getAverageExpressionDF(averageExpMatrix)
 getAverageExpressionDF = function(M)
 {
@@ -428,10 +426,7 @@ sankeyFromMatrix = function(M,disambiguation=c('R_','C_'),
 #' @examples
 #' getExample = make.getExample()
 #' STranspose = getExample('STranspose')
-#' S_sce = getExample('S_sce')
-#' STranspose_sce = getExample('STranspose_sce')
 #' clusterExpression = getGeneClusterAveragesPerCell(S,STranspose)
-#' clusterExpression_sce = getGeneClusterAveragesPerCell(S_sce,STranspose_sce)
 getGeneClusterAveragesPerCell = function(f,
                                          fPrime,
                                          cells=colnames(f),

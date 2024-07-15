@@ -227,19 +227,26 @@ have a close relation to UMAP distance. This function will also return
 weighted combinatorial distance from a single gene where distance is
 the reciprocal of edge weight.
 
-```{r eval = FALSE}
+```{r}
 geneSet = intersect(colnames(STranspose),
                     hallmark[['HALLMARK_INTERFERON_ALPHA_RESPONSE']])
 geometricallyNearbyGenes = getNearbyGenes(STranspose,geneSet,radius=0.2,metric='umap')
 theGeometricGenesThemselves = names(geometricallyNearbyGenes)
 combinatoriallyNearbyGenes = getNearbyGenes(STranspose,geneSet,radius=1,metric='NN')
 theCombinatoricGenesThemselves = names(combinatoriallyNearbyGenes)
-
+df = FetchData(STranspose,c('umap_1','umap_2'))
+df$gene = colnames(STranspose)
+geneSetIdx = df$gene %in% geneSet
+nearbyIdx = df$gene %in% theGeometricGenesThemselves
+g = ggplot() +
+    geom_point(data=df,aes(x=umap_1,y=umap_2),color='gray') +
+    geom_point(data=df[geneSetIdx,],aes(x=umap_1,y=umap_2),color='blue') +
+    geom_point(data=df[nearbyIdx,],aes(x=umap_1,y=umap_2),color='red') +
+    ggtitle(paste0(c('Genes within geometric radius 0.2 (red) of \n',
+                     'HALLMARK_INTERFERON_ALPHA_RESPONSE (blue)')))
+print(g)
 ```
 
-Here we show the geometrically nearby genes:
-
-![finding geometrically nearby genes](nearbyGenes.jpg){width=6in}
 
 ## Predicting gene function
 

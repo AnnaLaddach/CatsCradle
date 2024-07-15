@@ -51,8 +51,5 @@ clusters.
 \examples{
 getExample = make.getExample()
 STranspose = getExample('STranspose')
-S_sce = getExample('S_sce')
-STranspose_sce = getExample('STranspose_sce')
 clusterExpression = getGeneClusterAveragesPerCell(S,STranspose)
-clusterExpression_sce = getGeneClusterAveragesPerCell(S_sce,STranspose_sce)
 }
