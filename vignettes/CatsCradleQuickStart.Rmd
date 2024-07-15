@@ -226,7 +226,8 @@ extendedNeighbours = getExample('extendedNeighbours')
 agg = aggregateSeuratGeneExpression(smallXenium,extendedNeighbours,
                                     verbose=FALSE)
 smallXenium$aggregateNBHDClusters = agg@active.ident
-ImageDimPlot(smallXenium,group.by='aggregateNBHDClusters',cols='polychrome')
+ImageDimPlot(smallXenium,group.by='aggregateNBHDClusters',cols='polychrome',
+             size=1)
 ```
 
 Notice that since our neighbourhoods are all indexed by cells, we can
@@ -238,7 +239,16 @@ are subsumed into cell type neighbourhood cluster 0.  More generally,
 we see that clustering based on aggregate gene expression tends to
 subdivide that based on the cell types in each neighbourhood.
 
-![comparing neighbourhood clusterings](aggregationVsCelltypeNbhdClustering.jpg){width=6in}
+```{r}
+library(pheatmap)
+tab = table(smallXenium@meta.data[,c("aggregateNBHDClusters",
+                                     "NBHDClusterExtended" )])
+M = matrix(as.numeric(tab),nrow=nrow(tab))
+rownames(M) = paste('aggregation_cluster',rownames(tab))
+colnames(M) = paste('nbhd_cluster',colnames(tab))
+for(i in 1:nrow(M)) M[i,] = M[i,] / sum(M[i,])
+pheatmap(M)
+```
 
 Another way of comparing clusterings is via the adjusted Rand
 index. This compares two classifications of the same set of objects.

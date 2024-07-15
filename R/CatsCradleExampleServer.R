@@ -218,7 +218,7 @@ make.getExample = function()
 
         if(whichOne == 'averageExpMatrix')
         {
-            STranspose = makeExample('STranspose')
+            STranspose = getExample('STranspose')
             answer = getAverageExpressionMatrix(S,STranspose,layer='data')
         }
                 
