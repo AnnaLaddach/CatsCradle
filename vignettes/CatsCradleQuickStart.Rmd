@@ -47,6 +47,8 @@ on the basis of the similarities and differences in the cells they are
 expressed in.
 
 ```{r}
+getExample = make.getExample()
+STranspose = getExample('STranspose')
 DimPlot(STranspose,cols='polychrome')
 ```
 
@@ -136,6 +138,7 @@ neighbours.  This is an undirected graph in which each cell has an
 edge connecting it to each of these neighbours.
 
 ```{r}
+delaunayNeighbours = getExample('delaunayNeighbours')
 head(delaunayNeighbours,10)
 ```
 
@@ -158,6 +161,9 @@ cells of type B compose at least 5 percent of the cells in
 neighbourhoods around type A.
 
 ```{r}
+NBHDByCTMatrixExtended = getExample('NBHDByCTMatrixExtended')
+clusters = getExample('clusters')
+colours = getExample('colours')
 cellTypesPerCellTypeMatrixExtended = computeCellTypesPerCellTypeMatrix(NBHDByCTMatrixExtended,clusters)
 
 cellTypesPerCellTypeGraphFromCellMatrix(cellTypesPerCellTypeMatrixExtended, minWeight = 0.05, colours = colours)
@@ -188,6 +194,7 @@ spatial object and visualize the neighbourhood clusters on the tissue
 coordinates. (Again, we are using extended neighbourhoods.)
 
 ```{r}
+NBHDByCTSeuratExtended = getExample('NBHDByCTSeuratExtended')
 smallXenium$NBHDClusterExtended= 
   NBHDByCTSeuratExtended@active.ident
 ImageDimPlot(smallXenium, group.by = c("NBHDClusterExtended"), 
@@ -215,10 +222,12 @@ addition, we can find the marker genes which characterise the transcriptomic
 differences between the neighbourhood types.
 
 ```{r}
+extendedNeighbours = getExample('extendedNeighbours')
 agg = aggregateSeuratGeneExpression(smallXenium,extendedNeighbours,
                                     verbose=FALSE)
 smallXenium$aggregateNBHDClusters = agg@active.ident
-ImageDimPlot(smallXenium,group.by='aggregateNBHDClusters',cols='polychrome')
+ImageDimPlot(smallXenium,group.by='aggregateNBHDClusters',cols='polychrome',
+             size=1)
 ```
 
 Notice that since our neighbourhoods are all indexed by cells, we can
@@ -230,7 +239,16 @@ are subsumed into cell type neighbourhood cluster 0.  More generally,
 we see that clustering based on aggregate gene expression tends to
 subdivide that based on the cell types in each neighbourhood.
 
-![comparing neighbourhood clusterings](aggregationVsCelltypeNbhdClustering.png){width=6in}
+```{r}
+library(pheatmap)
+tab = table(smallXenium@meta.data[,c("aggregateNBHDClusters",
+                                     "NBHDClusterExtended" )])
+M = matrix(as.numeric(tab),nrow=nrow(tab))
+rownames(M) = paste('aggregation_cluster',rownames(tab))
+colnames(M) = paste('nbhd_cluster',colnames(tab))
+for(i in 1:nrow(M)) M[i,] = M[i,] / sum(M[i,])
+pheatmap(M)
+```
 
 Another way of comparing clusterings is via the adjusted Rand
 index. This compares two classifications of the same set of objects.

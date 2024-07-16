@@ -23,5 +23,6 @@ This function computes a spatial graph where
 neighbors are identified based on Delaunay triangulation.
 }
 \examples{
+centroids = make.getExample()('centroids')
 delaunayNeighbours = computeNeighboursDelaunay(centroids)
 }

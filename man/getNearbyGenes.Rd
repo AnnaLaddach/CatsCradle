@@ -49,6 +49,7 @@ This finds the genes near a give subset using either
 a dimensional reduction or the nearest neighbor graph
 }
 \examples{
+STranspose = make.getExample()('STranspose')
 geneSet = intersect(colnames(STranspose),hallmark[[1]])
 geometricallyNearby = getNearbyGenes(STranspose,geneSet,radius=0.2,metric='umap')
 combinatoriallyNearby = getNearbyGenes(STranspose,geneSet,radius=1,metric='NN')

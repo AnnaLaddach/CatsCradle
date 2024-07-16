@@ -57,6 +57,7 @@ This function creates a seurat object using a neighbourhood by cell type
 matrix
 }
 \examples{
+NBHDByCTMatrix = make.getExample()('NBHDByCTMatrix')
 NBHDByCTSeurat = computeNBHDVsCTSeurat(NBHDByCTMatrix)
 NBHDByCTSeurat_sce = computeNBHDVsCTSeurat(NBHDByCTMatrix,returnType='SCE')
 }

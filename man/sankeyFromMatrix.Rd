@@ -58,5 +58,5 @@ set.seed(100)
 M = matrix(runif(12)-.3,nrow=3)
 rownames(M) = as.character(1:3)
 colnames(M) = as.character(1:4)
-S = sankeyFromMatrix(M)
+sankey = sankeyFromMatrix(M)
 }

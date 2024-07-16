@@ -33,6 +33,9 @@ around cells of that type and discovers the fractions of those
 cells of each type.
 }
 \examples{
+getExample = make.getExample()
+NBHDByCTMatrix = getExample('NBHDByCTMatrix')
+clusters = getExample('clusters')
 cellTypesPerCellType = computeCellTypesPerCellTypeMatrix(NBHDByCTMatrix,
                                                      clusters)
 }

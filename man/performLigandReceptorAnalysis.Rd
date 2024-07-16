@@ -86,6 +86,9 @@ calculates whether these are observed more frequently than expected by
 chance.
 }
 \examples{
+getExample = make.getExample()
+delaunayNeighbours = getExample('delaunayNeighbours')
+clusters = getExample('clusters')
 performLigandReceptorAnalysis(smallXenium, delaunayNeighbours, 
                                       "mouse", clusters, nSim = 10,
                                        verbose=FALSE)

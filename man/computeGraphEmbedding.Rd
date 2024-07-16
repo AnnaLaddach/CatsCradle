@@ -35,5 +35,6 @@ be a SingleCellExperiment depending on parameter returnType.
 This function adds a force directed graph embedding to a seurat object
 }
 \examples{
+NBHDByCTSeurat = make.getExample()('NBHDByCTSeurat')
 objWithEmbedding = computeGraphEmbedding(NBHDByCTSeurat)
 }

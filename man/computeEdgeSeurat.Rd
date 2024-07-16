@@ -48,5 +48,6 @@ centroids of edges between cells. The "expression matrix" is the
 binarised presence/absence of an interaction (ligand receptor pair) on an edge.
 }
 \examples{
+centroids = make.getExample()('centroids')
 edgeSeurat = computeEdgeSeurat(ligandReceptorResults, centroids)
 }

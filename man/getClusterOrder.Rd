@@ -21,5 +21,6 @@ has been converted from a factor to a character or a
 numeric.
 }
 \examples{
+STranspose = make.getExample()('STranspose')
 geneClusters = getClusterOrder(STranspose)
 }

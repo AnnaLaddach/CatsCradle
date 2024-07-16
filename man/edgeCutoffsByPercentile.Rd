@@ -12,7 +12,7 @@ edgeCutoffsByPercentile(annEdges, percentileCutoff)
 and cellTypePair as produced by edgeLengthsAndCellTypePairs.
 }}
 
-\item{percentileCutof}{\itemize{
+\item{percentileCutoff}{\itemize{
 \item a numeric
 }}
 }
@@ -24,6 +24,10 @@ cutoff.
 This finds edge cutoffs by percentile
 }
 \examples{
+getExample = make.getExample()
+centroids = getExample('centroids')
+clusters = getExample('clusters')
+delaunayNeighbours = getExample('delaunayNeighbours')
 annEdges =
     edgeLengthsAndCellTypePairs(delaunayNeighbours,clusters,centroids)
 cutoffDF = edgeCutoffsByPercentile(annEdges,percentileCutoff=95)

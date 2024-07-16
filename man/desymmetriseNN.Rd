@@ -29,6 +29,7 @@ that randomisation does not magically split undirected
 edges into two edges.
 }
 \examples{
+NN = make.getExample()('NN')
 print(dim(NN))
 NNN = desymmetriseNN(NN)
 print(dim(NNN))

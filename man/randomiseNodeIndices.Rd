@@ -28,6 +28,7 @@ randomiseNodeIndices(neighborListDf, n = 100, useWeights = F)
 This function generates random indices for node B
 }
 \examples{
+NN = make.getExample()('NN')
 NN = desymmetriseNN(NN)
 randomIndices = randomiseNodeIndices(NN,10,TRUE)
 }

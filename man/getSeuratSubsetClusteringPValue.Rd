@@ -54,6 +54,7 @@ based on the median distance from its complement to
 the set.
 }
 \examples{
+STranspose = make.getExample()('STranspose')
 geneSubset = intersect(colnames(STranspose),hallmark[[1]])
 p = getSeuratSubsetClusteringPValue(STranspose,geneSubset,100)
 }

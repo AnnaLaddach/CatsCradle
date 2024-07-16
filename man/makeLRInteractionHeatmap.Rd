@@ -51,6 +51,9 @@ matrix of -log10(pvalues) that underlies the heatmap.
 This function takes ligandReceptorResults and plots a heatmap of -log10(pvalues).
 }
 \examples{
+getExample = make.getExample()
+clusters = getExample('clusters')
+colours = getExample('colours')
 ligRecMatrix = makeLRInteractionHeatmap(ligandReceptorResults, 
 clusters, colours = colours, labelClusterPairs = FALSE)
 }

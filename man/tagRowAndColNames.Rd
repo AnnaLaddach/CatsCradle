@@ -26,6 +26,8 @@ The same matrix with fancier row and col names
 This gussies up the rownames and colnames of M
 }
 \examples{
+getExample = make.getExample()
+averageExpMatrix = getExample('averageExpMatrix')
 averageExpMatrix = tagRowAndColNames(averageExpMatrix,
                                      'cellCluster_','geneCluster_')
 }

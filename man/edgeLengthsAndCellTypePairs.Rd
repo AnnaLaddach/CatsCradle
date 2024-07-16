@@ -30,6 +30,10 @@ This function annotates edges with their distance and
 the types of cells they connect
 }
 \examples{
+getExample = make.getExample()
+centroids = getExample('centroids')
+clusters = getExample('clusters')
+delaunayNeighbours = getExample('delaunayNeighbours')
 annEdges = edgeLengthsAndCellTypePairs(delaunayNeighbours,
                    clusters,centroids)
 }

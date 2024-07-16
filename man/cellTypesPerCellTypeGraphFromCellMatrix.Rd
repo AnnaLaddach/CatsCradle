@@ -83,6 +83,9 @@ whose vertices correspond to seurat_clusters and whose
 edge correspond to occupancy fraction.
 }
 \examples{
+getExample = make.getExample()
+cellTypesPerCellTypeMatrix = getExample('cellTypesPerCellTypeMatrix')
+colours = getExample('colours')
 G = cellTypesPerCellTypeGraphFromCellMatrix(cellTypesPerCellTypeMatrix, 
 minWeight = 0.05, colours = colours)
 }

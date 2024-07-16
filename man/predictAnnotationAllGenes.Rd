@@ -60,5 +60,6 @@ This function predicts the functions of all genes based
 on the functions of their neighbours.
 }
 \examples{
+STranspose = make.getExample()('STranspose')
 predictions = predictAnnotationAllGenes(hallmark,STranspose,radius=.5)
 }

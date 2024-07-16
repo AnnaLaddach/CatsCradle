@@ -25,13 +25,13 @@ that have at least this many edges.  If this is a character
 vector, we plot the pairs in this list.
 }}
 
-\item{legend}{\itemize{
-\item Show legend, defaults to FALSE
-}}
-
-\item{xlim}{\itemize{
+\item{xLim}{\itemize{
 \item limits the extent of the plots. Defaults to 100.  Can
 be set to NULL.
+}}
+
+\item{legend}{\itemize{
+\item Show legend, defaults to FALSE
 }}
 }
 \value{
@@ -43,6 +43,10 @@ by the cell types of the cells they connect.  It
 optionally plots a cutoff for each pair of types.
 }
 \examples{
+getExample = make.getExample()
+centroids = getExample('centroids')
+clusters = getExample('clusters')
+delaunayNeighbours = getExample('delaunayNeighbours') 
 annEdges = edgeLengthsAndCellTypePairs(delaunayNeighbours,
                    clusters,centroids)
 cutoffDF = edgeCutoffsByPercentile(annEdges,95)

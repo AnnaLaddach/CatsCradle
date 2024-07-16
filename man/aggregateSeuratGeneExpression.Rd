@@ -51,6 +51,7 @@ genes and the values are gene expression totals for
 the cells in each neighbourhood
 }
 \examples{
+extendedNeighbours = make.getExample()('extendedNeighbours')
 agg = aggregateSeuratGeneExpression(smallXenium,extendedNeighbours,
 verbose=FALSE)
 }

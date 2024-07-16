@@ -12,7 +12,7 @@ edgeCutoffsByZScore(annEdges, zCutoff)
 and cellTypePair as produced by edgeLengthsAndCellTypePairs.
 }}
 
-\item{zCutof}{\itemize{
+\item{zCutoff}{\itemize{
 \item a numeric
 }}
 }
@@ -24,6 +24,10 @@ cutoff.
 This finds edge cutoffs by z-score
 }
 \examples{
+getExample = make.getExample()
+centroids = getExample('centroids')
+clusters = getExample('clusters')
+delaunayNeighbours = getExample('delaunayNeighbours') 
 annEdges =
     edgeLengthsAndCellTypePairs(delaunayNeighbours,clusters,centroids)
 cutoffDF = edgeCutoffsByZScore(annEdges,zCutoff=1.5)

@@ -52,6 +52,5 @@ Seurat object
 }
 \examples{
 STranspose = transposeSeuratObject(S)
-STransposeFromSCE = transposeSeuratObject(S_sce)
 STransposeAsSCE = transposeSeuratObject(S,returnType='SCE')
 }

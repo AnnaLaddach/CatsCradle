@@ -1,7 +1,7 @@
 Package: CatsCradle
-Title: This package discovers gene clusters in Seurat data
-Version: 0.99.1
-Authors@R:
+Title: This package provides methods for analysing spatial transcriptomics data and for discovering gene clusters
+Version: 0.99.0
+Authors@R: 
     person(given = "Anna",
         family = "Laddach",
         role = c("aut", "cre"),
@@ -18,35 +18,34 @@ Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.1
 Imports: Seurat,
-	 SeuratObject,
 	 ggplot2,
 	 networkD3,
 	 stringr,
 	 pracma,
 	 knitr,
 	 reshape2,
-	 rdist,
+         rdist,
 	 igraph,
 	 interp,
 	 geometry,
 	 Rfast,
 	 dplyr,
 	 data.table,
-	 abind,
+         abind,
 	 pheatmap,
 	 fossil,
-	 SingleCellExperiment,
-	 SpatialExperiment,
+	 EBImage,
 	 S4Vectors,
-	 EBImage
-Depends: 
-    R (>= 4.0)
+	 SeuratObject,
+	 SingleCellExperiment,
+	 SpatialExperiment
+Depends: R (>= 4.0)
 LazyData: true
 VignetteBuilder: knitr
 LazyDataCompression: xz
-biocViews:
-    BiologicalQuestion,
-    StatisticalMethod,
-    GeneExpression,
-    SingleCell,
-    Transcriptomics
+biocViews: BiologicalQuestion, StatisticalMethod, GeneExpression,
+        SingleCell, Transcriptomics
+NeedsCompilation: no
+Packaged: 2024-07-09 11:03:13 UTC; shapirm
+Author: Michael Shapiro [aut, cre] (<https://orcid.org/0000-0002-2769-9320>)
+Maintainer: Michael Shapiro <michael.shapiro@crick.ac.uk>

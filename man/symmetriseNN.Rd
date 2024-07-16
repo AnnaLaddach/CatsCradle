@@ -20,5 +20,6 @@ This first checks to see if the NN graph is symmetric
 and if not symmetrises it.
 }
 \examples{
+NN = make.getExample()('NN')
 NNStar = symmetriseNN(NN)
 }

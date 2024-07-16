@@ -48,6 +48,7 @@ This computes average expression of each gene cluster in
 each cell cluster and returns the result as a matrix
 }
 \examples{
+getExample = make.getExample()
+STranspose = getExample('STranspose')
 M = getAverageExpressionMatrix(S,STranspose,layer='data')
-M_sce = getAverageExpressionMatrix(S_sce,STranspose_sce,layer='data')
 }

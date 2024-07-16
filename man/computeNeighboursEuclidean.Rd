@@ -29,5 +29,6 @@ neighbors are identified based on euclidean distance and a
 user defined threshold.
 }
 \examples{
+centroids = make.getExample()('centroids')
 euclideanNeighbours = computeNeighboursEuclidean(centroids,20)
 }

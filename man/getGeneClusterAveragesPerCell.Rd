@@ -49,6 +49,7 @@ clusters in cells.  By default, it uses all cells and all gene
 clusters.
 }
 \examples{
+getExample = make.getExample()
+STranspose = getExample('STranspose')
 clusterExpression = getGeneClusterAveragesPerCell(S,STranspose)
-clusterExpression_sce = getGeneClusterAveragesPerCell(S_sce,STranspose_sce)
 }

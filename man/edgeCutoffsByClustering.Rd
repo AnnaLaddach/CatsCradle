@@ -8,15 +8,26 @@ clustering with k  = 2}
 \usage{
 edgeCutoffsByClustering(annEdges)
 }
+\arguments{
+\item{annEdges}{\itemize{
+\item a data frame with columns nodeA, nodeB, length
+and cellTypePair as produced by edgeLengthsAndCellTypePairs.
+}}
+}
 \value{
 This returns a data frame with columns cellTypePair and
 cutoff.
 }
 \description{
-@param annEdges - a data frame with columns nodeA, nodeB, length
-and cellTypePair as produced by edgeLengthsAndCellTypePairs.
+This finds proposed cutoffs for edge lengths by clustering
+the lengths of the edges for each cell type pair using k-means
+clustering with k  = 2
 }
 \examples{
+getExample = make.getExample()
+centroids = getExample('centroids')
+clusters = getExample('clusters')
+delaunayNeighbours = getExample('delaunayNeighbours')
 annEdges =
     edgeLengthsAndCellTypePairs(delaunayNeighbours,clusters,centroids)
 cutoffDF = edgeCutoffsByClustering(annEdges)

@@ -26,6 +26,10 @@ This returns a subset of the annotated edges
 This subsets edges by our chosen critera
 }
 \examples{
+getExample = make.getExample()
+centroids = getExample('centroids')
+clusters = getExample('clusters')
+delaunayNeighbours = getExample('delaunayNeighbours') 
 annEdges =
     edgeLengthsAndCellTypePairs(delaunayNeighbours,clusters,centroids)
 tolerance = 5

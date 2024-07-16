@@ -30,6 +30,9 @@ neighbor graph returned from getNearestNeighborListsSeurat
 }
 \examples{
 library(Seurat)
+getExample = make.getExample()
+STranspose = getExample('STranspose')
+NN = getExample('NN')
 neighbors = getGeneNeighbors("Ccl6",STranspose)
 neighborsAgain = getGeneNeighbors("Ccl6",NN)
 }
