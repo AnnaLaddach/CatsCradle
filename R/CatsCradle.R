@@ -173,10 +173,10 @@ getAverageExpressionDF = function(M)
 stripGeneSet = function(geneSet)
 {
   names = character(length(geneSet))
-  for(i in 1:length(geneSet))
+  for(i in seq_len(length(geneSet)))
   {
     names[i] = geneSet[[i]][1]
-    geneSet[[i]] = geneSet[[i]][3:length(geneSet[[i]])]
+    geneSet[[i]] = geneSet[[i]][seq(from=3,to=length(geneSet[[i]]))]
   }
   
   return(geneSet)
@@ -240,9 +240,9 @@ geneSetsVsGeneClustersPValueMatrix = function(geneSets,
     rownames(M) = names(geneSets)
     colnames(M) = as.character(clusters)
     
-    for(i in 1:NGeneSets)
+    for(i in seq_len(NGeneSets))
     {
-        for(j in 1:NClusters)
+        for(j in seq_len(NClusters))
         {
             cluster = clusters[j]
             idx = clusterDF$geneCluster == cluster
@@ -292,7 +292,7 @@ orderGeneSetPValues = function(M,ascending=TRUE,cutoff=NULL,nameTag='')
 {
     answer = list()
     
-    for(i in 1:ncol(M))
+    for(i in seq_len(ncol(M)))
     {
         tag = paste0(nameTag,colnames(M)[i])
 
@@ -352,9 +352,9 @@ sankeyFromMatrix = function(M,disambiguation=c('R_','C_'),
 {
   ## Maybe the matrix doesn't have row and column names:
   if(is.null(rownames(M)))
-    rownames(M) = paste0(disambiguation[1],1:nrow(M))
+    rownames(M) = paste0(disambiguation[1],seq_len(nrow(M)))
   if(is.null(colnames(M)))
-    colnames(M) = paste0(disambiguation[1],1:ncol(M))
+    colnames(M) = paste0(disambiguation[1],seq_len(ncol(M)))
   
   ## Create the links DF:
   from = rownames(M)
@@ -440,7 +440,7 @@ getGeneClusterAveragesPerCell = function(f,
     rownames(M) = cells
     colnames(M) = paste0('cluster_',geneClusters)
 
-    for(i in 1:length(geneClusters))
+    for(i in seq_len(length(geneClusters)))
     {
         cluster = geneClusters[i]
         idx = fPrime$seurat_clusters == cluster
@@ -579,7 +579,7 @@ desymmetriseNN = function(NN)
     }
 
     ## Order the genes on each edge:
-    idx = unlist(lapply(1:nrow(NN),orderGenes))
+    idx = unlist(lapply(seq_len(nrow(NN),orderGenes)))
     NN[idx,1:2] = NN[idx,2:1]
 
     ## Delete the duplicates:
@@ -609,7 +609,7 @@ randomiseNodeIndices = function(neighborListDf, n = 100, useWeights = F){
   
   #determine number of edges and create empty matrix for randomised indices
   nEdges = nrow(neighborListDf)
-  indices = 1:nEdges
+  indices = seq_len(nEdges)
   randomIndices = matrix(, nrow = nEdges, ncol = n)
   
   #check if weights are to be used
@@ -617,7 +617,7 @@ randomiseNodeIndices = function(neighborListDf, n = 100, useWeights = F){
     
     #determine unique weights
     weights = unique(neighborListDf$weight)
-    for (i in 1:n){
+    for (i in seq_len(n)){
       
       #randomise indices within each weight category
       for (weight in weights){
@@ -630,7 +630,7 @@ randomiseNodeIndices = function(neighborListDf, n = 100, useWeights = F){
   
   #otherwise ignore weights and randomise indices
   else {
-    for (i in 1:n){
+    for (i in seq_len(n)){
       randomIndices[,i] = sample(indices)
     }
   }
@@ -1160,7 +1160,7 @@ getSeuratSubsetClusteringStatistics = function(fPrime,
 
     if(reduction == 'PCA')
     {
-        pcs = paste0('PC_',1:numPCs)
+        pcs = paste0('PC_',seq_len(numPCs))
         S = FetchData(fPrime,pcs)
     }
 
@@ -1216,7 +1216,7 @@ runGeometricClusteringTrials = function(S,
     answer$subsetDistance = medianComplementDistance(S,geneSubset)
 
     randomSubsetDistance = c()
-    for(i in 1:numTrials)
+    for(i in seq_len(numTrials))
     {
         randomSubset = sample(rownames(S),sum(geneSubset))
         randomSubset = rownames(S) %in% randomSubset
@@ -1252,7 +1252,7 @@ medianComplementDistance = function(S,geneSubset)
     D = distmat(A,B)
     
     rowMin = c()
-    for(i in 1:nrow(D))
+    for(i in seq_len(nrow(D)))
         rowMin[i] = min(D[i,])
     d = median(rowMin)
     
@@ -1324,7 +1324,7 @@ getNearbyGenes = function(fPrime,geneSet,radius,metric='umap',
         a = FetchData(fPrime,c('tSNE_1','tSNE_2'))
     if(metric == 'pca')
     {
-        pcs = paste0('PC_',1:numPCs)
+        pcs = paste0('PC_',seq_len(numPCs))
         a = FetchData(fPrime,pcs)
     }
     S = data.matrix(a)
@@ -1336,7 +1336,7 @@ getNearbyGenes = function(fPrime,geneSet,radius,metric='umap',
 
     D = distmat(SHat,X)
     rowMin = c()
-    for(i in 1:nrow(D))
+    for(i in seq_len(nrow(D)))
         rowMin[i] = min(D[i,])
     idx = rowMin <= radius
 
@@ -1426,7 +1426,7 @@ directedHausdorfDistance = function(A,B)
     D = distmat(A,B)
     
     rowMin = c()
-    for(i in 1:nrow(D))
+    for(i in seq_len(nrow(D)))
         rowMin[i] = min(D[i,])
     d = max(rowMin)
     
@@ -1439,7 +1439,7 @@ directedMedianDistance =function(A,B)
     D = distmat(A,B)
     
     rowMin = c()
-    for(i in 1:nrow(D))
+    for(i in seq_len(nrow(D)))
         rowMin[i] = min(D[i,])
     d = median(rowMin)
     
@@ -1508,7 +1508,7 @@ medianComplementPValue = function(S,idx,numTrials=1000,returnTrials=FALSE)
     
     random = c()
 
-    for(i in 1:numTrials)
+    for(i in seq_len(numTrials))
     {
         IDX = rep(FALSE,numSuper)
         r = sample(numSuper,numSub)

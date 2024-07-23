@@ -156,7 +156,7 @@ neighbourhoodDiameter = function(neighbourhoods,centroids)
     theseCells = neighbourhoods[[nbhd]]
     N = length(theseCells)
     M = matrix(0,nrow=N,ncol=2)
-    M[1:N,1:2] = as.matrix(centroids[theseCells,1:2])
+    M[seq_len(N),1:2] = as.matrix(centroids[theseCells,1:2])
     D = distmat(M,M)
     
     diameters[nbhd] = max(D)
@@ -235,7 +235,7 @@ computeNBHDVsCTSeurat= function(dataMatrix, resolution = 0.1,
                         verbose=verbose)
     if (transpose){
       NBHDSeurat = RunUMAP(NBHDSeurat,assay='RNA',
-                           dims = 1:npcs, n.neighbors = n.neighbors,
+                           dims = seq_len(npcs), n.neighbors = n.neighbors,
                            verbose=verbose)
   
     } else{
@@ -245,7 +245,7 @@ computeNBHDVsCTSeurat= function(dataMatrix, resolution = 0.1,
                            verbose=verbose)
     }
     if (transpose){
-        NBHDSeurat = FindNeighbors(NBHDSeurat, dims = 1:npcs,
+        NBHDSeurat = FindNeighbors(NBHDSeurat, dims = seq_len(npcs),
                                    verbose=verbose)
     } else{
         NBHDSeurat = FindNeighbors(NBHDSeurat, 
@@ -357,7 +357,7 @@ getExtendedNBHDs = function(spatialGraph, n){
 #' extendedNeighbours = collapseExtendedNBHDs(extendedNeighboursList, 4)
 collapseExtendedNBHDs = function(extendedNeighboursList, n = length(extendedNeighboursList)){
   
-    collapsedGraph = as.data.frame(do.call(rbind,extendedNeighboursList[1:n]))
+    collapsedGraph = as.data.frame(do.call(rbind,extendedNeighboursList[seq_len(n)]))
     collapsedGraph = desymmetriseNN(collapsedGraph)
     
     return(collapsedGraph)
@@ -555,10 +555,10 @@ cellTypesPerCellTypeGraphFromNbhdMatrix = function(nbhdByCellType,
 #' @return A randomised graph where degree from the original graph is preserved.
 randomiseGraph = function(spatialGraph, maxTries = 1000){
   n = nrow(spatialGraph)
-  toFlip = sample(1:n, size = round(n/2))
+  toFlip = sample(seq_len(n), size = round(n/2))
   simGraph = spatialGraph[toFlip,c(2,1)]
   names(simGraph) =  c("nodeA","nodeB")
-  simGraph = rbind(simGraph, spatialGraph[!(1:n %in% toFlip),])
+  simGraph = rbind(simGraph, spatialGraph[!(seq_len(n) %in% toFlip),])
   simGraph[,2] = sample(simGraph[,2])
   selfEdge = which(simGraph$nodeA == simGraph$nodeB)
   i = 1
@@ -608,7 +608,7 @@ computeNeighbourEnrichment = function(spatialGraph, cellTypes, nSim = 1000,
   spatialGraphOrig = spatialGraph
   NBHDByCTmatrix = computeNBHDByCTMatrix(spatialGraphOrig,cellTypes) 
   cellTypeMatrix = computeCellTypesPerCellTypeMatrix(NBHDByCTmatrix, cellTypes) 
-  for (i in 1:nSim){ 
+  for (i in seq_len(nSim)){ 
     spatialGraph = spatialGraphOrig
     simGraph = randomiseGraph(spatialGraph, maxTries = maxTries)
     NBHDByCTmatrix = computeNBHDByCTMatrix(simGraph,cellTypes)
@@ -724,7 +724,7 @@ getInteractionsOnEdges = function(M,pairDF,spatialGraph)
   ## Find the interactions on the edges:
   edges = spatialGraph
   
-  for(i in 1:nrow(pairDF))
+  for(i in seq_len(nrow(pairDF)))
   {
     tag = paste(pairDF$ligand[i],pairDF$receptor[i],sep='-')
     edges[,tag] = (M[pairDF$ligand[i],edges$nodeA] &
@@ -743,7 +743,7 @@ getInteractionsOnEdges = function(M,pairDF,spatialGraph)
 #' rows.
 permuteMatrix = function(M){
   n = ncol(M)
-  for (i in 1:nrow(M)){
+  for (i in seq_len(nrow(M))){
     M[i,] = M[i,sample(n)]
   }
   return(M)
@@ -953,7 +953,7 @@ performLigandReceptorAnalysis = function(obj, spatialGraph, species, clusters,
   
   #perform simulations
   results = list()
-  for (i in 1:nSim){
+  for (i in seq_len(nSim)){
     permuted = permuteMatrix(M)
     sim = getInteractionsOnEdges(permuted,lrPairs,spatialGraph)
     sim = aggregate(sim[,3:ncol(sim)], list(pair), sum)
@@ -1065,8 +1065,8 @@ makeSummedLRInteractionHeatmap = function(ligandReceptorResults, clusters, type,
   clusterNames = levels(clusters)
   nClusters = length(clusterNames)
   summedInteractionsByClusterMatrix = matrix(0, ncol = nClusters, nrow = nClusters)
-  for (i in 1:nClusters){
-    for (j in 1:nClusters){
+  for (i in seq_len(nClusters)){
+    for (j in seq_len(nClusters)){
       value = summedInteractionsByCluster$nInteractions[(summedInteractionsByCluster$Sender == clusterNames[i]) & (summedInteractionsByCluster$Receiver == clusterNames[j])]
       if (length(value) > 0){
         summedInteractionsByClusterMatrix[i,j] = value
@@ -1326,7 +1326,7 @@ runMoransI = function(obj, spatialGraph, assay = "RNA", layer = "data",
     
     moransI = computeMoransI(M,nbhdList)
     results = list()
-    for (i in 1:nSim){
+    for (i in seq_len(nSim)){
         permuted = permuteMatrix(M)
         results[[i]] = computeMoransI(permuted,nbhdList)
         if (i %% 10 == 0 & verbose){
@@ -1437,7 +1437,7 @@ SeuratToSCE = function(f,spatial=FALSE)
         NN = getNearestNeighborListsSeurat(f,n)
         numPairs = nrow(NN)
 
-        a = 1:ncol(sce)
+        a = seq_len(ncol(sce))
         names(a) = colnames(sce)
         cell1 = a[NN$nodeA]
         cell2 = a[NN$nodeB]
@@ -1498,7 +1498,7 @@ edgeLengthsAndCellTypePairs = function(edges,clusters,centroids)
         return(Norm(delta[i,]))
     }
 
-    theRun = 1:nrow(delta)
+    theRun = seq_len(nrow(delta))
     edges$length = unlist(lapply(theRun,getLength))
 
     getClusterPair = function(i)
@@ -1830,7 +1830,7 @@ cullEdges = function(annEdges,cutoffSpec)
     }
 
     ## Otherwise cutoffSpec is a data frame:
-    for(i in 1:nrow(cutoffSpec))
+    for(i in seq_len(nrow(cutoffSpec)))
     {
         idx = annEdges$cellTypePair == cutoffSpec$cellTypePair[i] &
             annEdges$length <= cutoffSpec$cutoff[i]
