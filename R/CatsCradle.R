@@ -579,7 +579,7 @@ desymmetriseNN = function(NN)
     }
 
     ## Order the genes on each edge:
-    idx = unlist(lapply(seq_len(nrow(NN),orderGenes)))
+    idx = unlist(lapply(seq_len(nrow(NN)),orderGenes))
     NN[idx,1:2] = NN[idx,2:1]
 
     ## Delete the duplicates:
