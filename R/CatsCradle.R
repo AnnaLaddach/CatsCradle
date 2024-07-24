@@ -25,7 +25,7 @@
 #' STranspose = transposeSeuratObject(S)
 #' STransposeAsSCE = transposeSeuratObject(S,returnType='SCE')
 transposeSeuratObject = function(f,active.assay='RNA',
-                                 npcs=30,dims=1:20,res=1,
+                                 npcs=30,dims=seq_len(20),res=1,
                                  returnType='Seurat')
 {
     f = acceptor(f)
@@ -343,8 +343,8 @@ orderGeneSetPValues = function(M,ascending=TRUE,cutoff=NULL,nameTag='')
 #' @examples
 #' set.seed(100)
 #' M = matrix(runif(12)-.3,nrow=3)
-#' rownames(M) = as.character(1:3)
-#' colnames(M) = as.character(1:4)
+#' rownames(M) = as.character(seq_len(3))
+#' colnames(M) = as.character(seq_len(4))
 #' sankey = sankeyFromMatrix(M)
 sankeyFromMatrix = function(M,disambiguation=c('R_','C_'),
                             fontSize=20,minus='red',plus='blue',
@@ -580,7 +580,7 @@ desymmetriseNN = function(NN)
 
     ## Order the genes on each edge:
     idx = unlist(lapply(seq_len(nrow(NN)),orderGenes))
-    NN[idx,1:2] = NN[idx,2:1]
+    NN[idx,seq_len(2)] = NN[idx,seq(from=2,to=1)]
 
     ## Delete the duplicates:
     tag = paste(NN$nodeA,NN$nodeB,sep='___')
@@ -688,7 +688,7 @@ symmetriseNN = function(NN)
 
     ## If not, symmetrise:
     NN2 = NN
-    NN2[,1:2] = NN2[,2:1]
+    NN2[,seq_len(2)] = NN2[,seq(from=2,to=1)]
     NN = rbind(NN,NN2)
 
     tag = paste(NN$nodeA,NN$nodeB)
@@ -798,7 +798,7 @@ readGmt = function(gmtFile, addDescr = F){
     } else {
       name = info[1]
     }
-    geneSets[name] = list(info[3:length(info)])
+    geneSets[name] = list(info[seq(from=3,to=length(info))])
   } 
   return(geneSets)
 }
@@ -1418,8 +1418,8 @@ fetchUMAP = function(f)
 #' in A from its nearest point in B.
 #' @export
 #' @examples
-#' A = matrix(1:8,ncol=2)
-#' B = matrix(3:16,ncol=2)
+#' A = matrix(seq_len(8),ncol=2)
+#' B = matrix(seq(from=3,to=16),ncol=2)
 #' d_hausdorf = directedHausdorfDistance(A,B)
 directedHausdorfDistance = function(A,B)
 {
@@ -1460,7 +1460,7 @@ directedMedianDistance =function(A,B)
 #' to the subset
 #' @export
 #' @examples
-#' S = matrix(1:12,ncol=2)
+#' S = matrix(seq_len(12),ncol=2)
 #' idx = c(rep(FALSE,3),rep(TRUE,3))
 #' compDist = medianComplementDistance(S,idx)
 medianComplementDistance = function(S,idx)

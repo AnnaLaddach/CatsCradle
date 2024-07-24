@@ -16,7 +16,7 @@
 computeNeighboursDelaunay = function(centroids){
 
     ## This is confounded when centroids has extra columns:
-    centroids = centroids[,1:2]
+    centroids = centroids[,seq_len(2)]
   
     ##get cell names
     cellNames = rownames(centroids)
@@ -80,8 +80,8 @@ computeNeighboursEuclidean = function(centroids, threshold){
   k = 1
   
   ##calculate distances for cells in overlapping windows  
-  for (i in 0:9){
-    for (j in 0:9){
+  for (i in seq(from=0,to=9)){
+    for (j in seq(from=0,to=9)){
       x1 = i * XStep + minX 
       x2 = x1 + 2*XStep
       y1 = j * YStep + minY 
@@ -145,7 +145,7 @@ extractCells = function(NN)
 #' delaunayNeighbours = getExample('delaunayNeighbours')
 #' cells = unique(c(delaunayNeighbours[,'nodeA'],delaunayNeighbours[,'nodeB']))
 #' nbhds = nbhdsAsEdgesToNbhdsAsList(cells,delaunayNeighbours)
-#' diameters = neighbourhoodDiameter(nbhds[1:100],centroids)
+#' diameters = neighbourhoodDiameter(nbhds[seq_len(100)],centroids)
 neighbourhoodDiameter = function(neighbourhoods,centroids)
 {
   rownames(centroids) = centroids$cell
@@ -156,7 +156,7 @@ neighbourhoodDiameter = function(neighbourhoods,centroids)
     theseCells = neighbourhoods[[nbhd]]
     N = length(theseCells)
     M = matrix(0,nrow=N,ncol=2)
-    M[seq_len(N),1:2] = as.matrix(centroids[theseCells,1:2])
+    M[seq_len(N),seq_len(2)] = as.matrix(centroids[theseCells,seq_len(2)])
     D = distmat(M,M)
     
     diameters[nbhd] = max(D)
@@ -319,7 +319,7 @@ getExtendedNBHDs = function(spatialGraph, n){
   neighbours = list()
   neighbours[[1]] = spatialGraph
   
-  for (i in (2:n)){
+  for (i in seq(from=2,to=n)){
     writeLines(paste('radius',i))
     graph = merge(neighbours[[i-1]], neighbours[[1]], by.x = "nodeB", 
                   by.y = "nodeA", allow.cartesian = TRUE)
@@ -392,7 +392,7 @@ computeCellTypesPerCellTypeMatrix = function(nbhdByCellType,cellTypes)
 {
   MM = aggregate(nbhdByCellType, list(cellTypes), sum)
   rownames(MM) = MM$Group.1
-  MM = MM[,2:ncol(MM)]
+  MM = MM[,seq(from=2,to=ncol(MM))]
   MM = MM/rowSums(MM)
   MM = as.matrix(MM)
   return(MM)
@@ -796,7 +796,7 @@ countLRInteractionsPerCell = function(edges,sourceOrTarget)
     if(sourceOrTarget == 'target')
         by = factor(edges$nodeB)
 
-    edges = edges[,3:ncol(edges)]
+    edges = edges[,seq(from=3,to=ncol(edges))]
     interactionCountDF = aggregate(edges,by=list(by),FUN=sum) 
 
     interactionCountDF$Group.1 =
@@ -837,7 +837,7 @@ annotateLRInteractionCounts = function(interactionCounts,obj,nbhdObj)
     annotated$nbhdType = nbhdObj$seurat_clusters[annotated$cell]
 
     ## Bung in the interaction counts:
-    pairs = names(interactionCounts)[2:ncol(interactionCounts)]
+    pairs = names(interactionCounts)[seq(from=2,to=ncol(interactionCounts))]
 
     annotated[,pairs] = 0
     annotated[rownames(interactionCounts),pairs] =
@@ -927,27 +927,28 @@ performLigandReceptorAnalysis = function(obj, spatialGraph, species, clusters,
   interactionsOnEdges = cbind(clusters[interactionsOnEdges$nodeA],
                               clusters[interactionsOnEdges$nodeB], 
                               interactionsOnEdges)
-  names(interactionsOnEdges)[1:2] = c("clusterA","clusterB") 
+  names(interactionsOnEdges)[seq_len(2)] = c("clusterA","clusterB") 
   
   #get sum of interactions within and between clusters
   pair = 
     paste0(interactionsOnEdges$clusterA,  "-", interactionsOnEdges$clusterB) 
   totalInteractionsByCluster = 
-    aggregate(interactionsOnEdges[,5:ncol(interactionsOnEdges)], list(pair), 
+    aggregate(interactionsOnEdges[,seq(from=5,to=ncol(interactionsOnEdges))], list(pair), 
               sum)
   rownames(totalInteractionsByCluster) = totalInteractionsByCluster$Group.1
   totalInteractionsByCluster = 
-    totalInteractionsByCluster[,2:ncol(totalInteractionsByCluster)]
+    totalInteractionsByCluster[,seq(from=2,to=ncol(totalInteractionsByCluster))]
   
   #get total edges per cluster pair
   totalEdges = table(pair)
   
   totalInteractionsByCluster = cbind(totalEdges[rownames(totalInteractionsByCluster)],
                                 totalInteractionsByCluster)
-  colnames(totalInteractionsByCluster)[1:2] = c("clusterPair", "totalEdges")
+  colnames(totalInteractionsByCluster)[seq_len(2)] = c("clusterPair", "totalEdges")
   
-  meanInteractionsByCluster = totalInteractionsByCluster[,3:ncol(totalInteractionsByCluster)]/totalInteractionsByCluster$totalEdges
-  meanInteractionsByCluster = cbind(totalInteractionsByCluster[,1:2], meanInteractionsByCluster)
+    meanInteractionsByCluster = totalInteractionsByCluster[,seq(from=3,to=ncol(totalInteractionsByCluster))] /
+        totalInteractionsByCluster$totalEdges
+  meanInteractionsByCluster = cbind(totalInteractionsByCluster[,seq_len(2)], meanInteractionsByCluster)
   
   
   
@@ -956,9 +957,9 @@ performLigandReceptorAnalysis = function(obj, spatialGraph, species, clusters,
   for (i in seq_len(nSim)){
     permuted = permuteMatrix(M)
     sim = getInteractionsOnEdges(permuted,lrPairs,spatialGraph)
-    sim = aggregate(sim[,3:ncol(sim)], list(pair), sum)
+    sim = aggregate(sim[,seq(from=3,to=ncol(sim))], list(pair), sum)
     rownames(sim) = sim$Group.1
-    results[[i]] = sim[,2:ncol(sim)]
+    results[[i]] = sim[,seq(from=2,to=ncol(sim))]
     if (i %% 10 == 0 & verbose){
       writeLines(as.character(i))
     }
@@ -966,7 +967,7 @@ performLigandReceptorAnalysis = function(obj, spatialGraph, species, clusters,
   
   #calculate summary statistics for simulation results
   results = lapply(results, function(x, y) y > x, y = 
-                     totalInteractionsByCluster[,3:ncol(totalInteractionsByCluster)])
+                     totalInteractionsByCluster[,seq(from=3,to=ncol(totalInteractionsByCluster))])
   results = abind(results, along = 3L)
   simResults = rowSums(results, dims = 2)
   rownames(simResults) = rownames(totalInteractionsByCluster)
@@ -1057,7 +1058,7 @@ makeSummedLRInteractionHeatmap = function(ligandReceptorResults, clusters, type,
   if (type == "mean"){
     interactionsByCluster = ligandReceptorResults$meanInteractionsByCluster
   } 
-  summedInteractionsByCluster = rowSums(interactionsByCluster[,3:ncol(interactionsByCluster)])
+  summedInteractionsByCluster = rowSums(interactionsByCluster[,seq(from=3,to=ncol(interactionsByCluster))])
   pair = str_split_fixed(names(summedInteractionsByCluster), pattern = "-", 2)
   summedInteractionsByCluster = as.data.frame(cbind(pair,summedInteractionsByCluster))
   colnames(summedInteractionsByCluster) = c("Sender", "Receiver", "nInteractions")
@@ -1114,11 +1115,11 @@ computeEdgeSeurat = function(ligandReceptorResults, centroids, npcs = 10,
                              returnType='Seurat'){
   interactionsOnEdges = ligandReceptorResults$interactionsOnEdges
   rownames(interactionsOnEdges) = paste0(interactionsOnEdges$nodeA, "-", interactionsOnEdges$nodeB)
-  interactionsOnEdgesMat = as.matrix(interactionsOnEdges[,5:ncol(interactionsOnEdges)])
+  interactionsOnEdgesMat = as.matrix(interactionsOnEdges[,seq(from=5,to=ncol(interactionsOnEdges))])
   interactionsOnEdgesMat= 1 * interactionsOnEdgesMat
-  edgeSeurat = CreateSeuratObject(t(interactionsOnEdgesMat), meta = interactionsOnEdges[,1:4])
-  edgeCoords = as.data.frame(cbind(centroids[interactionsOnEdges$nodeA, 1:2], 
-                                  centroids[interactionsOnEdges$nodeB, 1:2]))
+  edgeSeurat = CreateSeuratObject(t(interactionsOnEdgesMat), meta = interactionsOnEdges[,seq_len(4)])
+  edgeCoords = as.data.frame(cbind(centroids[interactionsOnEdges$nodeA, seq_len(2)], 
+                                  centroids[interactionsOnEdges$nodeB, seq_len(2)]))
   
   edgeCoords$edgeX = 0.6 * edgeCoords[,1] + 0.4 * edgeCoords[,3]
   edgeCoords$edgeY = 0.6 * edgeCoords[,2] + 0.4 * edgeCoords[,4] 
@@ -1232,7 +1233,7 @@ aggregateSeuratGeneExpression = function(f,neighbourhoods,verbose=TRUE,
     nbhdObj = ScaleData(nbhdObj,verbose=verbose)
     nbhdObj = FindVariableFeatures(nbhdObj,verbose=verbose)
     nbhdObj = RunPCA(nbhdObj,verbose=verbose)
-    nbhdObj = RunUMAP(nbhdObj,dims=1:20,verbose=verbose)
+    nbhdObj = RunUMAP(nbhdObj,dims=seq_len(20),verbose=verbose)
     nbhdObj = FindNeighbors(nbhdObj,verbose=verbose)
     nbhdObj = FindClusters(nbhdObj,verbose=verbose)
 
@@ -1458,7 +1459,7 @@ SeuratToSCE = function(f,spatial=FALSE)
         ## Copy in the centroids:
         centroids = GetTissueCoordinates(f)
         rownames(centroids) = centroids$cell
-        centroids = centroids[,1:2]
+        centroids = centroids[,seq_len(2)]
         centroids = data.matrix(centroids)
 
         spatialCoords(sce) = centroids
@@ -1490,7 +1491,7 @@ SeuratToSCE = function(f,spatial=FALSE)
 #'                    clusters,centroids)
 edgeLengthsAndCellTypePairs = function(edges,clusters,centroids)
 {
-    centr = data.matrix(centroids[,1:2])
+    centr = data.matrix(centroids[,seq_len(2)])
     delta = centr[edges$nodeA,] - centr[edges$nodeB,]
 
     getLength = function(i)

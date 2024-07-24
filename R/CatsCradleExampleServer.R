@@ -186,7 +186,7 @@ make.getExample = function()
         if(whichOne == 'shorterHallmark')
         {
             hallmark = getExample('hallmark')
-            answer = hallmark[1:10]
+            answer = hallmark[seq_len(10)]
         }
         
         if(whichOne == 'clusterDF')
