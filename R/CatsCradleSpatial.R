@@ -37,10 +37,6 @@ computeNeighboursDelaunay = function(centroids){
     results[,1] = cellNames[as.numeric(results[,1])]
     results[,2] = cellNames[as.numeric(results[,2])]
 
-    ## ## This shouldn't be, but it is:
-    ## idx = results[,1] == results[,2]
-    ## results = results[!idx,]
-    
     ## Convert to data.frame and name as nodeA, nodeB:
     results = as.data.frame(results)
     names(results) = c('nodeA','nodeB')
@@ -1042,10 +1038,12 @@ makeLRInteractionHeatmap = function(ligandReceptorResults,
 #' @param ligandReceptorResults - as returned by performLigandReceptorAnalysis()
 #' @param clusters - named vector of cell types where names are each cell and
 #' clusters are a factor
-#' @param type - "total" or "mean" to plot raw total interactions or mean interactions per edge.
-#' @param  logScale - plot heatmap using log scale (defaults to T)
+#' @param type - "total" or "mean" to plot raw total interactions or mean
+#' interactions per edge.
+#' @param  logScale - plot heatmap using log scale (defaults to TRUE)
 #' @import pheatmap
-#' @return matrix of total ligand receptor interactions that underlies the heatmap.
+#' @return matrix of total ligand receptor interactions that underlies t
+#' he heatmap.
 #' @export
 #' @examples
 #' clusters = make.getExample()('clusters')

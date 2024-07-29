@@ -32,5 +32,5 @@ centroids = getExample('centroids')
 delaunayNeighbours = getExample('delaunayNeighbours')
 cells = unique(c(delaunayNeighbours[,'nodeA'],delaunayNeighbours[,'nodeB']))
 nbhds = nbhdsAsEdgesToNbhdsAsList(cells,delaunayNeighbours)
-diameters = neighbourhoodDiameter(nbhds[1:100],centroids)
+diameters = neighbourhoodDiameter(nbhds[seq_len(100)],centroids)
 }

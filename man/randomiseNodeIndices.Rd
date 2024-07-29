@@ -4,7 +4,7 @@
 \alias{randomiseNodeIndices}
 \title{This function generates random indices for node B}
 \usage{
-randomiseNodeIndices(neighborListDf, n = 100, useWeights = F)
+randomiseNodeIndices(neighborListDf, n = 100, useWeights = FALSE)
 }
 \arguments{
 \item{neighborListDf}{\itemize{

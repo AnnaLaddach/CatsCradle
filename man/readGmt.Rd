@@ -4,7 +4,7 @@
 \alias{readGmt}
 \title{This function reads in gene sets in .gmt format}
 \usage{
-readGmt(gmtFile, addDescr = F)
+readGmt(gmtFile, addDescr = FALSE)
 }
 \arguments{
 \item{gmtFile}{\itemize{

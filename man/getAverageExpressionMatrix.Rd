@@ -8,7 +8,7 @@ each cell cluster and returns the result as a matrix}
 getAverageExpressionMatrix(
   f,
   fPrime,
-  v5 = T,
+  v5 = TRUE,
   clusteringName = "seurat_clusters",
   layer = "scale.data"
 )

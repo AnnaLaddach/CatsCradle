@@ -8,7 +8,7 @@ transposeSeuratObject(
   f,
   active.assay = "RNA",
   npcs = 30,
-  dims = 1:20,
+  dims = seq_len(20),
   res = 1,
   returnType = "Seurat"
 )

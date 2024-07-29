@@ -402,7 +402,7 @@ CTByNBHDSeurat =
 CTByNBHDSeurat$cellType = colnames(CTByNBHDSeurat)
 
 DimPlot(CTByNBHDSeurat, group.by = "cellType", cols = "polychrome", 
-        reduction = "umap", label = T)
+        reduction = "umap", label = TRUE)
 ```
 
 Note how Pyramidal, Pvalb and Lamp5 neurons are located close together
@@ -414,7 +414,7 @@ We can also compute a force-directed graph embedding.
 ```{r}
 CTByNBHDSeurat= computeGraphEmbedding(CTByNBHDSeurat)
 
-DimPlot(CTByNBHDSeurat,group.by = "cellType", cols = "alphabet", reduction = "graph", label = T)
+DimPlot(CTByNBHDSeurat,group.by = "cellType", cols = "alphabet", reduction = "graph", label = TRUE)
 ```
 
 From this  11_oligo and 5_Astro appear to be in neighbourhoods distinct from the 
@@ -557,7 +557,7 @@ Plot a heatmap showing -log10(pvalues) for the enrichment of ligand-receptor
 interactions between pairs of clusters. 
 
 ```{r}
-ligRecMatrix = makeLRInteractionHeatmap(ligandReceptorResults, clusters, colours = colours, labelClusterPairs = F)
+ligRecMatrix = makeLRInteractionHeatmap(ligandReceptorResults, clusters, colours = colours, labelClusterPairs = FALSE)
 ```
 
 Make a heatmap of total ligand-receptor interactions between clusters.
@@ -570,7 +570,7 @@ clusters i.e., (sum of all ligand receptor interactions on A-B edges)/(total
 A-B edges)
 
 ```{r}
-cellTypePerCellTypeLigRecMatrix = makeSummedLRInteractionHeatmap(ligandReceptorResults, clusters, "mean", logScale = T)
+cellTypePerCellTypeLigRecMatrix = makeSummedLRInteractionHeatmap(ligandReceptorResults, clusters, "mean", logScale = TRUE)
 ```
 
 Look at a histogram of values for summed mean ligand/receptor interactions between clusters.

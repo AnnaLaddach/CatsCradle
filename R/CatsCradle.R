@@ -72,7 +72,7 @@ transposeSeuratObject = function(f,active.assay='RNA',
 #' getExample = make.getExample()
 #' STranspose = getExample('STranspose')
 #' M = getAverageExpressionMatrix(S,STranspose,layer='data')
-getAverageExpressionMatrix = function(f,fPrime, v5 = T,
+getAverageExpressionMatrix = function(f,fPrime, v5 = TRUE,
                                       clusteringName='seurat_clusters',
                                       layer='scale.data')
 {
@@ -88,7 +88,7 @@ getAverageExpressionMatrix = function(f,fPrime, v5 = T,
     geneCluster = geneCluster[order(as.numeric(geneCluster))]
     
     ## Get assay data:
-    if (v5 == T){
+    if (v5 == TRUE){
         X = GetAssayData(f,layer=layer)
     } else {
         X = GetAssayData(f,slot=layer)
@@ -213,7 +213,6 @@ geneListPValue = function(A,B,C,background=25000)
 #' @return a matrix of p-values rows correspond to the gene
 #' sets and the columns correspond the the CatsCradle gene
 #' clusters
-#' @import stats
 #' @export
 #' @examples
 #' getExample = make.getExample()
@@ -395,13 +394,14 @@ sankeyFromMatrix = function(M,disambiguation=c('R_','C_'),
   linkColour = str_replace(linkColour,'Y',plus)  
   
   
-  p = sankeyNetwork(Links = links, Nodes = nodes, Source = "IDsource", Target = "IDtarget", 
-                    Value = "value", NodeID = "name", 
-                    colourScale=linkColour,
-                    LinkGroup="group",
-                    fontSize=fontSize,
-                    height=height,
-                    width=width)
+    p = sankeyNetwork(Links = links, Nodes = nodes,
+                      Source = "IDsource", Target = "IDtarget", 
+                      Value = "value", NodeID = "name", 
+                      colourScale=linkColour,
+                      LinkGroup="group",
+                      fontSize=fontSize,
+                      height=height,
+                      width=width)
   
   return(p)
 }
@@ -601,7 +601,7 @@ desymmetriseNN = function(NN)
 #' NN = make.getExample()('NN')
 #' NN = desymmetriseNN(NN)
 #' randomIndices = randomiseNodeIndices(NN,10,TRUE)
-randomiseNodeIndices = function(neighborListDf, n = 100, useWeights = F){
+randomiseNodeIndices = function(neighborListDf, n = 100, useWeights = FALSE){
     NN = desymmetriseNN(neighborListDf)
     if(!identical(NN,neighborListDf))
         stop(paste0('randomiseNodeIndices is meant to be used',
@@ -788,7 +788,7 @@ combinatorialSpheres = function(NN,origin,radius)
 #' gene set name  
 #' @return - A named list of gene sets
 #' @export
-readGmt = function(gmtFile, addDescr = F){
+readGmt = function(gmtFile, addDescr = FALSE){
   lines = readLines(gmtFile)
   geneSets = list()
   for (line in lines){

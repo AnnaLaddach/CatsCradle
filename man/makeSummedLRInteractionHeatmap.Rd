@@ -23,15 +23,17 @@ clusters are a factor
 }}
 
 \item{type}{\itemize{
-\item "total" or "mean" to plot raw total interactions or mean interactions per edge.
+\item "total" or "mean" to plot raw total interactions or mean
+interactions per edge.
 }}
 
 \item{logScale}{\itemize{
-\item plot heatmap using log scale (defaults to T)
+\item plot heatmap using log scale (defaults to TRUE)
 }}
 }
 \value{
-matrix of total ligand receptor interactions that underlies the heatmap.
+matrix of total ligand receptor interactions that underlies t
+he heatmap.
 }
 \description{
 This function takes ligandReceptorResults and plots a heatmap of the total
