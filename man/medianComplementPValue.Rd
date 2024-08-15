@@ -45,7 +45,9 @@ subsets of the same size.
 }
 \examples{
 library(Seurat)
-STranspose = make.getExample()('STranspose')
+getExample = make.getExample()
+STranspose = getExample('STranspose')
+hallmark = getExample('hallmark')
 S = data.matrix(FetchData(STranspose,c('umap_1','umap_2')))
 idx = colnames(STranspose) \%in\% hallmark[[1]]
 mcpv = medianComplementPValue(S,idx,numTrials=100)

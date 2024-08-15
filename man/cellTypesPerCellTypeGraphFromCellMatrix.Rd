@@ -87,5 +87,5 @@ getExample = make.getExample()
 cellTypesPerCellTypeMatrix = getExample('cellTypesPerCellTypeMatrix')
 colours = getExample('colours')
 G = cellTypesPerCellTypeGraphFromCellMatrix(cellTypesPerCellTypeMatrix, 
-minWeight = 0.05, colours = colours)
+                                   minWeight = 0.05, colours = colours)
 }

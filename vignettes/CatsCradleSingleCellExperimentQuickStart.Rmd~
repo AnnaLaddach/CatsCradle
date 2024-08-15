@@ -1,10 +1,10 @@
 ---
-title: "CatsCradle Quick Start"
+title: "CatsCradle SingleCellExperiment Quick Start"
 author: "Anna Laddach and Michael Shapiro"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-    %\VignetteIndexEntry{CatsCradle Quick Start}
+    %\VignetteIndexEntry{CatsCradle SingleCellExperiment Quick Start}
     %\VignetteEngine{knitr::rmarkdown}
     %\VignetteEncoding{UTF-8}
 ---
@@ -16,8 +16,6 @@ knitr::opts_chunk$set(
     comment = "#>"
 )
 ```
-`r BiocStyle::Biocpkg("BiocStyle")`
-
 ![](CatsCradleLogo.png){width=2in}
 
 
@@ -26,33 +24,47 @@ knitr::opts_chunk$set(
 CatsCradle provides two types of functionality for analysing single
 cell data.  It provides tools for the clustering and annotation of
 genes and it provides extensive tools for analysing spatial
-transcriptomics data.
+transcriptomics data.  Here we exposit these capabilities using
+the class SingleCellExperiment.
 
 ## Clustering and annotation of genes
 
-A typical analysis of scRNA-seq data using Seurat involves dimensionality reduction 
+A typical analysis of scRNA-seq data involves dimensionality reduction 
 (PCA, UMAP, tSNE) and the clustering of cells using the Louvain algorithm. All of
 this is done based on the similarities and differences in the genes
 cells express.  Here we see a UMAP where the points are cells, coloured by
-their seurat_clusters.  
+their clusters.  
 
 ```{r}
-library(Seurat,quietly=TRUE)
+library(SingleCellExperiment,quietly=TRUE)
 library(CatsCradle,quietly=TRUE)
-data(exSeuratObj)
-DimPlot(exSeuratObj,cols='polychrome')
+library(ggplot2,quietly=TRUE)
+getExample = make.getExample()
+S_sce = getExample('S_sce')
+df = as.data.frame(reducedDim(S_sce,'UMAP'))
+df$seurat_clusters = S_sce$seurat_clusters
+g = ggplot(df,aes(x=UMAP_1,y=UMAP_2,color=seurat_clusters)) +
+    geom_point() +
+    ggtitle('SingleCellExperiment of cells colored by seurat_cluster')
+print(g)    
 ```
 
 By transposing the expression matrix, we can use the same technology
-to produce a Seurat object where the samples are the genes and the features are 
+to produce an object where the samples are the genes and the features are 
 cells.  Genes now have their own UMAP and their own clusters.  This is all done 
 on the basis of the similarities and differences in the cells they are
 expressed in.
 
 ```{r}
-getExample = make.getExample()
-STranspose = getExample('STranspose')
-DimPlot(STranspose,cols='polychrome')
+STranspose_sce = getExample('STranspose_sce')
+df = as.data.frame(reducedDim(STranspose_sce,'UMAP'))
+df$seurat_clusters = STranspose_sce$seurat_clusters
+h = ggplot(df,aes(x=umap_1,y=umap_2,color=seurat_clusters)) +
+    geom_point() +
+    ggtitle('SingleCellExperiment of genes colored by cluster')
+print(h)  
+
+
 ```
 
 ### Gene clusters vs. cell clusters
@@ -68,23 +80,26 @@ in the CatsCradle vignette [CatsCradle](doc/CatsCradle.html).)
 
 Gene sets such as Hallmark tend to localise on gene UMAP, though they
 are not necessarily confined to specific gene clusters.  Here we show
-HALLMARK_OXIDATIVE_PHOSPHORYLATION (subset to the genes in our Seurat
-object) superimposed in green and black on the gene cluster UMAP.
+HALLMARK_OXIDATIVE_PHOSPHORYLATION (subset to the genes in our
+SingleCellExperiment object) superimposed in green and black on the
+gene cluster UMAP.
 
 
 
 ```{r}
-library(ggplot2,quietly=TRUE)
 hallmark = getExample('hallmark')
 h = 'HALLMARK_OXIDATIVE_PHOSPHORYLATION'
-umap = FetchData(STranspose,c('umap_1','umap_2'))
-idx = colnames(STranspose) %in% hallmark[[h]]
-g = DimPlot(STranspose,cols='polychrome') +
-    geom_point(data=umap[idx,],aes(x=umap_1,y=umap_2),color='black',size=2.7) +
-    geom_point(data=umap[idx,],aes(x=umap_1,y=umap_2),color='green') +
+
+idx = colnames(STranspose_sce) %in% hallmark[[h]]
+
+k = ggplot(data=df,aes(x=umap_1,y=umap_2,color=seurat_clusters)) +
+    geom_point() + 
+    geom_point(data=df[idx,],aes(x=umap_1,y=umap_2),color='black',size=2.7) +
+    geom_point(data=df[idx,],aes(x=umap_1,y=umap_2),color='green') +
     ggtitle(paste(h,'\non gene clusters'))
-print(g)
-pValue = getObjectSubsetClusteringPValue(STranspose,idx)
+
+print(k)
+pValue = getObjectSubsetClusteringPValue(STranspose_sce,idx)
 pValue
 ```
 
@@ -120,8 +135,14 @@ transcriptomics data.  Here we see cell type plotted on the cell
 centroids of our example data.
 
 ```{r}
-smallXenium = getExample('smallXenium')
-ImageDimPlot(smallXenium,cols='polychrome')
+library(SpatialExperiment)
+X_sce = getExample('X_sce')
+cellCoords = as.data.frame(spatialCoords(X_sce))
+cellCoords$cluster = X_sce$cluster
+ell = ggplot(cellCoords,aes(x=x,y=y,color=cluster)) +
+      geom_point() +
+      ggtitle('Spatial coordinates colored by cell type')
+print(ell)      
 ```
 
 With Moran's I, we can see spatial autocorrelation of gene expression
@@ -160,27 +181,30 @@ distance.
 For each cell type A, we can ask "What types of cells are found around
 cells of type A?"  We can display the answer in a directed graph. Here
 we are using an extended neighbourhood.  A fat arrow from type A to
-type B indicates that neighbourhoods around cells of type A have lots
-of cells of type B. Here we only display an arrow from A to B when
-cells of type B compose at least 5 percent of the cells in
+type B indicates that neighbourhoods around cells of type A have a
+high proportion of cells of type B. Here we only display an arrow from
+A to B when cells of type B compose at least 5 percent of the cells in
 neighbourhoods around type A.
 
 ```{r}
 NBHDByCTMatrixExtended = getExample('NBHDByCTMatrixExtended')
 clusters = getExample('clusters')
 colours = getExample('colours')
-cellTypesPerCellTypeMatrixExtended = computeCellTypesPerCellTypeMatrix(NBHDByCTMatrixExtended,clusters)
+cellTypesPerCellTypeMatrixExtended =
+      computeCellTypesPerCellTypeMatrix(NBHDByCTMatrixExtended,clusters)
 
-cellTypesPerCellTypeGraphFromCellMatrix(cellTypesPerCellTypeMatrixExtended, minWeight = 0.05, colours = colours)
+cellTypesPerCellTypeGraphFromCellMatrix(cellTypesPerCellTypeMatrixExtended,
+                                        minWeight = 0.05, colours = colours)
 ```
 
 We can also test for statistical significance for the enrichment of a
 given cell type in the neighbourhoods around another cell type 
 (see [CatsCradleSpatial](doc/CatsCradleSpatial.html)).
 
-### Neighourhood Seurat objects.
+### Neighourhood objects.
 
-Neighbourhoods naturally want to be encoded into Seurat objects.
+Each neighbourhood is the neighbourhood _of a cell_.  Accordingly,
+neighbourhoods naturally want to be encoded into single cell objects.
 There are two ways to do this.
 
 #### Neighbourhoods and cell types
@@ -188,22 +212,24 @@ There are two ways to do this.
 Just as cells express genes, with poetic license we can say that
 neighbourhoods "express" cell types.  A cell types by neighbourhoods
 matrix gives the counts of cells of each type in each neighbourhood.
-This can be taken as the counts matrix for a Seurat object.  We can
-then use the Louvain algorithm to cluster neighbourhoods into
-neighbourhood types.  If we like, we can display these on a
-neighbourhood UMAP.
+This can be taken as the counts matrix for a SingleCellExperiment
+object.  We can then use the Louvain algorithm to cluster
+neighbourhoods into neighbourhood types.  If we like, we can display
+these on a neighbourhood UMAP.
 
 Here we attach these neighbourhood_clusters from a neighbourhood
-Seurat object (created by computeNBHDVsCTObject()) to our original
-spatial object and visualize the neighbourhood clusters on the tissue
+object (created by computeNBHDVsCTObject()) to our original spatial
+object and visualize the neighbourhood clusters on the tissue
 coordinates. (Again, we are using extended neighbourhoods.)
 
 ```{r}
-NBHDByCTSeuratExtended = getExample('NBHDByCTSeuratExtended')
-smallXenium$NBHDClusterExtended= 
-  NBHDByCTSeuratExtended@active.ident
-ImageDimPlot(smallXenium, group.by = c("NBHDClusterExtended"), 
-             size = 1, cols = "polychrome")
+NBHDByCTSingleCellExtended_sce = getExample('NBHDByCTSingleCellExtended_sce')
+cellCoords$neighbourhood_clusters =
+  NBHDByCTSingleCellExtended_sce$neighbourhood_clusters
+nbhdPlot = ggplot(cellCoords,aes(x=x,y=y,color=neighbourhood_clusters)) +
+           geom_point() +
+	   ggtitle('Cell coordinates colored by neighbourhood_clusters')
+print(nbhdPlot)	   
 ```
 
 ### Aggregate gene expression
@@ -228,11 +254,15 @@ differences between the neighbourhood types.
 
 ```{r}
 extendedNeighbours = getExample('extendedNeighbours')
-agg = aggregateGeneExpression(smallXenium,extendedNeighbours,
-                                    verbose=FALSE)
-smallXenium$aggregateNBHDClusters = agg@active.ident
-ImageDimPlot(smallXenium,group.by='aggregateNBHDClusters',cols='polychrome',
-             size=1)
+smallXenium = getExample('smallXenium')
+agg_sce = aggregateGeneExpression(smallXenium,extendedNeighbours,
+                                    verbose=FALSE,
+				    returnType='sce')
+cellCoords$aggregation_clusters = agg_sce$aggregation_clusters
+aggPlot = ggplot(cellCoords,aes(x=x,y=y,color=aggregation_clusters)) +
+           geom_point() +
+	   ggtitle('Cell coordinates colored by aggregation_clusters')
+print(aggPlot)	  
 ```
 
 Notice that since our neighbourhoods are all indexed by cells, we can
@@ -246,8 +276,8 @@ subdivide that based on the cell types in each neighbourhood.
 
 ```{r}
 library(pheatmap)
-tab = table(smallXenium@meta.data[,c("aggregateNBHDClusters",
-                                     "NBHDClusterExtended" )])
+tab = table(cellCoords[,c('aggregation_clusters','neighbourhood_clusters')])
+                             
 M = matrix(as.numeric(tab),nrow=nrow(tab))
 rownames(M) = paste('aggregation_cluster',rownames(tab))
 colnames(M) = paste('nbhd_cluster',colnames(tab))
@@ -263,8 +293,8 @@ level no better than chance.
 
 ```{r}
 library(fossil,quietly=TRUE)
-adjustedRandIndex = adj.rand.index(agg@active.ident,
-                                   NBHDByCTSeuratExtended@active.ident)
+adjustedRandIndex = adj.rand.index(agg_sce$aggregation_clusters,
+                       NBHDByCTSingleCellExtended_sce$neighbourhood_clusters)
 adjustedRandIndex
 ```
 

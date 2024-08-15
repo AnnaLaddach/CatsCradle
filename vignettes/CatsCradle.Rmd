@@ -16,6 +16,7 @@ knitr::opts_chunk$set(
     comment = "#>"
 )
 ```
+`r BiocStyle::Biocpkg("BiocStyle")`
 
 ![](CatsCradleLogo.png){width=2in}
 
@@ -39,7 +40,9 @@ show similar patterns of expression.
 
 ```{r}
 library(CatsCradle,quietly=TRUE)
-STranspose = transposeSeuratObject(S)
+getExample = make.getExample()
+exSeuratObj = getExample('exSeuratObj')
+STranspose = transposeObject(exSeuratObj)
 ```
 This function transposes the expression matrix and carries out the
 basic functions, FindVariableFeatures(), ScaleData(), RunPCA(),
@@ -56,7 +59,7 @@ clusters on UMAP, tSNE or PCA.
 ```{r}
 library(Seurat,quietly=TRUE)
 library(ggplot2,quietly=TRUE)
-DimPlot(S,cols='polychrome') + ggtitle('Cell clusters on UMAP')
+DimPlot(exSeuratObj,cols='polychrome') + ggtitle('Cell clusters on UMAP')
 ```
 
 ```{r}
@@ -90,7 +93,7 @@ across each cell cluster (rows).
 
 ```{r}
 library(pheatmap,quietly=TRUE)
-averageExpMatrix = getAverageExpressionMatrix(S,STranspose,layer='data')
+averageExpMatrix = getAverageExpressionMatrix(exSeuratObj,STranspose,layer='data')
 averageExpMatrix = tagRowAndColNames(averageExpMatrix,
                                      ccTag='cellClusters_',
                                      gcTag='geneClusters_')
@@ -143,6 +146,7 @@ the most strongly clustered.
 
 
 ```{r}
+hallmark = getExample('hallmark')
 h = 'HALLMARK_G2M_CHECKPOINT'
 umap = FetchData(STranspose,c('umap_1','umap_2'))
 idx = colnames(STranspose) %in% hallmark[[h]]
@@ -176,7 +180,7 @@ $X$.)
 ```{r}
 g2mGenes = intersect(colnames(STranspose),
                      hallmark[['HALLMARK_G2M_CHECKPOINT']])
-stats = getSeuratSubsetClusteringStatistics(STranspose,
+stats = getObjectSubsetClusteringStatistics(STranspose,
                                       g2mGenes,
                                       numTrials=1000)
 ```				      

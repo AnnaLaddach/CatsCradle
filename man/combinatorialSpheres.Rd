@@ -36,6 +36,7 @@ getExample = make.getExample()
 NN = getExample('NN')
 STranspose = getExample('STranspose')
 spheres = combinatorialSpheres(NN,'Ccl6',3)
+hallmark = getExample('hallmark')
 geneSet = intersect(hallmark[[1]],colnames(STranspose))
 sphereAroundSet = combinatorialSpheres(NN,geneSet,1)
 }

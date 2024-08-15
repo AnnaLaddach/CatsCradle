@@ -30,6 +30,7 @@ sets it does and does not belong to.  This vector can
 be normalised to account for the sizes of the sets.
 }
 \examples{
+hallmark = make.getExample()('hallmark')
 Myc = annotateGeneAsVector('Myc',hallmark)
 MycNormalised = annotateGeneAsVector('Myc',hallmark,TRUE)
 }

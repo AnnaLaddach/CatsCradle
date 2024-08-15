@@ -40,5 +40,6 @@ receptor network to those pairs that occur in the
 panel
 }
 \examples{
+smallXenium = make.getExample()('smallXenium')
 lrPairs = getLigandReceptorPairsInPanel(smallXenium, "mouse")
 }

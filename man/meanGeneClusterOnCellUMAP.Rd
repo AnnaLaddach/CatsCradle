@@ -29,6 +29,8 @@ This function paints gene expression for a
 given gene cluster on cell umap.
 }
 \examples{
-STranspose = make.getExample()('STranspose')
-g = meanGeneClusterOnCellUMAP(S,STranspose,geneCluster=0)
+getExample = make.getExample()
+exSeuratObj = getExample('exSeuratObj')
+STranspose = getExample('STranspose')
+g = meanGeneClusterOnCellUMAP(exSeuratObj,STranspose,geneCluster=0)
 }

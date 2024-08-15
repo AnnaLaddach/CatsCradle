@@ -7,8 +7,8 @@
 #' contain x and y coordinates respectively.
 #' @return a graph in neighbour format, i.e., a data frame with
 #'     columns nodeA and nodeB.
-#' @import geometry
-#' @import Rfast
+#' @importFrom geometry delaunayn
+#' @importFrom Rfast rowSort
 #' @export
 #' @examples
 #' centroids = make.getExample()('centroids')
@@ -56,9 +56,7 @@ computeNeighboursDelaunay = function(centroids){
 #' @param threshold - a distance cut off to compute neighbours.
 #' @return a graph in neighbour format, i.e., a data frame with
 #'     columns nodeA and nodeB.
-#' @import rdist 
-#' @import reshape2 
-#' @import Rfast
+#' @importFrom rdist pdist
 #' @export
 #' @examples
 #' centroids = make.getExample()('centroids')
@@ -130,7 +128,6 @@ extractCells = function(NN)
 #' @param neighbourhoods - a list of neighbourhoods as
 #' returned by nbhdsAsEdgesToNbhdsAsList
 #' @param centroids - the centroids of the cells
-#' @import pracma
 #' @return a named numeric.  The names are the names
 #' of the list neighbourhoods and the values are the
 #' maximum distance within each neighbourhood
@@ -209,14 +206,13 @@ computeNBHDByCTMatrix = function(spatialGraph, cellTypes){
 #' @return a seurat object based on a neighbourhood by cell type matrix or its 
 #' transpose, containing clusters and UMAP. This can also be a
 #' SingleCellExperiment depending on the parameter returnType.
-#' @import Seurat
 #' @import SeuratObject
 #' @export
 #' @examples
 #' NBHDByCTMatrix = make.getExample()('NBHDByCTMatrix')
-#' NBHDByCTSeurat = computeNBHDVsCTSeurat(NBHDByCTMatrix)
-#' NBHDByCTSeurat_sce = computeNBHDVsCTSeurat(NBHDByCTMatrix,returnType='SCE')
-computeNBHDVsCTSeurat= function(dataMatrix, resolution = 0.1, 
+#' NBHDByCTSeurat = computeNBHDVsCTObject(NBHDByCTMatrix)
+#' NBHDByCTSingleCell_sce = computeNBHDVsCTObject(NBHDByCTMatrix,returnType='SCE')
+computeNBHDVsCTObject= function(dataMatrix, resolution = 0.1, 
                                 npcs = 10, n.neighbors = 30L, 
                                 transpose = FALSE,
                                 verbose=TRUE,
@@ -270,8 +266,8 @@ computeNBHDVsCTSeurat= function(dataMatrix, resolution = 0.1,
 #' returns a Seurat object
 #' @return a seurat object with a "graph" dimensionality reduction. Can also
 #' be a SingleCellExperiment depending on parameter returnType.
-#' @import Seurat  
-#' @import igraph
+#' @importFrom igraph graph_from_adjacency_matrix layout_with_fr
+#' @importFrom igraph V E V<- E<-
 #' @export
 #' @examples
 #' NBHDByCTSeurat = make.getExample()('NBHDByCTSeurat')
@@ -301,7 +297,7 @@ computeGraphEmbedding = function(seuratObj, graph=defaultGraph(seuratObj),
 #' connecting vertices of degree n for.
 #' @return A named list of neighbour graphs, where each graph contains edges 
 #' connecting vertices of degree n. Each graph is named according to degree n.
-#' @import data.table
+#' @importFrom data.table data.table merge.data.table
 #' @export
 #' @examples
 #' delaunayNeighbours = make.getExample()('delaunayNeighbours')
@@ -317,8 +313,8 @@ getExtendedNBHDs = function(spatialGraph, n){
   
   for (i in seq(from=2,to=n)){
     writeLines(paste('radius',i))
-    graph = merge(neighbours[[i-1]], neighbours[[1]], by.x = "nodeB", 
-                  by.y = "nodeA", allow.cartesian = TRUE)
+    graph = merge.data.table(neighbours[[i-1]], neighbours[[1]], by.x = "nodeB", 
+                             by.y = "nodeA", allow.cartesian = TRUE)
     graph = graph[,c("nodeA","nodeB.y")]
     names(graph) = c("nodeA","nodeB")
     graph = unique(graph)
@@ -383,7 +379,7 @@ collapseExtendedNBHDs = function(extendedNeighboursList, n = length(extendedNeig
 #' NBHDByCTMatrix = getExample('NBHDByCTMatrix')
 #' clusters = getExample('clusters')
 #' cellTypesPerCellType = computeCellTypesPerCellTypeMatrix(NBHDByCTMatrix,
-#'                                                      clusters)
+#'                                                          clusters)
 computeCellTypesPerCellTypeMatrix = function(nbhdByCellType,cellTypes)
 {
   MM = aggregate(nbhdByCellType, list(cellTypes), sum)
@@ -436,7 +432,7 @@ computeCellTypesPerCellTypeMatrix = function(nbhdByCellType,cellTypes)
 #' cellTypesPerCellTypeMatrix = getExample('cellTypesPerCellTypeMatrix')
 #' colours = getExample('colours')
 #' G = cellTypesPerCellTypeGraphFromCellMatrix(cellTypesPerCellTypeMatrix, 
-#' minWeight = 0.05, colours = colours)
+#'                                    minWeight = 0.05, colours = colours)
 cellTypesPerCellTypeGraphFromCellMatrix = function(M,
                                                colours=NULL,
                                                selfEdges=FALSE,
@@ -589,14 +585,14 @@ randomiseGraph = function(spatialGraph, maxTries = 1000){
 #' @param verbose - whether to print trace.  Defaults to TRUE
 #' @return A square matrix containing upper tail p values describing whether two 
 #' cell types are more frequently found together than expected by chance.
-#' @import abind
+#' @importFrom abind abind
 #' @export
 #' @examples
 #' getExample = make.getExample()
 #' delaunayNeighbours = getExample('delaunayNeighbours')
 #' clusters = getExample('clusters')
 #' cellTypesPerCellTypePValues = computeNeighbourEnrichment(delaunayNeighbours, 
-#' clusters, nSim = 10, verbose = FALSE)
+#'                                         clusters, nSim = 10, verbose = FALSE)
 computeNeighbourEnrichment = function(spatialGraph, cellTypes, nSim = 1000,
                                       maxTries = 1000,
                                       verbose=TRUE){
@@ -637,12 +633,20 @@ computeNeighbourEnrichment = function(spatialGraph, cellTypes, nSim = 1000,
 getLigandReceptorNetwork = function(species)
 {
     stopifnot(species %in% c('human','mouse'))
+
+    getExample = make.getExample()
     
     if(species == 'human')
+    {
+        humanLRN = getExample('humanLRN')
         return(humanLRN)
+    }
 
     if(species == 'mouse')
+    {
+        mouseLRN = getExample('mouseLRN')
         return(mouseLRN)
+    }
 }
 
 ## ####################################################
@@ -661,6 +665,7 @@ getLigandReceptorNetwork = function(species)
 #' receptor
 #' @export
 #' @examples
+#' smallXenium = make.getExample()('smallXenium')
 #' lrPairs = getLigandReceptorPairsInPanel(smallXenium, "mouse")
 getLigandReceptorPairsInPanel = function(obj,species,
                                          lrn = getLigandReceptorNetwork(species))
@@ -747,8 +752,8 @@ permuteMatrix = function(M){
 
 
 ## ####################################################
-#' This functions retrieves an expression matrix from a seurat object and 
-#' binarises it.
+#' This functions retrieves an expression matrix from a
+#' seurat object or SingleCellExperiment and binarises it.
 #'
 #' @param obj - a Seurat object or SingleCellExperiment to be
 #' turned into a Seurat object
@@ -892,6 +897,7 @@ annotateLRInteractionCounts = function(interactionCounts,obj,nbhdObj)
 #' @export
 #' @examples
 #' getExample = make.getExample()
+#' smallXenium = getExample('smallXenium')
 #' delaunayNeighbours = getExample('delaunayNeighbours')
 #' clusters = getExample('clusters')
 #' performLigandReceptorAnalysis(smallXenium, delaunayNeighbours, 
@@ -992,7 +998,7 @@ performLigandReceptorAnalysis = function(obj, spatialGraph, species, clusters,
 #' ligand and receptor. At least one cluster pair must have 
 #' pvalue <  pValCutoffLigRec for ligand-receptor pair. Defaults to 0.05.
 #' @param  labelClusterPairs - show labels for cluster pairs. Defaults to TRUE.
-#' @import Rfast
+#' @importFrom Rfast rowMins colMins
 #' @import pheatmap
 #' @return matrix of -log10(pvalues) that underlies the heatmap.
 #' @export
@@ -1000,6 +1006,7 @@ performLigandReceptorAnalysis = function(obj, spatialGraph, species, clusters,
 #' getExample = make.getExample()
 #' clusters = getExample('clusters')
 #' colours = getExample('colours')
+#' ligandReceptorResults = getExample('ligandReceptorResults')
 #' ligRecMatrix = makeLRInteractionHeatmap(ligandReceptorResults, 
 #' clusters, colours = colours, labelClusterPairs = FALSE)
 makeLRInteractionHeatmap = function(ligandReceptorResults,
@@ -1021,9 +1028,9 @@ makeLRInteractionHeatmap = function(ligandReceptorResults,
   rownames(rowAnno) = rownames(selectedPValues)
   rowAnno = rowAnno[,c("receiver","sender")]
   if (length(colours) > 0){
-  pheatmap(negLog10PValues, annotation_row = rowAnno, annotation_colors = list("sender" = colours, 
-                                                                    "receiver" = colours),
-           show_rownames = labelClusterPairs)
+      pheatmap(negLog10PValues, annotation_row = rowAnno,
+               annotation_colors = list("sender" = colours, "receiver" = colours),
+               show_rownames = labelClusterPairs)
   } else{
     pheatmap(negLog10PValues, annotation_row = rowAnno, show_rownames = labelClusterPairs)
   }
@@ -1046,7 +1053,9 @@ makeLRInteractionHeatmap = function(ligandReceptorResults,
 #' he heatmap.
 #' @export
 #' @examples
-#' clusters = make.getExample()('clusters')
+#' getExample = make.getExample()
+#' clusters = getExample('clusters')
+#' ligandReceptorResults = getExample('ligandReceptorResults')
 #' cellTypePerCellTypeLigRecMatrix = 
 #' makeSummedLRInteractionHeatmap(ligandReceptorResults, clusters, "mean")
 makeSummedLRInteractionHeatmap = function(ligandReceptorResults, clusters, type, logScale = TRUE){ 
@@ -1066,7 +1075,8 @@ makeSummedLRInteractionHeatmap = function(ligandReceptorResults, clusters, type,
   summedInteractionsByClusterMatrix = matrix(0, ncol = nClusters, nrow = nClusters)
   for (i in seq_len(nClusters)){
     for (j in seq_len(nClusters)){
-      value = summedInteractionsByCluster$nInteractions[(summedInteractionsByCluster$Sender == clusterNames[i]) & (summedInteractionsByCluster$Receiver == clusterNames[j])]
+        value = summedInteractionsByCluster$nInteractions[(summedInteractionsByCluster$Sender == clusterNames[i]) &
+                                                          (summedInteractionsByCluster$Receiver == clusterNames[j])]
       if (length(value) > 0){
         summedInteractionsByClusterMatrix[i,j] = value
       } 
@@ -1098,7 +1108,6 @@ makeSummedLRInteractionHeatmap = function(ligandReceptorResults, clusters, type,
 #' @param returnType Determines whether to return a Seurat object or a
 #' SpatialExperiment.  Will do the later if this is set to either SCE,
 #' SingleCellExperiment or lower case versions of either.
-#' @import Seurat
 #' @return This returns a seurat object where 
 #' each point represents an edge between cells, and spatial coordinates are the 
 #' centroids of edges between cells. The "expression matrix" is the 
@@ -1107,15 +1116,17 @@ makeSummedLRInteractionHeatmap = function(ligandReceptorResults, clusters, type,
 #' a SpatialExperiment.
 #' @export
 #' @examples
-#' centroids = make.getExample()('centroids')
-#' edgeSeurat = computeEdgeSeurat(ligandReceptorResults, centroids)
-computeEdgeSeurat = function(ligandReceptorResults, centroids, npcs = 10,
+#' getExample = make.getExample()
+#' centroids = getExample('centroids')
+#' ligandReceptorResults = getExample('ligandReceptorResults')
+#' edgeSeurat = computeEdgeObject(ligandReceptorResults, centroids)
+computeEdgeObject = function(ligandReceptorResults, centroids, npcs = 10,
                              returnType='Seurat'){
   interactionsOnEdges = ligandReceptorResults$interactionsOnEdges
   rownames(interactionsOnEdges) = paste0(interactionsOnEdges$nodeA, "-", interactionsOnEdges$nodeB)
   interactionsOnEdgesMat = as.matrix(interactionsOnEdges[,seq(from=5,to=ncol(interactionsOnEdges))])
   interactionsOnEdgesMat= 1 * interactionsOnEdgesMat
-  edgeSeurat = CreateSeuratObject(t(interactionsOnEdgesMat), meta = interactionsOnEdges[,seq_len(4)])
+  edgeSeurat = CreateSeuratObject(t(interactionsOnEdgesMat), meta.data = interactionsOnEdges[,seq_len(4)])
   edgeCoords = as.data.frame(cbind(centroids[interactionsOnEdges$nodeA, seq_len(2)], 
                                   centroids[interactionsOnEdges$nodeB, seq_len(2)]))
   
@@ -1197,13 +1208,14 @@ nbhdsAsEdgesToNbhdsAsList = function(cells,
 #' parameter returnType.
 #' @return a Seurat object giving total gene expression
 #' in each neighbourhood or SingleCellExperiment
-#' @import Seurat
 #' @export
 #' @examples
-#' extendedNeighbours = make.getExample()('extendedNeighbours')
-#' agg = aggregateSeuratGeneExpression(smallXenium,extendedNeighbours,
+#' getExample = make.getExample()
+#' smallXenium = getExample('smallXenium')
+#' extendedNeighbours = getExample('extendedNeighbours')
+#' agg = aggregateGeneExpression(smallXenium,extendedNeighbours,
 #' verbose=FALSE)
-aggregateSeuratGeneExpression = function(f,neighbourhoods,verbose=TRUE,
+aggregateGeneExpression = function(f,neighbourhoods,verbose=TRUE,
                                          returnType='Seurat')
 {
     f = acceptor(f)
@@ -1224,7 +1236,7 @@ aggregateSeuratGeneExpression = function(f,neighbourhoods,verbose=TRUE,
     nbhdList =nbhdsAsEdgesToNbhdsAsList(cells,
                                         neighbourhoods)
     
-    C = aggregateFeatureMatrix(counts, nbhdList, rowsums)
+    C = aggregateFeatureMatrix(counts, nbhdList, rowSums)
 
     nbhdObj = CreateSeuratObject(counts=C)
     nbhdObj = NormalizeData(nbhdObj,verbose=verbose)
@@ -1282,7 +1294,7 @@ aggregateFeatureMatrix = function(M, nbhdList, aggregateFunction)
 #' @export
 computeMoransI = function(M,nbhdList){
   aggrM = aggregateFeatureMatrix(M,nbhdList, rowMeans)
-  means = rowmeans(M)
+  means = rowMeans(M)
   zi = M - means
   zj = aggrM - means
   moransI = rowSums(zi*zj)/rowSums((zi^2))
@@ -1302,14 +1314,15 @@ computeMoransI = function(M,nbhdList){
 #' @param nSim - number of simulations to perform for p value calculation. 
 #' Defaults to 100.
 #' @param verbose - whether to print trace, defaults to TRUE
-#' @import Seurat
 #' @import SingleCellExperiment
 #' @import SpatialExperiment
 #' @importFrom S4Vectors SelfHits
 #' @return a dataframe containing Moran's I and p values for each feature.
 #' @export
 #' @examples
-#' delaunayNeighbours = make.getExample()('delaunayNeighbours')
+#' getExample = make.getExample()
+#' smallXenium = getExample('smallXenium')
+#' delaunayNeighbours = getExample('delaunayNeighbours')
 #' moransI = runMoransI(smallXenium, delaunayNeighbours, assay = "SCT", 
 #' layer = "data", nSim = 10, verbose = FALSE)
 
@@ -1355,7 +1368,7 @@ runMoransI = function(obj, spatialGraph, assay = "RNA", layer = "data",
 #' @return a graph in neighbour format  where edges in the original graph 
 #' become nodes and A-B edges (in the original graph) become connected to
 #' all A- edges and all B- edges. 
-#' @import data.table
+#' @importFrom Matrix sparseMatrix
 #' @export
 #' @examples
 #' delaunayNeighbours = make.getExample()('delaunayNeighbours')
@@ -1407,19 +1420,28 @@ returnAs = function(obj,returnType,spatial=FALSE)
 ## ####################################################
 SCEtoSeurat = function(sce)
 {
-    f = as.Seurat(sce)
-
+    if('counts' %in% names(assays(sce))) {
+        f = as.Seurat(sce)
+    } else {
+        f = as.Seurat(sce,counts=NULL) }
+    
     numCells = ncol(sce)
     for(n in colPairNames(sce))
     {
-        M = matrix(0,nrow=numCells,ncol=numCells)
-        rownames(M) = colnames(sce)
-        colnames(M) = colnames(sce)
-
         df = colPair(sce,n)
         df = as.data.frame(df)
-        M[df$from,df$to] = df$value
-        M[df$to,df$from] = df$value
+
+        ## Factorize:
+        df[,1] = factor(df[,1])
+        df[,2] = factor(df[,2])
+
+        ## Make sparse matrix:
+        M = sparseMatrix(i=as.numeric(df[,1]),
+                         j=as.numeric(df[,2]),
+                         x = as.numeric(df[,3]),
+                         dimnames = list(levels(df[,1]), levels(df[,2])))
+
+        ## Make graph and install:
         graph = as.Graph(M)
         f@graphs[[n]] = graph
     }
@@ -1431,9 +1453,10 @@ SCEtoSeurat = function(sce)
 SeuratToSCE = function(f,spatial=FALSE)
 {
     sce = as.SingleCellExperiment(f)
+    
     for(n in names(f@graphs))
     {
-        NN = getNearestNeighborListsSeurat(f,n)
+        NN = getNearestNeighbourLists(f,n)
         numPairs = nrow(NN)
 
         a = seq_len(ncol(sce))
@@ -1453,6 +1476,9 @@ SeuratToSCE = function(f,spatial=FALSE)
     if(spatial)
     {
         sce = SpatialExperiment(sce)
+
+        for(n in names(f@meta.data))
+            colData(sce)[,n] = f@meta.data[,n]
 
         ## Copy in the centroids:
         centroids = GetTissueCoordinates(f)

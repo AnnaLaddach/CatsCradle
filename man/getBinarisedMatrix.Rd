@@ -2,8 +2,8 @@
 % Please edit documentation in R/CatsCradleSpatial.R
 \name{getBinarisedMatrix}
 \alias{getBinarisedMatrix}
-\title{This functions retrieves an expression matrix from a seurat object and
-binarises it.}
+\title{This functions retrieves an expression matrix from a
+seurat object or SingleCellExperiment and binarises it.}
 \usage{
 getBinarisedMatrix(obj, cutoff = 0, layer = "count")
 }
@@ -26,6 +26,6 @@ A binarised expression matrix where rows are genes and columns are
 cells.
 }
 \description{
-This functions retrieves an expression matrix from a seurat object and
-binarises it.
+This functions retrieves an expression matrix from a
+seurat object or SingleCellExperiment and binarises it.
 }

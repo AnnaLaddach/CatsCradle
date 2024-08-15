@@ -61,7 +61,9 @@ the functions of a gene based on the functions of its
 neighbours.
 }
 \examples{
-STranspose = make.getExample()('STranspose')
+getExample = make.getExample()
+STranspose = getExample('STranspose')
+hallmark = getExample('hallmark')
 genesAnno = annotateGenesByGeneSet(hallmark)
 predictions = predictGeneAnnotationImpl('Myc',STranspose,genesAnno,
 radius=.5,metric='umap')

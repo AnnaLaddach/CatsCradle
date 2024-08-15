@@ -54,5 +54,5 @@ getExample = make.getExample()
 delaunayNeighbours = getExample('delaunayNeighbours')
 clusters = getExample('clusters')
 cellTypesPerCellTypePValues = computeNeighbourEnrichment(delaunayNeighbours, 
-clusters, nSim = 10, verbose = FALSE)
+                                        clusters, nSim = 10, verbose = FALSE)
 }

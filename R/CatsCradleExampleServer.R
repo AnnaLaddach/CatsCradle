@@ -17,23 +17,81 @@
 make.getExample = function()
 {
     
-    alreadyFound = list(S=S,
-                        smallXenium=smallXenium,
-                        ligandReceptorResults=ligandReceptorResults,
-                        moransI=moransI,
-                        moransILigandReceptor=moransILigandReceptor,
-                        hallmark=hallmark,
-                        humanLRN=humanLRN,
-                        mouseLRN=mouseLRN)
+    alreadyFound = list()
+
     
     
     getExample = function(whichOne)
     {
+        packageVars = c('exSeuratObj',
+                        'smallXenium',
+                        'ligandReceptorResults',
+                        'moransI',
+                        'moransILigandReceptor',
+                        'hallmark',
+                        'humanLRN',
+                        'mouseLRN')
+        
+        if(whichOne %in% packageVars)
+        {
+            if(whichOne == 'exSeuratObj')
+            {
+                data(exSeuratObj)
+                answer = exSeuratObj
+            }
+
+            if(whichOne == 'smallXenium')
+            {
+                data(smallXenium)
+                answer = smallXenium
+            }
+
+            if(whichOne == 'ligandReceptorResults')
+            {
+                data(ligandReceptorResults)
+                answer = ligandReceptorResults
+            }
+
+            if(whichOne == 'moransI')
+            {
+                data(moransI)
+                answer = moransI
+            }
+
+            if(whichOne == 'moransILigandReceptor')
+            {
+                data(moransILigandReceptor)
+                answer = moransILigandReceptor
+            }
+
+            if(whichOne == 'hallmark')
+            {
+                data(hallmark)
+                answer = hallmark
+            }
+
+            if(whichOne == 'humanLRN')
+            {
+                data(humanLRN)
+                answer = humanLRN
+            }
+
+            if(whichOne == 'mouseLRN')
+            {
+                data(mouseLRN)
+                answer = mouseLRN
+            }
+        }
+            
+
+        
         if(whichOne %in% names(alreadyFound))
+        {
             return(alreadyFound[[whichOne]])
+        }
         
         if(whichOne == 'list')
-            return(alreadyFound)
+            return(names(alreadyFound))
         
         if(! whichOne %in% exampleObjects())
             stop(paste(whichOne,
@@ -41,17 +99,19 @@ make.getExample = function()
         
         ## ####################################################
         ## Otherwise, compute:
+
+        
         
         if(whichOne == 'STranspose')
         {
-            S = getExample('S')
-            answer = transposeSeuratObject(S)
+            exSeuratObj = getExample('exSeuratObj')
+            answer = transposeObject(exSeuratObj)
         }
         
         if(whichOne == 'S_sce')
         {
-            S = getExample('S')
-            answer = SeuratToSCE(S)
+            exSeuratObj = getExample('exSeuratObj')
+            answer = SeuratToSCE(exSeuratObj)
         }
         
         if(whichOne == 'STranspose_sce')
@@ -70,8 +130,14 @@ make.getExample = function()
         if(whichOne == 'NBHDByCTSeuratExtended')
         {
             NBHDByCTMatrixExtended = getExample('NBHDByCTMatrixExtended')
-            answer = computeNBHDVsCTSeurat(NBHDByCTMatrixExtended,
+            answer = computeNBHDVsCTObject(NBHDByCTMatrixExtended,
                                            verbose=FALSE)
+        }
+
+        if(whichOne == 'NBHDByCTSingleCellExtended_sce')
+        {
+            NBHDByCTSeuratExtended = getExample('NBHDByCTSeuratExtended')
+            answer = SeuratToSCE(NBHDByCTSeuratExtended)
         }
         
         if(whichOne == 'CTByNBHDSeuratExtended')
@@ -83,7 +149,7 @@ make.getExample = function()
         {
             ligandReceptorResults = getExample('ligandReceptorResults')
             centroids = getExample('centroids')
-            answer = computeEdgeSeurat(ligandReceptorResults, centroids)
+            answer = computeEdgeObject(ligandReceptorResults, centroids)
         }
         
         if(whichOne == 'centroids')
@@ -115,20 +181,20 @@ make.getExample = function()
         if(whichOne == 'NBHDByCTSeurat')
         {
             NBHDByCTMatrix = getExample('NBHDByCTMatrix')
-            answer = computeNBHDVsCTSeurat(NBHDByCTMatrix,verbose=FALSE)
+            answer = computeNBHDVsCTObject(NBHDByCTMatrix,verbose=FALSE)
         }
         
         if(whichOne == 'NN')
         {
             STranspose = getExample('STranspose')
-            answer = getNearestNeighborListsSeurat(STranspose)
+            answer = getNearestNeighbourLists(STranspose)
         }
         
         if(whichOne == 'CTByNBHDSeurat')
         {
             NBHDByCTMatrix = getExample('NBHDByCTMatrix')
             answer =
-                computeNBHDVsCTSeurat(t(NBHDByCTMatrix), npcs = 10, 
+                computeNBHDVsCTObject(t(NBHDByCTMatrix), npcs = 10, 
                                       transpose = TRUE, resolution = 1, n.neighbors = 5,
                                       verbose=FALSE)
         }
@@ -218,8 +284,15 @@ make.getExample = function()
 
         if(whichOne == 'averageExpMatrix')
         {
+            exSeuratObj = getExample('exSeuratObj')
             STranspose = getExample('STranspose')
-            answer = getAverageExpressionMatrix(S,STranspose,layer='data')
+            answer = getAverageExpressionMatrix(exSeuratObj,STranspose,layer='data')
+        }
+
+        if(whichOne == 'X_sce')
+        {
+            smallXenium = getExample('smallXenium')
+            answer = SeuratToSCE(smallXenium,spatial=TRUE)
         }
                 
         ## Save and return:
@@ -242,11 +315,12 @@ make.getExample = function()
 #' availableObjects = exampleObjects()
 exampleObjects = function()
 {
-    objects = c('S',
+    objects = c('exSeuratObj',
                 'STranspose',
                 'STranspose_sce',
                 'S_sce',
                 'NBHDByCTSeuratExtended',
+                'NBHDByCTSingleCellExtended_sce',                
                 'edgeSeurat',
                 'smallXenium',
                 'extendedNeighbours',
@@ -272,7 +346,8 @@ exampleObjects = function()
                 'cellTypesPerCellTypeMatrix',
                 'cellTypesPerCellTypePValues',
                 'moransILigandReceptor',
-                'colours')
+                'colours',
+                'X_sce')
 
     return(objects)
 }

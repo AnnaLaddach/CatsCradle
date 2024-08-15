@@ -22,9 +22,10 @@
 #' @export
 #' @import Seurat
 #' @examples
-#' STranspose = transposeSeuratObject(S)
-#' STransposeAsSCE = transposeSeuratObject(S,returnType='SCE')
-transposeSeuratObject = function(f,active.assay='RNA',
+#' exSeuratObj = make.getExample()('exSeuratObj')
+#' STranspose = transposeObject(exSeuratObj)
+#' STransposeAsSCE = transposeObject(exSeuratObj,returnType='SCE')
+transposeObject = function(f,active.assay='RNA',
                                  npcs=30,dims=seq_len(20),res=1,
                                  returnType='Seurat')
 {
@@ -56,8 +57,6 @@ transposeSeuratObject = function(f,active.assay='RNA',
 #' to be turned into a Seurat object
 #' @param fPrime - The Seurat object of genes,  or SingleCellExperiment
 #' to be turned into a Seurat object
-#' @param v5 - A logical. Are we using Seurat v5? Defaults
-#' to TRUE
 #' @param clusteringName In many cases, this will be the cell
 #'     clustering, i.e., seurat_clusters, which is the default, but
 #'     for neighbourhood Seurat objects, this can be
@@ -67,12 +66,13 @@ transposeSeuratObject = function(f,active.assay='RNA',
 #' correspond to cell clusters and the columns correspond to
 #' gene clusters.
 #' @export
-#' @import stringr
+#' @importFrom stringr str_replace str_replace_all str_split str_split_fixed
 #' @examples
 #' getExample = make.getExample()
 #' STranspose = getExample('STranspose')
-#' M = getAverageExpressionMatrix(S,STranspose,layer='data')
-getAverageExpressionMatrix = function(f,fPrime, v5 = TRUE,
+#' exSeuratObj = getExample('exSeuratObj')
+#' M = getAverageExpressionMatrix(exSeuratObj,STranspose,layer='data')
+getAverageExpressionMatrix = function(f,fPrime,
                                       clusteringName='seurat_clusters',
                                       layer='scale.data')
 {
@@ -82,17 +82,14 @@ getAverageExpressionMatrix = function(f,fPrime, v5 = TRUE,
     f$clustering = as.character(f@meta.data[,clusteringName])
     cellCluster = unique(f$clustering)
     cellCluster = cellCluster[order(as.numeric(cellCluster))]
-
+    
     fPrime$clustering = as.character(fPrime@meta.data[,clusteringName])
     geneCluster = unique(fPrime$clustering)
     geneCluster = geneCluster[order(as.numeric(geneCluster))]
     
     ## Get assay data:
-    if (v5 == TRUE){
-        X = GetAssayData(f,layer=layer)
-    } else {
-        X = GetAssayData(f,slot=layer)
-    }
+    X = GetAssayData(f,layer=layer)
+    
     ## Seems X can be smaller:
     selected = rownames(X)
     f = f[selected,]
@@ -149,7 +146,7 @@ tagRowAndColNames = function(M,ccTag='CC_',gcTag='GC_')
 #' @param M - An average gene expression matrix.
 #' @return A data frame with columns cellCluster, geneCluster
 #' and average expression
-#' @import reshape2
+#' @importFrom reshape2 melt
 #' @export
 #' @examples
 #' getExample = make.getExample()
@@ -219,6 +216,7 @@ geneListPValue = function(A,B,C,background=25000)
 #' STranspose = getExample('STranspose')
 #' clusterDF = data.frame(gene=colnames(STranspose),
 #'                        geneCluster=STranspose@meta.data[,'seurat_clusters'])
+#' hallmark = getExample('hallmark')
 #' geneSet = intersect(hallmark[[1]],colnames(STranspose))
 #' pvalueMatrix = geneSetsVsGeneClustersPValueMatrix(geneSet,
 #'                                               clusterDF,
@@ -337,8 +335,7 @@ orderGeneSetPValues = function(M,ascending=TRUE,cutoff=NULL,nameTag='')
 #' @param width - width in pixels, defaults to 900
 #' @return A sankey graph
 #' @export
-#' @import networkD3
-#' @import stringr
+#' @importFrom networkD3 sankeyNetwork
 #' @examples
 #' set.seed(100)
 #' M = matrix(runif(12)-.3,nrow=3)
@@ -425,8 +422,9 @@ sankeyFromMatrix = function(M,disambiguation=c('R_','C_'),
 #' @export
 #' @examples
 #' getExample = make.getExample()
+#' exSeuratObj = getExample('exSeuratObj')
 #' STranspose = getExample('STranspose')
-#' clusterExpression = getGeneClusterAveragesPerCell(S,STranspose)
+#' clusterExpression = getGeneClusterAveragesPerCell(exSeuratObj,STranspose)
 getGeneClusterAveragesPerCell = function(f,
                                          fPrime,
                                          cells=colnames(f),
@@ -501,8 +499,8 @@ defaultGraph = function(f)
 #' @export
 #' @examples
 #' STranspose = make.getExample()('STranspose')
-#' NN = getNearestNeighborListsSeurat(STranspose)
-getNearestNeighborListsSeurat = function(f, graph=defaultGraph(f)){
+#' NN = getNearestNeighbourLists(STranspose)
+getNearestNeighbourLists = function(f, graph=defaultGraph(f)){
 
     f = acceptor(f)
   
@@ -521,11 +519,11 @@ getNearestNeighborListsSeurat = function(f, graph=defaultGraph(f)){
 ## ####################################################
 #' This function gets the neighbors of a given gene
 #' using either the gene Seurat object or its nearest
-#' neighbor graph returned from getNearestNeighborListsSeurat
+#' neighbor graph returned from getNearestNeighbourLists
 #'
 #' @param gene - the gene in question
 #' @param NN - either the gene Seurat object or its nearest
-#' neighbor graph as found by getNearestNeighborListsSeurat.
+#' neighbor graph as found by getNearestNeighbourLists.
 #' This can also be a SingleCellExperiment which will be converted
 #' to a Seurat object
 #' @return the neighboring genes
@@ -543,7 +541,7 @@ getGeneNeighbors = function(gene,NN)
     NN = acceptor(NN)
     
     if(inherits(NN,'Seurat'))
-        NN = getNearestNeighborListsSeurat(NN)
+        NN = getNearestNeighbourLists(NN)
 
     NN = symmetriseNN(NN)
 
@@ -646,7 +644,7 @@ randomiseNodeIndices = function(neighborListDf, n = 100, useWeights = FALSE){
 #' retrieved from a Seurat object is.
 #'
 #' @param NN - a nearest neighbor graph.  This is in the form
-#' of a data frame  as returned by getNearestNeighborListsSeurat.
+#' of a data frame  as returned by getNearestNeighbourLists.
 #' Its coloumns include nodeA and nodeB.
 #' @return TRUE or FALSE
 #' @export
@@ -672,7 +670,7 @@ symmetryCheckNN = function(NN)
 #' and if not symmetrises it.
 #'
 #' @param NN - a nearest neighbors graph as returned
-#' by getNearestNeighborListsSeurat
+#' by getNearestNeighbourLists
 #'
 #' @return a nearest neighbors graph
 #' 
@@ -719,6 +717,7 @@ symmetriseNN = function(NN)
 #' NN = getExample('NN')
 #' STranspose = getExample('STranspose')
 #' spheres = combinatorialSpheres(NN,'Ccl6',3)
+#' hallmark = getExample('hallmark')
 #' geneSet = intersect(hallmark[[1]],colnames(STranspose))
 #' sphereAroundSet = combinatorialSpheres(NN,geneSet,1)
 combinatorialSpheres = function(NN,origin,radius)
@@ -818,6 +817,7 @@ readGmt = function(gmtFile, addDescr = FALSE){
 #' @return - A list where names are genes and values are lists of terms
 #' @export
 #' @examples
+#' hallmark = make.getExample()('hallmark')
 #' annotatedGenes = annotateGenesByGeneSet(hallmark)
 annotateGenesByGeneSet = function(geneSets)
 {
@@ -856,6 +856,7 @@ annotateGenesByGeneSet = function(geneSets)
 #' @return a numeric
 #' @export
 #' @examples
+#' hallmark = make.getExample()('hallmark')
 #' Myc = annotateGeneAsVector('Myc',hallmark)
 #' MycNormalised = annotateGeneAsVector('Myc',hallmark,TRUE)
 annotateGeneAsVector = function(gene,geneSets,normalise=FALSE)
@@ -904,9 +905,11 @@ annotateGeneAsVector = function(gene,geneSets,normalise=FALSE)
 #' getExample = make.getExample()
 #' STranspose = getExample('STranspose')
 #' STranspose_sce = getExample('STranspose_sce')
+#' hallmark = getExample('hallmark')
 #' set.seed(100)
 #' genes = sample(colnames(STranspose),5)
 #' predictions = predictAnnotation(genes,hallmark,STranspose,radius=.5)
+#' library(SingleCellExperiment)
 #' predictions_sce = predictAnnotation(genes,hallmark,STranspose_sce,radius=.5)
 predictAnnotation = function(genes,
                              geneSets,
@@ -974,7 +977,9 @@ predictAnnotation = function(genes,
 #' are the relative wieghts of the contributions.
 #' @export 
 #' @examples
-#' STranspose = make.getExample()('STranspose')
+#' getExample = make.getExample()
+#' STranspose = getExample('STranspose')
+#' hallmark = getExample('hallmark')
 #' genesAnno = annotateGenesByGeneSet(hallmark)
 #' predictions = predictGeneAnnotationImpl('Myc',STranspose,genesAnno,
 #' radius=.5,metric='umap')
@@ -1027,7 +1032,7 @@ predictGeneAnnotationImpl = function(gene,fPrime,genesAnno,
 #'
 #' @param geneSets - a set of gene sets, e.g., hallmark
 #' @param fPrime - a transposed Seurat object (generated with 
-#' transposeSeuratObject()) or SingleCellExperiment to
+#' transposeObject()) or SingleCellExperiment to
 #' be converted to a Seurat object
 #' @param radius - radius of the region to use for prediction
 #' @param metric - reduction or NN, defaults to umap
@@ -1041,7 +1046,9 @@ predictGeneAnnotationImpl = function(gene,fPrime,genesAnno,
 #' of gene annotations whose entries correspond to the geneSets
 #' @export
 #' @examples
-#' STranspose = make.getExample()('STranspose')
+#' getExample = make.getExample()
+#' STranspose = getExample('STranspose')
+#' hallmark = getExample('hallmark')
 #' predictions = predictAnnotationAllGenes(hallmark,STranspose,radius=.5)
 predictAnnotationAllGenes = function(geneSets,
                                      fPrime,
@@ -1085,13 +1092,16 @@ predictAnnotationAllGenes = function(geneSets,
 #' @return A p-value reporting how often a random subset
 #' of the same size is sufficiently clustered to produce
 #' an equally large distance from its complement.
-#' @import pracma
+#' @importFrom pracma distmat Norm ceil std
+#' @importFrom stats median
 #' @export
 #' @examples
-#' STranspose = make.getExample()('STranspose')
+#' getExample = make.getExample()
+#' STranspose = getExample('STranspose')
+#' hallmark = getExample('hallmark')
 #' geneSubset = intersect(colnames(STranspose),hallmark[[1]])
-#' p = getSeuratSubsetClusteringPValue(STranspose,geneSubset,100)
-getSeuratSubsetClusteringPValue = function(fPrime,
+#' p = getObjectSubsetClusteringPValue(STranspose,geneSubset,100)
+getObjectSubsetClusteringPValue = function(fPrime,
                                            geneSubset,
                                            numTrials=1000,
                                            reduction='UMAP',
@@ -1107,7 +1117,7 @@ getSeuratSubsetClusteringPValue = function(fPrime,
                                        colnames(fPrime)))
     stopifnot(numInSubset > 0)
     
-    stats = getSeuratSubsetClusteringStatistics(fPrime,
+    stats = getObjectSubsetClusteringStatistics(fPrime,
                                                 geneSubset,
                                                 numTrials,
                                                 reduction,
@@ -1144,10 +1154,12 @@ getSeuratSubsetClusteringPValue = function(fPrime,
 #' median distance from the mean of the randomised distances.
 #' @export
 #' @examples
-#' STranspose = make.getExample()('STranspose')
+#' getExample = make.getExample()
+#' STranspose = getExample('STranspose')
+#' hallmark = getExample('hallmark')
 #' geneSubset = intersect(colnames(STranspose),hallmark[[1]])
-#' stats = getSeuratSubsetClusteringStatistics(STranspose,geneSubset,100)
-getSeuratSubsetClusteringStatistics = function(fPrime,
+#' stats = getObjectSubsetClusteringStatistics(STranspose,geneSubset,100)
+getObjectSubsetClusteringStatistics = function(fPrime,
                                                geneSubset,
                                                numTrials=1000,
                                                reduction='UMAP',
@@ -1201,7 +1213,9 @@ getSeuratSubsetClusteringStatistics = function(fPrime,
 #' @export
 #' @examples
 #' library(Seurat)
-#' STranspose = make.getExample()('STranspose')
+#' getExample = make.getExample()
+#' STranspose = getExample('STranspose')
+#' hallmark = getExample('hallmark')
 #' S = data.matrix(FetchData(STranspose,c('umap_1','umap_2')))
 #' geneSubset = rownames(S) %in% hallmark[[1]]
 #' geneClustering = runGeometricClusteringTrials(S,geneSubset,100)
@@ -1277,7 +1291,9 @@ medianComplementDistance = function(S,geneSubset)
 #' from geneSet and whose names are the nearby genes.
 #' @export
 #' @examples
-#' STranspose = make.getExample()('STranspose')
+#' getExample = make.getExample()
+#' STranspose = getExample('STranspose')
+#' hallmark = getExample('hallmark')
 #' geneSet = intersect(colnames(STranspose),hallmark[[1]])
 #' geometricallyNearby = getNearbyGenes(STranspose,geneSet,radius=0.2,metric='umap')
 #' combinatoriallyNearby = getNearbyGenes(STranspose,geneSet,radius=1,metric='NN')
@@ -1303,7 +1319,7 @@ getNearbyGenes = function(fPrime,geneSet,radius,metric='umap',
     ## Combinatorial:
     if(metric == 'NN')
     {
-        NN = getNearestNeighborListsSeurat(fPrime)
+        NN = getNearestNeighbourLists(fPrime)
         spheres = combinatorialSpheres(NN,geneSet,radius)
         idx = ! spheres$nodes %in% geneSet
         spheres = spheres[idx,]
@@ -1349,7 +1365,7 @@ getNearbyGenes = function(fPrime,geneSet,radius,metric='umap',
 ## ####################################################
 nearbyGenesWeighted = function(fPrime,gene)
 {
-    NN = getNearestNeighborListsSeurat(fPrime)
+    NN = getNearestNeighbourLists(fPrime)
     NN = symmetriseNN(NN)
     idx = NN$nodeA == gene
     neighbours = NN$nodeB[idx]
@@ -1371,11 +1387,14 @@ nearbyGenesWeighted = function(fPrime,gene)
 #' SingleCellExperiment to be converted to a Seurat object
 #' @param geneCluster - a gene cluster of fPrime
 #' @return This returns a ggplot object
-#' @import ggplot2
+#' @importFrom ggplot2 ggplot geom_point geom_density theme xlim ggtitle
+#' @importFrom ggplot2 geom_vline facet_wrap aes
 #' @export
 #' @examples
-#' STranspose = make.getExample()('STranspose')
-#' g = meanGeneClusterOnCellUMAP(S,STranspose,geneCluster=0)
+#' getExample = make.getExample()
+#' exSeuratObj = getExample('exSeuratObj')
+#' STranspose = getExample('STranspose')
+#' g = meanGeneClusterOnCellUMAP(exSeuratObj,STranspose,geneCluster=0)
 meanGeneClusterOnCellUMAP = function(f,fPrime,geneCluster)
 {
     f = acceptor(f)
@@ -1495,7 +1514,9 @@ medianComplementDistance = function(S,idx)
 #' @export
 #' @examples
 #' library(Seurat)
-#' STranspose = make.getExample()('STranspose')
+#' getExample = make.getExample()
+#' STranspose = getExample('STranspose')
+#' hallmark = getExample('hallmark')
 #' S = data.matrix(FetchData(STranspose,c('umap_1','umap_2')))
 #' idx = colnames(STranspose) %in% hallmark[[1]]
 #' mcpv = medianComplementPValue(S,idx,numTrials=100)

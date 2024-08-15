@@ -4,7 +4,7 @@ author: "Anna Laddach and Michael Shapiro"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-    %\VignetteIndexEntry{CatsCradleExampleData}
+    %\VignetteIndexEntry{CatsCradle Example Data}
     %\VignetteEngine{knitr::rmarkdown}
     %\VignetteEncoding{UTF-8}
 ---
@@ -16,6 +16,8 @@ knitr::opts_chunk$set(
     comment = "#>"
 )
 ```
+`r BiocStyle::Biocpkg("BiocStyle")`
+
 ![](CatsCradleLogo.png){width=2in}
 
 
@@ -61,11 +63,11 @@ A complete list of the example objects available via the function
 exampleObjects().  Here we document some of the more prominent of
 these.
 
-* __S__ - A Seurat object of cells.  It includes a UMAP of the
+* __exSeuratObj__ - A Seurat object of cells.  It includes a UMAP of the
 cells and annotated clustering into cell types.  This is a package
 variable.
 * __STranpose__ - A Seurat object of genes.  This is created from S by
-transposeSeuratObject().
+transposeObject().
 * __S_sce__ - S as a SingleCellExperiment
 * __STranspose_sce__ - STranspose as a SingleCellExperiment
 * __NN__ - A nearest neighbours graph from STranspose.  This is a data

@@ -11,8 +11,8 @@ Each row represents a mouse ligand - receptor pair.
 }
 }
 \source{
-This is derived from the nichenetr mouse ligand -
-receptor network.
+This is taken from the nichenetr package,
+specifically the mouse ligand - receptor network.
 }
 \usage{
 mouseLRN

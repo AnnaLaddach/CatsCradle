@@ -87,6 +87,7 @@ chance.
 }
 \examples{
 getExample = make.getExample()
+smallXenium = getExample('smallXenium')
 delaunayNeighbours = getExample('delaunayNeighbours')
 clusters = getExample('clusters')
 performLigandReceptorAnalysis(smallXenium, delaunayNeighbours, 

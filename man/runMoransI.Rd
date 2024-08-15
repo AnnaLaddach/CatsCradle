@@ -49,7 +49,9 @@ This function takes a matrix where rows are features and columns are cells,
 and a neighbourhood list, and computes Moran's I.
 }
 \examples{
-delaunayNeighbours = make.getExample()('delaunayNeighbours')
+getExample = make.getExample()
+smallXenium = getExample('smallXenium')
+delaunayNeighbours = getExample('delaunayNeighbours')
 moransI = runMoransI(smallXenium, delaunayNeighbours, assay = "SCT", 
 layer = "data", nSim = 10, verbose = FALSE)
 }

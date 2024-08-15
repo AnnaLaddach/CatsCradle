@@ -9,7 +9,7 @@ symmetriseNN(NN)
 \arguments{
 \item{NN}{\itemize{
 \item a nearest neighbors graph as returned
-by getNearestNeighborListsSeurat
+by getNearestNeighbourLists
 }}
 }
 \value{

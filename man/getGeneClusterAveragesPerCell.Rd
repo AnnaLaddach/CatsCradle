@@ -50,6 +50,7 @@ clusters.
 }
 \examples{
 getExample = make.getExample()
+exSeuratObj = getExample('exSeuratObj')
 STranspose = getExample('STranspose')
-clusterExpression = getGeneClusterAveragesPerCell(S,STranspose)
+clusterExpression = getGeneClusterAveragesPerCell(exSeuratObj,STranspose)
 }

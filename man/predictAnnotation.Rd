@@ -77,8 +77,10 @@ its neighboring genes.
 getExample = make.getExample()
 STranspose = getExample('STranspose')
 STranspose_sce = getExample('STranspose_sce')
+hallmark = getExample('hallmark')
 set.seed(100)
 genes = sample(colnames(STranspose),5)
 predictions = predictAnnotation(genes,hallmark,STranspose,radius=.5)
+library(SingleCellExperiment)
 predictions_sce = predictAnnotation(genes,hallmark,STranspose_sce,radius=.5)
 }

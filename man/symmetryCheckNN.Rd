@@ -9,7 +9,7 @@ symmetryCheckNN(NN)
 \arguments{
 \item{NN}{\itemize{
 \item a nearest neighbor graph.  This is in the form
-of a data frame  as returned by getNearestNeighborListsSeurat.
+of a data frame  as returned by getNearestNeighbourLists.
 Its coloumns include nodeA and nodeB.
 }}
 }

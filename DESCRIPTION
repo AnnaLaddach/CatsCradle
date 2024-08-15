@@ -16,34 +16,36 @@ Description: The basic insight driving this package is the idea that by transpos
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.1
-Imports: Seurat,
+RoxygenNote: 7.3.2
+Imports: Seurat (>= 5.0.1),
 	 ggplot2,
 	 networkD3,
 	 stringr,
 	 pracma,
-	 knitr,
 	 reshape2,
          rdist,
 	 igraph,
-	 interp,
 	 geometry,
 	 Rfast,
 	 dplyr,
 	 data.table,
          abind,
 	 pheatmap,
-	 fossil,
 	 EBImage,
 	 S4Vectors,
 	 SeuratObject,
 	 SingleCellExperiment,
-	 SpatialExperiment
+	 SpatialExperiment,
+	 Matrix
+Suggests: fossil,
+	  interp,
+	  knitr,
+	  BiocStyle
 Depends: R (>= 4.0)
-LazyData: true
+LazyData: false
 VignetteBuilder: knitr
 LazyDataCompression: xz
 biocViews: BiologicalQuestion, StatisticalMethod, GeneExpression,
-        SingleCell, Transcriptomics
+        SingleCell, Transcriptomics, Spatial
 NeedsCompilation: no
 Packaged: 2024-07-09 11:03:13 UTC; shapirm

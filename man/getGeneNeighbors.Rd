@@ -4,7 +4,7 @@
 \alias{getGeneNeighbors}
 \title{This function gets the neighbors of a given gene
 using either the gene Seurat object or its nearest
-neighbor graph returned from getNearestNeighborListsSeurat}
+neighbor graph returned from getNearestNeighbourLists}
 \usage{
 getGeneNeighbors(gene, NN)
 }
@@ -15,7 +15,7 @@ getGeneNeighbors(gene, NN)
 
 \item{NN}{\itemize{
 \item either the gene Seurat object or its nearest
-neighbor graph as found by getNearestNeighborListsSeurat.
+neighbor graph as found by getNearestNeighbourLists.
 This can also be a SingleCellExperiment which will be converted
 to a Seurat object
 }}
@@ -26,7 +26,7 @@ the neighboring genes
 \description{
 This function gets the neighbors of a given gene
 using either the gene Seurat object or its nearest
-neighbor graph returned from getNearestNeighborListsSeurat
+neighbor graph returned from getNearestNeighbourLists
 }
 \examples{
 library(Seurat)

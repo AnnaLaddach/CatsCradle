@@ -8,7 +8,6 @@ each cell cluster and returns the result as a matrix}
 getAverageExpressionMatrix(
   f,
   fPrime,
-  v5 = TRUE,
   clusteringName = "seurat_clusters",
   layer = "scale.data"
 )
@@ -22,11 +21,6 @@ to be turned into a Seurat object
 \item{fPrime}{\itemize{
 \item The Seurat object of genes,  or SingleCellExperiment
 to be turned into a Seurat object
-}}
-
-\item{v5}{\itemize{
-\item A logical. Are we using Seurat v5? Defaults
-to TRUE
 }}
 
 \item{clusteringName}{In many cases, this will be the cell
@@ -50,5 +44,6 @@ each cell cluster and returns the result as a matrix
 \examples{
 getExample = make.getExample()
 STranspose = getExample('STranspose')
-M = getAverageExpressionMatrix(S,STranspose,layer='data')
+exSeuratObj = getExample('exSeuratObj')
+M = getAverageExpressionMatrix(exSeuratObj,STranspose,layer='data')
 }

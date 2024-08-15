@@ -49,6 +49,7 @@ getExample = make.getExample()
 STranspose = getExample('STranspose')
 clusterDF = data.frame(gene=colnames(STranspose),
                        geneCluster=STranspose@meta.data[,'seurat_clusters'])
+hallmark = getExample('hallmark')
 geneSet = intersect(hallmark[[1]],colnames(STranspose))
 pvalueMatrix = geneSetsVsGeneClustersPValueMatrix(geneSet,
                                               clusterDF,

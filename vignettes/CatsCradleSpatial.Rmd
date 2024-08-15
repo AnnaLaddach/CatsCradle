@@ -16,6 +16,7 @@ knitr::opts_chunk$set(
     comment = "#>"
 )
 ```
+`r BiocStyle::Biocpkg("BiocStyle")`
 
 ![](CatsCradleLogo.png){width=2in}
 
@@ -40,6 +41,8 @@ not definitive and are for illustratory purporses only.
 ```{r}
 library(Seurat,quietly=TRUE)
 library(CatsCradle,quietly=TRUE)
+getExample = make.getExample()
+smallXenium = getExample('smallXenium')
 ImageDimPlot(smallXenium, cols = "polychrome", size = 1)
 ```
 
@@ -150,7 +153,7 @@ the neighbourhoods (called aggregation_clusters) both on the tissue
 plot and on the resulting UMAP.
 
 ```{r}
-agg = aggregateSeuratGeneExpression(smallXenium,extendedNeighbours,
+agg = aggregateGeneExpression(smallXenium,extendedNeighbours,
                                     verbose=FALSE)
 smallXenium$aggregateNBHDClusters = agg@active.ident
 ImageDimPlot(smallXenium,group.by='aggregateNBHDClusters',cols='polychrome')
@@ -276,7 +279,7 @@ dimensionality of the feature space is relatively low (number of cell
 types) we calculate the UMAP using features rather than PCs.
 
 ```{r}
-NBHDByCTSeurat = computeNBHDVsCTSeurat(NBHDByCTMatrix,verbose=FALSE)
+NBHDByCTSeurat = computeNBHDVsCTObject(NBHDByCTMatrix,verbose=FALSE)
 ```
 
 Add cell type information to the neighbourhoodSeurat object.
@@ -302,7 +305,7 @@ ImageDimPlot(smallXenium, group.by = "NBHDCluster", size = 1, cols = "polychrome
 
 Let's try the same thing with our extended neighbourhoods up to degree 4.
 ```{r}
-NBHDByCTSeuratExtended = computeNBHDVsCTSeurat(NBHDByCTMatrixExtended,
+NBHDByCTSeuratExtended = computeNBHDVsCTObject(NBHDByCTMatrixExtended,
                                                verbose=FALSE)
 ```
 Add cell type information to the NBHDByCTSeuratExtended object.
@@ -395,7 +398,7 @@ the low number of observations we need to set a lower value for n.neighbours.
 
 ```{r}
 CTByNBHDSeurat = 
-  computeNBHDVsCTSeurat(t(NBHDByCTMatrix), npcs = 10, 
+  computeNBHDVsCTObject(t(NBHDByCTMatrix), npcs = 10, 
                         transpose = TRUE, resolution = 1, n.neighbors = 5,
 			verbose=FALSE)
 
@@ -518,6 +521,7 @@ of these interactions.
 
 
 ```{r}
+
 ligandReceptorResults = performLigandReceptorAnalysis(smallXenium, delaunayNeighbours, 
                                                 "mouse", clusters,verbose=FALSE)
 ```
@@ -603,7 +607,7 @@ interaction (ligand receptor pair) on an edge. This is useful for
 visualising where ligand receptor interactions occur spatially.
 
 ```{r}
-edgeSeurat = computeEdgeSeurat(ligandReceptorResults, centroids)
+edgeSeurat = computeEdgeObject(ligandReceptorResults, centroids)
 ```
 
 
@@ -637,6 +641,7 @@ moransILigandReceptor = runMoransI(edgeSeurat, edgeNeighbours, assay = "RNA",
 
 View most spatially autocorrelated ligand-receptor interactions.
 ```{r}
+moransILigandReceptor = getExample('moransILigandReceptor')
 head(moransILigandReceptor)
 ```
 

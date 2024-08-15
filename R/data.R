@@ -1,6 +1,6 @@
 
 ## ####################################################
-#' S
+#' exSeuratObj
 #'
 #' A Seurat object of 2000 genes by 540 cells.
 #'
@@ -14,7 +14,7 @@
 #' }  
 #' @source This is subset from the data associated with
 #'     https://www.nature.com/articles/s41586-021-04006-z
-"S"
+"exSeuratObj"
 
 ## ####################################################
 #' hallmark
@@ -37,8 +37,8 @@
 #' \describe{A data frame with two columns, 'from' and 'to'.
 #' Each row represents a human ligand - receptor pair.
 #' }
-#' @source This is derived from the nichenetr human ligand -
-#' receptor network.
+#' @source This is taken from the nichenetr package,
+#' specifically the human ligand - receptor network.
 "humanLRN"
 
 ## ####################################################
@@ -50,8 +50,8 @@
 #' \describe{A data frame with two columns, 'from' and 'to'.
 #' Each row represents a mouse ligand - receptor pair.
 #' }
-#' @source This is derived from the nichenetr mouse ligand -
-#' receptor network.
+#' @source This is taken from the nichenetr package,
+#' specifically the mouse ligand - receptor network.
 "mouseLRN"
 
 ## ####################################################

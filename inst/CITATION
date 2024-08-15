@@ -11,7 +11,7 @@ textVersion = paste('Anna Laddach and Michael Shapiro,',
                     'single cell transcriptomics and the',
                     'clustering and annotation of genes,',
                     'developed in the Pachnis lab at the',
-                    'Fracis Crick Institute',
+                    'Francis Crick Institute',
                     'https://github.com/AnnaLaddach/CatsCradle')
 )
 

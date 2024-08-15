@@ -25,5 +25,6 @@ returns a list where each item is a gene and gives the
 gene sets that gene is in.
 }
 \examples{
+hallmark = make.getExample()('hallmark')
 annotatedGenes = annotateGenesByGeneSet(hallmark)
 }

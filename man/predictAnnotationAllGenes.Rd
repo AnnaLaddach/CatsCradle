@@ -22,7 +22,7 @@ predictAnnotationAllGenes(
 
 \item{fPrime}{\itemize{
 \item a transposed Seurat object (generated with
-transposeSeuratObject()) or SingleCellExperiment to
+transposeObject()) or SingleCellExperiment to
 be converted to a Seurat object
 }}
 
@@ -60,6 +60,8 @@ This function predicts the functions of all genes based
 on the functions of their neighbours.
 }
 \examples{
-STranspose = make.getExample()('STranspose')
+getExample = make.getExample()
+STranspose = getExample('STranspose')
+hallmark = getExample('hallmark')
 predictions = predictAnnotationAllGenes(hallmark,STranspose,radius=.5)
 }

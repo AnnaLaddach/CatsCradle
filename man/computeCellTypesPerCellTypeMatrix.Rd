@@ -37,5 +37,5 @@ getExample = make.getExample()
 NBHDByCTMatrix = getExample('NBHDByCTMatrix')
 clusters = getExample('clusters')
 cellTypesPerCellType = computeCellTypesPerCellTypeMatrix(NBHDByCTMatrix,
-                                                     clusters)
+                                                         clusters)
 }

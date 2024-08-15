@@ -54,6 +54,7 @@ This function takes ligandReceptorResults and plots a heatmap of -log10(pvalues)
 getExample = make.getExample()
 clusters = getExample('clusters')
 colours = getExample('colours')
+ligandReceptorResults = getExample('ligandReceptorResults')
 ligRecMatrix = makeLRInteractionHeatmap(ligandReceptorResults, 
 clusters, colours = colours, labelClusterPairs = FALSE)
 }
