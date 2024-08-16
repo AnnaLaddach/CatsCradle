@@ -153,7 +153,8 @@ edgeCutoffsByPercentile = function(annEdges,
 #' clusters = getExample('clusters')
 #' delaunayNeighbours = getExample('delaunayNeighbours') 
 #' annEdges =
-#'     edgeLengthsAndCellTypePairs(delaunayNeighbours,clusters,centroids)
+#'     edgeLengthsAndCellTypePairs
+#'                  (delaunayNeighbours,clusters,centroids)
 #' cutoffDF = edgeCutoffsByZScore(annEdges,zCutoff=1.5)
 edgeCutoffsByZScore = function(annEdges,zCutoff)
 {
@@ -195,7 +196,8 @@ edgeCutoffsByZScore = function(annEdges,zCutoff)
 #' clusters = getExample('clusters')
 #' delaunayNeighbours = getExample('delaunayNeighbours') 
 #' annEdges =
-#'     edgeLengthsAndCellTypePairs(delaunayNeighbours,clusters,centroids)
+#'     edgeLengthsAndCellTypePairs
+#'               (delaunayNeighbours,clusters,centroids)
 #' cutoffDF = edgeCutoffsByWatershed(annEdges)
 edgeCutoffsByWatershed = function(annEdges,nbins=15,tolerance=10)
 {

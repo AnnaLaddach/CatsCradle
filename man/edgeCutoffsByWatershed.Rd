@@ -40,6 +40,7 @@ centroids = getExample('centroids')
 clusters = getExample('clusters')
 delaunayNeighbours = getExample('delaunayNeighbours') 
 annEdges =
-    edgeLengthsAndCellTypePairs(delaunayNeighbours,clusters,centroids)
+    edgeLengthsAndCellTypePairs
+              (delaunayNeighbours,clusters,centroids)
 cutoffDF = edgeCutoffsByWatershed(annEdges)
 }

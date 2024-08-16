@@ -196,7 +196,8 @@ make.getExample = function()
             NBHDByCTMatrix = getExample('NBHDByCTMatrix')
             answer =
                 computeNBHDVsCTObject(t(NBHDByCTMatrix), npcs = 10, 
-                                      transpose = TRUE, resolution = 1, n.neighbors = 5,
+                                      transpose = TRUE, resolution = 1,
+                                      n.neighbors = 5,
                                       verbose=FALSE)
         }
         

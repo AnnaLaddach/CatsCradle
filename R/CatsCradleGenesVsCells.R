@@ -24,7 +24,8 @@
 #' correspond to cell clusters and the columns correspond to
 #' gene clusters.
 #' @export
-#' @importFrom stringr str_replace str_replace_all str_split str_split_fixed
+#' @importFrom stringr str_replace str_replace_all
+#' @importFrom stringr str_split str_split_fixed
 #' @examples
 #' getExample = make.getExample()
 #' STranspose = getExample('STranspose')

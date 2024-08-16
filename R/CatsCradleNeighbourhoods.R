@@ -20,10 +20,10 @@
 #' centroids = make.getExample()('centroids')
 #' delaunayNeighbours = computeNeighboursDelaunay(centroids)
 computeNeighboursDelaunay = function(centroids){
-
+    
     ## This is confounded when centroids has extra columns:
     centroids = centroids[,seq_len(2)]
-  
+    
     ##get cell names
     cellNames = rownames(centroids)
     
@@ -31,7 +31,9 @@ computeNeighboursDelaunay = function(centroids){
     triangles = delaunayn(centroids)
     
     ##extract neighbours
-    results = rbind(triangles[,c(1,2)],triangles[,c(1,3)],triangles[,c(2,3)])
+    results = rbind(triangles[,c(1,2)],
+                    triangles[,c(1,3)],
+                    triangles[,c(2,3)])
     
     ##sort rows
     results = rowSort(results)
@@ -42,7 +44,7 @@ computeNeighboursDelaunay = function(centroids){
     ##convert indices to cell names
     results[,1] = cellNames[as.numeric(results[,1])]
     results[,2] = cellNames[as.numeric(results[,2])]
-
+    
     ## Convert to data.frame and name as nodeA, nodeB:
     results = as.data.frame(results)
     names(results) = c('nodeA','nodeB')
@@ -68,50 +70,53 @@ computeNeighboursDelaunay = function(centroids){
 #' centroids = make.getExample()('centroids')
 #' euclideanNeighbours = computeNeighboursEuclidean(centroids,20)
 computeNeighboursEuclidean = function(centroids, threshold){
-  centroids = centroids[,c(1,2)]
-  colnames(centroids) = c("x","y")
-  maxX = max(centroids[,"x"])
-  minX = min(centroids[,"x"])
-  maxY = max(centroids[,"y"])
-  minY = min(centroids[,"y"])
-  XStep = (maxX - minX)/10
-  YStep = (maxY - minY)/10
-  results = list()
-  k = 1
-  
-  ##calculate distances for cells in overlapping windows  
-  for (i in seq(from=0,to=9)){
-    for (j in seq(from=0,to=9)){
-      x1 = i * XStep + minX 
-      x2 = x1 + 2*XStep
-      y1 = j * YStep + minY 
-      y2 = y1 + 2*YStep
-      selected = centroids[(centroids[,"x"] >= x1) & (centroids[,"x"] <= x2) & (centroids[,"y"] >= y1) & (centroids[,"y"] <= y2), ]
-      distances = pdist(selected) 
-      distances = reshape2::melt(distances)
-      
-      ##retain edges within distance threshold
-      distances = distances[distances$value < threshold,]
-      distances = distances[,c(1,2)]
-      
-      ##sort rows
-      distances =  rowSort(as.matrix(distances))
-      distances[,1] = rownames(selected)[distances[,1]]
-      distances[,2] = rownames(selected)[as.numeric(distances[,2])]
-      
-      results[[k]] = distances
-      k = k+1
+    centroids = centroids[,c(1,2)]
+    colnames(centroids) = c("x","y")
+    maxX = max(centroids[,"x"])
+    minX = min(centroids[,"x"])
+    maxY = max(centroids[,"y"])
+    minY = min(centroids[,"y"])
+    XStep = (maxX - minX)/10
+    YStep = (maxY - minY)/10
+    results = list()
+    k = 1
+    
+    ##calculate distances for cells in overlapping windows  
+    for (i in seq(from=0,to=9)){
+        for (j in seq(from=0,to=9)){
+            x1 = i * XStep + minX 
+            x2 = x1 + 2*XStep
+            y1 = j * YStep + minY 
+            y2 = y1 + 2*YStep
+            selected = centroids[(centroids[,"x"] >= x1) &
+                                 (centroids[,"x"] <= x2) &
+                                 (centroids[,"y"] >= y1) &
+                                 (centroids[,"y"] <= y2), ]
+            distances = pdist(selected) 
+            distances = reshape2::melt(distances)
+            
+            ##retain edges within distance threshold
+            distances = distances[distances$value < threshold,]
+            distances = distances[,c(1,2)]
+            
+            ##sort rows
+            distances =  rowSort(as.matrix(distances))
+            distances[,1] = rownames(selected)[distances[,1]]
+            distances[,2] = rownames(selected)[as.numeric(distances[,2])]
+            
+            results[[k]] = distances
+            k = k+1
+        }
     }
-  }
-  
-  results = do.call(rbind, results)
-  
-  ##remove duplicate edges
-  results = unique(results)
-  colnames(results) = c("nodeA", "nodeB")
-  results = results[results[,"nodeA"] != results[,"nodeB"],]
-  results = as.data.frame(results)
-  return(results)
+    
+    results = do.call(rbind, results)
+    
+    ##remove duplicate edges
+    results = unique(results)
+    colnames(results) = c("nodeA", "nodeB")
+    results = results[results[,"nodeA"] != results[,"nodeB"],]
+    results = as.data.frame(results)
+    return(results)
 }
 
 ## ####################################################
@@ -137,21 +142,21 @@ computeNeighboursEuclidean = function(centroids, threshold){
 #' diameters = neighbourhoodDiameter(nbhds[seq_len(100)],centroids)
 neighbourhoodDiameter = function(neighbourhoods,centroids)
 {
-  rownames(centroids) = centroids$cell
-  nbhds = names(neighbourhoods)
-  diameters = c()
-  for(nbhd in nbhds)
-  {
-    theseCells = neighbourhoods[[nbhd]]
-    N = length(theseCells)
-    M = matrix(0,nrow=N,ncol=2)
-    M[seq_len(N),seq_len(2)] = as.matrix(centroids[theseCells,seq_len(2)])
-    D = distmat(M,M)
+    rownames(centroids) = centroids$cell
+    nbhds = names(neighbourhoods)
+    diameters = c()
+    for(nbhd in nbhds)
+    {
+        theseCells = neighbourhoods[[nbhd]]
+        N = length(theseCells)
+        M = matrix(0,nrow=N,ncol=2)
+        M[seq_len(N),seq_len(2)] = as.matrix(centroids[theseCells,seq_len(2)])
+        D = distmat(M,M)
+        
+        diameters[nbhd] = max(D)
+    }
     
-    diameters[nbhd] = max(D)
-  }
-  
-  return(diameters)
+    return(diameters)
 }
 
 ## ####################################################
@@ -169,31 +174,37 @@ neighbourhoodDiameter = function(neighbourhoods,centroids)
 #' delaunayNeighbours = make.getExample()('delaunayNeighbours')
 #' extendedNeighboursList = getExtendedNBHDs(delaunayNeighbours, 4)
 getExtendedNBHDs = function(spatialGraph, n){
-  spatialGraph = data.table(spatialGraph)
-  
-  spatialGraphR = spatialGraph
-  names(spatialGraphR) = c("nodeB","nodeA")
-  spatialGraph = rbind(spatialGraph,spatialGraphR[,c(2,1)])
-  neighbours = list()
-  neighbours[[1]] = spatialGraph
-  
-  for (i in seq(from=2,to=n)){
-    writeLines(paste('radius',i))
-    graph = merge.data.table(neighbours[[i-1]], neighbours[[1]], by.x = "nodeB", 
-                             by.y = "nodeA", allow.cartesian = TRUE)
-    graph = graph[,c("nodeA","nodeB.y")]
-    names(graph) = c("nodeA","nodeB")
-    graph = unique(graph)
-    orig = c(paste0(neighbours[[i-1]]$nodeB,"_",neighbours[[i-1]]$nodeA))
-    if (i > 2){
-      orig = c(orig,paste0(neighbours[[i-2]]$nodeB,"_",neighbours[[i-2]]$nodeA))
+    spatialGraph = data.table(spatialGraph)
+    
+    spatialGraphR = spatialGraph
+    names(spatialGraphR) = c("nodeB","nodeA")
+    spatialGraph = rbind(spatialGraph,spatialGraphR[,c(2,1)])
+    neighbours = list()
+    neighbours[[1]] = spatialGraph
+    
+    for (i in seq(from=2,to=n)){
+        writeLines(paste('radius',i))
+        graph = merge.data.table(neighbours[[i-1]], neighbours[[1]],
+                                 by.x = "nodeB", 
+                                 by.y = "nodeA",
+                                 allow.cartesian = TRUE)
+        graph = graph[,c("nodeA","nodeB.y")]
+        names(graph) = c("nodeA","nodeB")
+        graph = unique(graph)
+        orig = c(paste0(neighbours[[i-1]]$nodeB,
+                        "_",
+                        neighbours[[i-1]]$nodeA))
+        if (i > 2){
+            orig = c(orig,paste0(neighbours[[i-2]]$nodeB,
+                                 "_",
+                                 neighbours[[i-2]]$nodeA))
+        }
+        graph = graph[graph$nodeA != graph$nodeB,]
+        new = paste0(graph$nodeA,"_",graph$nodeB)
+        graph = graph[!(new %in% orig),]
+        neighbours[[i]] = graph
     }
-    graph = graph[graph$nodeA != graph$nodeB,]
-    new = paste0(graph$nodeA,"_",graph$nodeB)
-    graph = graph[!(new %in% orig),]
-    neighbours[[i]] = graph
-  }
-  return(neighbours)
+    return(neighbours)
 }
 
 ## ####################################################
@@ -211,9 +222,10 @@ getExtendedNBHDs = function(spatialGraph, n){
 #' @examples
 #' extendedNeighboursList = make.getExample()('extendedNeighboursList')
 #' extendedNeighbours = collapseExtendedNBHDs(extendedNeighboursList, 4)
-collapseExtendedNBHDs = function(extendedNeighboursList, n = length(extendedNeighboursList)){
-  
-    collapsedGraph = as.data.frame(do.call(rbind,extendedNeighboursList[seq_len(n)]))
+collapseExtendedNBHDs = function(extendedNeighboursList,
+                                 n = length(extendedNeighboursList)){ 
+    collapsedGraph = as.data.frame(do.call(rbind,
+                                           extendedNeighboursList[seq_len(n)]))
     collapsedGraph = desymmetriseNN(collapsedGraph)
     
     return(collapsedGraph)

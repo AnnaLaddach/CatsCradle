@@ -53,7 +53,10 @@ getExample = make.getExample()
 STranspose = getExample('STranspose')
 hallmark = getExample('hallmark')
 geneSet = intersect(colnames(STranspose),hallmark[[1]])
-geometricallyNearby = getNearbyGenes(STranspose,geneSet,radius=0.2,metric='umap')
-combinatoriallyNearby = getNearbyGenes(STranspose,geneSet,radius=1,metric='NN')
-weightedNearby = getNearbyGenes(STranspose,'Myc',radius=1,metric='NN',weights=TRUE)
+geometricallyNearby = getNearbyGenes
+                      (STranspose,geneSet,radius=0.2,metric='umap')
+combinatoriallyNearby = getNearbyGenes
+                      (STranspose,geneSet,radius=1,metric='NN')
+weightedNearby = getNearbyGenes
+                      (STranspose,'Myc',radius=1,metric='NN',weights=TRUE)
 }

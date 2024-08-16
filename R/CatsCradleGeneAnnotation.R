@@ -74,7 +74,7 @@ transposeObject = function(f,active.assay='RNA',
 #' getExample = make.getExample()
 #' STranspose = getExample('STranspose')
 #' clusterDF = data.frame(gene=colnames(STranspose),
-#'                        geneCluster=STranspose@meta.data[,'seurat_clusters'])
+#'                        geneCluster=STranspose$seurat_clusters)
 #' hallmark = getExample('hallmark')
 #' geneSet = intersect(hallmark[[1]],colnames(STranspose))
 #' pvalueMatrix = geneSetsVsGeneClustersPValueMatrix(geneSet,
@@ -535,9 +535,12 @@ predictAnnotationAllGenes = function(geneSets,
 #' STranspose = getExample('STranspose')
 #' hallmark = getExample('hallmark')
 #' geneSet = intersect(colnames(STranspose),hallmark[[1]])
-#' geometricallyNearby = getNearbyGenes(STranspose,geneSet,radius=0.2,metric='umap')
-#' combinatoriallyNearby = getNearbyGenes(STranspose,geneSet,radius=1,metric='NN')
-#' weightedNearby = getNearbyGenes(STranspose,'Myc',radius=1,metric='NN',weights=TRUE)
+#' geometricallyNearby = getNearbyGenes
+#'                       (STranspose,geneSet,radius=0.2,metric='umap')
+#' combinatoriallyNearby = getNearbyGenes
+#'                       (STranspose,geneSet,radius=1,metric='NN')
+#' weightedNearby = getNearbyGenes
+#'                       (STranspose,'Myc',radius=1,metric='NN',weights=TRUE)
 getNearbyGenes = function(fPrime,geneSet,radius,metric='umap',
                        numPCs=NULL,weights=FALSE)
 {
@@ -701,18 +704,19 @@ getClusterOrder = function(f)
 #' @return - A named list of gene sets
 #' @export
 readGmt = function(gmtFile, addDescr = FALSE){
-  lines = readLines(gmtFile)
-  geneSets = list()
-  for (line in lines){
-    info = strsplit(line, "\t")[[1]]
-    if (addDescr){
-      name = paste(info[1],info[2])
-    } else {
-      name = info[1]
-    }
-    geneSets[name] = list(info[seq(from=3,to=length(info))])
-  } 
-  return(geneSets)
+    lines = readLines(gmtFile)
+    geneSets = list()
+    for (line in lines){
+        info = strsplit(line, "\t")[[1]]
+        if (addDescr){
+            name = paste(info[1],info[2])
+        } else {
+            name = info[1]
+        }
+        geneSets[name] = list(info[seq(from=3,
+                                       to=length(info))])
+    } 
+    return(geneSets)
 }
 
 ## ####################################################
@@ -724,12 +728,12 @@ readGmt = function(gmtFile, addDescr = FALSE){
 #' @export
 stripGeneSet = function(geneSet)
 {
-  names = character(length(geneSet))
-  for(i in seq_len(length(geneSet)))
-  {
-    names[i] = geneSet[[i]][1]
-    geneSet[[i]] = geneSet[[i]][seq(from=3,to=length(geneSet[[i]]))]
-  }
-  
-  return(geneSet)
+    names = character(length(geneSet))
+    for(i in seq_len(length(geneSet)))
+    {
+        names[i] = geneSet[[i]][1]
+        geneSet[[i]] = geneSet[[i]][seq(from=3,to=length(geneSet[[i]]))]
+    }
+    
+    return(geneSet)
 }
