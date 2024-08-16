@@ -4,7 +4,7 @@ author: "Anna Laddach and Michael Shapiro"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-    %\VignetteIndexEntry{CatsCradleSpatialVignette}
+    %\VignetteIndexEntry{CatsCradle Spatial Vignette}
     %\VignetteEngine{knitr::rmarkdown}
     %\VignetteEncoding{UTF-8}
 ---

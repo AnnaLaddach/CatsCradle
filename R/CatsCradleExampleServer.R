@@ -7,6 +7,7 @@
 #' and makes example data objects. The latter saves any
 #' object it has found for quicker return.  Using the value 'list'
 #' causes it to return the list of all objects found so far.
+#' @importFrom SummarizedExperiment assays
 #' @export
 #' @examples
 #' getExample = make.getExample()
@@ -36,49 +37,49 @@ make.getExample = function()
         {
             if(whichOne == 'exSeuratObj')
             {
-                data(exSeuratObj)
+                data(exSeuratObj,envir=environment())
                 answer = exSeuratObj
             }
 
             if(whichOne == 'smallXenium')
             {
-                data(smallXenium)
+                data(smallXenium,envir=environment())
                 answer = smallXenium
             }
 
             if(whichOne == 'ligandReceptorResults')
             {
-                data(ligandReceptorResults)
+                data(ligandReceptorResults,envir=environment())
                 answer = ligandReceptorResults
             }
 
             if(whichOne == 'moransI')
             {
-                data(moransI)
+                data(moransI,envir=environment())
                 answer = moransI
             }
 
             if(whichOne == 'moransILigandReceptor')
             {
-                data(moransILigandReceptor)
+                data(moransILigandReceptor,envir=environment())
                 answer = moransILigandReceptor
             }
 
             if(whichOne == 'hallmark')
             {
-                data(hallmark)
+                data(hallmark,envir=environment())
                 answer = hallmark
             }
 
             if(whichOne == 'humanLRN')
             {
-                data(humanLRN)
+                data(humanLRN,envir=environment())
                 answer = humanLRN
             }
 
             if(whichOne == 'mouseLRN')
             {
-                data(mouseLRN)
+                data(mouseLRN,envir=environment())
                 answer = mouseLRN
             }
         }
