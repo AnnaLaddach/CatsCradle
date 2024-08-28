@@ -305,4 +305,8 @@ randomised predictions produces the following comparison.
 ![comparing real and randomised predictions](actualVsRandomisedPredictions.jpg){width=6in}
 
 
+```{r}
+sessionInfo()
+```
+
 

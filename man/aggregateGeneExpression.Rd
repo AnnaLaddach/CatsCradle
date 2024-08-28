@@ -54,6 +54,5 @@ the cells in each neighbourhood
 getExample = make.getExample()
 smallXenium = getExample('smallXenium')
 extendedNeighbours = getExample('extendedNeighbours')
-agg = aggregateGeneExpression(smallXenium,extendedNeighbours,
-verbose=FALSE)
+agg = aggregateGeneExpression(smallXenium,extendedNeighbours,verbose=FALSE)
 }

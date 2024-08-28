@@ -59,6 +59,9 @@ getExample() also retrieves package variables.
 smallXenium = getExample('smallXenium')
 ```
 
+Invoking this option has no effect on things that aren't rectangular.
+
+
 A complete list of the example objects available via the function
 exampleObjects().  Here we document some of the more prominent of
 these.
@@ -103,6 +106,10 @@ composition as to the cell types they contain.
 significance for the enrichment of cell types in the neighbourhoods of
 each cell type.
 
+
+```{r}
+sessionInfo()
+```
 
 
 

@@ -19,8 +19,7 @@
 #' centroids = getExample('centroids')
 #' clusters = getExample('clusters')
 #' delaunayNeighbours = getExample('delaunayNeighbours')
-#' annEdges = edgeLengthsAndCellTypePairs(delaunayNeighbours,
-#'                    clusters,centroids)
+#' annEdges = edgeLengthsAndCellTypePairs(delaunayNeighbours,clusters,centroids)
 edgeLengthsAndCellTypePairs = function(edges,clusters,centroids)
 {
     centr = data.matrix(centroids[,seq_len(2)])
@@ -65,7 +64,7 @@ edgeLengthsAndCellTypePairs = function(edges,clusters,centroids)
 #' centroids = getExample('centroids')
 #' clusters = getExample('clusters')
 #' delaunayNeighbours = getExample('delaunayNeighbours')
-#' annEdges =
+#' annEdges = 
 #'     edgeLengthsAndCellTypePairs(delaunayNeighbours,clusters,centroids)
 #' cutoffDF = edgeCutoffsByClustering(annEdges)
 edgeCutoffsByClustering = function(annEdges)
@@ -153,8 +152,7 @@ edgeCutoffsByPercentile = function(annEdges,
 #' clusters = getExample('clusters')
 #' delaunayNeighbours = getExample('delaunayNeighbours') 
 #' annEdges =
-#'     edgeLengthsAndCellTypePairs
-#'                  (delaunayNeighbours,clusters,centroids)
+#'     edgeLengthsAndCellTypePairs(delaunayNeighbours,clusters,centroids)
 #' cutoffDF = edgeCutoffsByZScore(annEdges,zCutoff=1.5)
 edgeCutoffsByZScore = function(annEdges,zCutoff)
 {
@@ -196,8 +194,7 @@ edgeCutoffsByZScore = function(annEdges,zCutoff)
 #' clusters = getExample('clusters')
 #' delaunayNeighbours = getExample('delaunayNeighbours') 
 #' annEdges =
-#'     edgeLengthsAndCellTypePairs
-#'               (delaunayNeighbours,clusters,centroids)
+#'     edgeLengthsAndCellTypePairs(delaunayNeighbours,clusters,centroids)
 #' cutoffDF = edgeCutoffsByWatershed(annEdges)
 edgeCutoffsByWatershed = function(annEdges,nbins=15,tolerance=10)
 {
@@ -265,8 +262,8 @@ edgeCutoffsByWatershed = function(annEdges,nbins=15,tolerance=10)
 #' centroids = getExample('centroids')
 #' clusters = getExample('clusters')
 #' delaunayNeighbours = getExample('delaunayNeighbours') 
-#' annEdges = edgeLengthsAndCellTypePairs(delaunayNeighbours,
-#'                    clusters,centroids)
+#' annEdges =
+#'    edgeLengthsAndCellTypePairs(delaunayNeighbours,clusters,centroids)
 #' cutoffDF = edgeCutoffsByPercentile(annEdges,95)
 #' g = edgeLengthPlot(annEdges,cutoffDF,whichPairs=60)
 edgeLengthPlot = function(annEdges,

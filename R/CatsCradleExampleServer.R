@@ -88,7 +88,8 @@ make.getExample = function()
         
         if(whichOne %in% names(alreadyFound))
         {
-            return(alreadyFound[[whichOne]])
+            answer = alreadyFound[[whichOne]]
+            return(answer)
         }
         
         if(whichOne == 'list')
@@ -299,7 +300,7 @@ make.getExample = function()
                 
         ## Save and return:
         alreadyFound[[whichOne]] <<- answer
-        
+
         return(answer)
     }
 
@@ -353,6 +354,8 @@ exampleObjects = function()
 
     return(objects)
 }
+
+
 
 
 

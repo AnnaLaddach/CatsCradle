@@ -47,8 +47,8 @@ getExample = make.getExample()
 centroids = getExample('centroids')
 clusters = getExample('clusters')
 delaunayNeighbours = getExample('delaunayNeighbours') 
-annEdges = edgeLengthsAndCellTypePairs(delaunayNeighbours,
-                   clusters,centroids)
+annEdges =
+   edgeLengthsAndCellTypePairs(delaunayNeighbours,clusters,centroids)
 cutoffDF = edgeCutoffsByPercentile(annEdges,95)
 g = edgeLengthPlot(annEdges,cutoffDF,whichPairs=60)
 }

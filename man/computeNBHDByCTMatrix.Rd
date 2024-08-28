@@ -30,6 +30,5 @@ number of cells of a given type within a neighbourhood.
 getExample = make.getExample()
 clusters = getExample('clusters')
 delaunayNeighbours = getExample('delaunayNeighbours')
-NBHDByCTMatrix = computeNBHDByCTMatrix(delaunayNeighbours,
-                                         clusters)
+NBHDByCTMatrix = computeNBHDByCTMatrix(delaunayNeighbours,clusters)
 }

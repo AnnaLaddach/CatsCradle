@@ -36,6 +36,5 @@ cells of each type.
 getExample = make.getExample()
 NBHDByCTMatrix = getExample('NBHDByCTMatrix')
 clusters = getExample('clusters')
-cellTypesPerCellType = computeCellTypesPerCellTypeMatrix(NBHDByCTMatrix,
-                                                         clusters)
+cellTypesPerCellType = computeCellTypesPerCellTypeMatrix(NBHDByCTMatrix,clusters)
 }

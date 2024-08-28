@@ -89,8 +89,7 @@ getAverageExpressionMatrix = function(f,fPrime,
 #' @examples
 #' getExample = make.getExample()
 #' averageExpMatrix = getExample('averageExpMatrix')
-#' averageExpMatrix = tagRowAndColNames(averageExpMatrix,
-#'                                      'cellCluster_','geneCluster_')
+#' averageExpMatrix = tagRowAndColNames(averageExpMatrix,'cellCluster_','geneCluster_')
 tagRowAndColNames = function(M,ccTag='CC_',gcTag='GC_')
 {
   rownames(M) = paste0(ccTag,rownames(M))

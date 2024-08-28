@@ -1,6 +1,6 @@
 Package: CatsCradle
 Title: This package provides methods for analysing spatial transcriptomics data and for discovering gene clusters
-Version: 0.99.9
+Version: 0.99.10
 Authors@R: 
     person(given = "Anna",
         family = "Laddach",
@@ -42,10 +42,12 @@ Suggests: fossil,
 	  interp,
 	  knitr,
 	  BiocStyle
-Depends: R (>= 4.0)
+Depends: R (>= 4.4.0)
 LazyData: false
 VignetteBuilder: knitr
 LazyDataCompression: xz
+BugReports: https://github.com/AnnaLaddach/CatsCradle/issues
+URL: https://github.com/AnnaLaddach/CatsCradle
 biocViews: BiologicalQuestion, StatisticalMethod, GeneExpression,
         SingleCell, Transcriptomics, Spatial
 NeedsCompilation: no

@@ -18,8 +18,7 @@
 #' getExample = make.getExample()
 #' clusters = getExample('clusters')
 #' delaunayNeighbours = getExample('delaunayNeighbours')
-#' NBHDByCTMatrix = computeNBHDByCTMatrix(delaunayNeighbours,
-#'                                          clusters)
+#' NBHDByCTMatrix = computeNBHDByCTMatrix(delaunayNeighbours,clusters)
 computeNBHDByCTMatrix = function(spatialGraph, cellTypes){
   
   spatialGraphBA = spatialGraph[,c(2,1)]
@@ -151,8 +150,7 @@ computeGraphEmbedding = function(seuratObj, graph=defaultGraph(seuratObj),
 #' getExample = make.getExample()
 #' NBHDByCTMatrix = getExample('NBHDByCTMatrix')
 #' clusters = getExample('clusters')
-#' cellTypesPerCellType = computeCellTypesPerCellTypeMatrix(NBHDByCTMatrix,
-#'                                                          clusters)
+#' cellTypesPerCellType = computeCellTypesPerCellTypeMatrix(NBHDByCTMatrix,clusters)
 computeCellTypesPerCellTypeMatrix = function(nbhdByCellType,cellTypes)
 {
   MM = aggregate(nbhdByCellType, list(cellTypes), sum)
@@ -384,8 +382,7 @@ computeNeighbourEnrichment = function(spatialGraph, cellTypes, nSim = 1000,
 #' getExample = make.getExample()
 #' smallXenium = getExample('smallXenium')
 #' extendedNeighbours = getExample('extendedNeighbours')
-#' agg = aggregateGeneExpression(smallXenium,extendedNeighbours,
-#' verbose=FALSE)
+#' agg = aggregateGeneExpression(smallXenium,extendedNeighbours,verbose=FALSE)
 aggregateGeneExpression = function(f,neighbourhoods,verbose=TRUE,
                                          returnType='Seurat')
 {

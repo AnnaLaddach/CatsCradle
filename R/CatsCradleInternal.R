@@ -153,3 +153,4 @@ SeuratToSCE = function(f,spatial=FALSE)
     }
     return(sce)
 }
+

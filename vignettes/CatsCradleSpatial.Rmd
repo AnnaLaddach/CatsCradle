@@ -785,6 +785,9 @@ can be a cutoff data frame as produced by any of the edgeCutoff
 functions or can be a single number in which case all the cell type
 pairs will be trimmed to the same cutoff.
 
+```{r}
+sessionInfo()
+```
 
 
 

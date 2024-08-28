@@ -354,6 +354,10 @@ SpatialExperiment object.  Because of the shallow nature of these
 conversions, other information may be lost.
 
 
+```{r}
+sessionInfo()
+```
+
 
 
 

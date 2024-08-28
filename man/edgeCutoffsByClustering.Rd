@@ -28,7 +28,7 @@ getExample = make.getExample()
 centroids = getExample('centroids')
 clusters = getExample('clusters')
 delaunayNeighbours = getExample('delaunayNeighbours')
-annEdges =
+annEdges = 
     edgeLengthsAndCellTypePairs(delaunayNeighbours,clusters,centroids)
 cutoffDF = edgeCutoffsByClustering(annEdges)
 }

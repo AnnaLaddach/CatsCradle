@@ -38,7 +38,8 @@
 #' Each row represents a human ligand - receptor pair.
 #' }
 #' @source This is taken from the nichenetr package,
-#' specifically the human ligand - receptor network.
+#' url = {https://www.nature.com/articles/s41592-019-0667-5}.
+#' Specifically we use the human ligand - receptor network.
 "humanLRN"
 
 ## ####################################################
@@ -51,7 +52,8 @@
 #' Each row represents a mouse ligand - receptor pair.
 #' }
 #' @source This is taken from the nichenetr package,
-#' specifically the mouse ligand - receptor network.
+#' url = {https://www.nature.com/articles/s41592-019-0667-5}.
+#' Specifically, we use the mouse ligand - receptor network.
 "mouseLRN"
 
 ## ####################################################
