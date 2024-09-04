@@ -1,7 +1,7 @@
 citHeader("To cite CatsCradle in publications use:")
 
-citEntry(
-entry    = "misc",
+bibentry(
+entry    = 'Misc',
 title    = 'CatsCradle',
 author   = 'Anna Laddach and Michael Shapiro',
 year     = '2024',

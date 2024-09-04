@@ -62,7 +62,7 @@ gene clusters and cell clusters.  One is by computing the average
 expression of each gene cluster in each cell cluster; this can be
 displayed as a heat map or a Sankey graph - the cat's cradle of our
 CatsCradle. (See getAverageExpressionMatrix() and sankeyFromMatrix()
-in the CatsCradle vignette [CatsCradle](doc/CatsCradle.html).)  
+in the CatsCradle vignette CatsCradle.
 
 ### Spatial co-location of genes on gene UMAP
 
@@ -111,7 +111,7 @@ annotations of its neighbouring genes.  If a gene has its own
 annotation and also has neighbours which have annotations, we can
 compare the actual annotation to the predicted annotation. These predictions 
 perform well above chance as described in the section Predicting gene function 
-of the CatsCradle vignette[CatsCradle](doc/CatsCradle.html) .
+of the CatsCradle vignette CatsCradle.
 
 ## Analysis of spatial transcriptomic data
 
@@ -126,7 +126,7 @@ ImageDimPlot(smallXenium,cols='polychrome')
 
 With Moran's I, we can see spatial autocorrelation of gene expression
 and compute p-values for this.  See CatsCradle spatial vignette
-[CatsCradleSpatial](doc/CatsCradleSpatial.html).
+CatsCradleSpatial.
 
 
 ### Neighbourhoods
@@ -176,7 +176,7 @@ cellTypesPerCellTypeGraphFromCellMatrix(cellTypesPerCellTypeMatrixExtended, minW
 
 We can also test for statistical significance for the enrichment of a
 given cell type in the neighbourhoods around another cell type 
-(see [CatsCradleSpatial](doc/CatsCradleSpatial.html)).
+(see CatsCradleSpatial).
 
 ### Neighourhood Seurat objects.
 
@@ -299,10 +299,9 @@ Other fields are downstream of this data frame.  For example, pValue
 tells whether a given ligand-receptor pair is statistically significantly
 enriched in the interactions between two specific cell types.  For
 further details see the section Ligand receptor analysis in the Cats
-Cradle Spatial vignette [CatsCradleSpatial](doc/CatsCradleSpatial.html).
+Cradle Spatial vignette CatsCradleSpatial.
 
-## CatsCradle, Seurat objects, SingleCellExperiment objects and
-   SpatialExperiment objects 
+## CatsCradle, Seurat objects, SingleCellExperiment objects and SpatialExperiment objects 
 
 CatsCradle provides rudimentary support for the Bioconductor classes
 SingleCellExperiment and its derived class SpatialExperiment.

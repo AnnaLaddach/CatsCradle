@@ -1,6 +1,6 @@
 # CatsCradle 
 
-<img src="CatsCradleLogoTransparent.png" alt="" width="200"/>
+<img src="vignettes/CatsCradleLogo.png" alt="" width="200"/>
 
 CatsCradle is an R package which provides tools for exploring duality
 present in single cell datasets. It interfaces with analyses performed
@@ -40,9 +40,8 @@ if (!requireNamespace("devtools", quietly = TRUE)) {
 
 devtools::install_github("AnnaLaddach/CatsCradle")
 ```
-CatsCradle is currently under review at Bioconductor and we hope soon
-to be migrating there.
 
-#### Developed by Anna Laddach and Michael Shapiro in the Pachnis lab
-     at the Francis Crick Institute.
+
+#### Developed by Anna Laddach and Michael Shapiro in the Pachnis lab at the Francis Crick Institute.
+     
 

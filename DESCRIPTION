@@ -1,18 +1,18 @@
 Package: CatsCradle
 Title: This package provides methods for analysing spatial transcriptomics data and for discovering gene clusters
-Version: 0.99.10
+Version: 0.99.11
 Authors@R: 
-    person(given = "Anna",
+    c(person(given = "Anna",
         family = "Laddach",
         role = c("aut", "cre"),
         email = "anna.laddach@crick.ac.uk",
-        comment = c(ORCID = "0000-0001-5552-6534"))
+        comment = c(ORCID = "0000-0001-5552-6534")),
     person(given = "Michael",
         family = "Shapiro",
-        role = c("aut", "cre"),
+        role = c("aut"),
         email = "michael.shapiro@crick.ac.uk",
-        comment = c(ORCID = "0000-0002-2769-9320"))
-Description: The basic insight driving this package is the idea that by transposing the expression matrix of a Seurat object, we can use the usual Seurat technology to cluster genes and to visualise their relationships in two dimensions, e.g., as UMAP plots.  In addition we are then able to use the nearest neighbor graph to gain additional insight into specific genes by querying their neighborhood in this graph. 
+        comment = c(ORCID = "0000-0002-2769-9320")))
+Description: This package addresses two broad areas.  It allows for in-depth analysis of spatial transcriptomic data by identifying tissue neighbourhoods.  These are contiguous regions of tissue surrounding individual cells.  'CatsCradle' allows for the categorisation of neighbourhoods by the cell types contained in them and the genes expressed in them.  In particular, it produces Seurat objects whose individual elements are neighbourhoods rather than cells.  In addition, it enables the categorisation and annotation of genes by producing Seurat objects whose elements are genes.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -45,7 +45,6 @@ Suggests: fossil,
 Depends: R (>= 4.4.0)
 LazyData: false
 VignetteBuilder: knitr
-LazyDataCompression: xz
 BugReports: https://github.com/AnnaLaddach/CatsCradle/issues
 URL: https://github.com/AnnaLaddach/CatsCradle
 biocViews: BiologicalQuestion, StatisticalMethod, GeneExpression,

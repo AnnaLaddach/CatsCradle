@@ -446,6 +446,7 @@ Let's look at the celltype composition of these clusters.
 CTComposition = table(CTByNBHDSeurat$cellType, CTByNBHDSeurat$neighbourhood_clusters)
 pheatmap(CTComposition)
 ```
+
 Although most clusters here are formed of a single cell type, cluster 2
 contains several cell types. We anticipate this analysis may be more informative 
 when performed on a larger tissue area, as some cell types are poorly 
@@ -581,6 +582,7 @@ Look at a histogram of values for summed mean ligand/receptor interactions betwe
 ```{r}
 hist(cellTypePerCellTypeLigRecMatrix)
 ```
+
 Visualise in graph format.
 ```{r}
 cellTypesPerCellTypeGraphFromCellMatrix(cellTypePerCellTypeLigRecMatrix, 
