@@ -52,7 +52,7 @@ computeNBHDByCTMatrix = function(spatialGraph, cellTypes){
 #' @import SeuratObject
 #' @export
 #' @examples
-#' NBHDByCTMatrix = make.getExample()('NBHDByCTMatrix')
+#' NBHDByCTMatrix = make.getExample()('NBHDByCTMatrix',toy=TRUE)
 #' NBHDByCTSeurat = computeNBHDVsCTObject(NBHDByCTMatrix)
 #' NBHDByCTSingleCell_sce = computeNBHDVsCTObject(NBHDByCTMatrix,returnType='SCE')
 computeNBHDVsCTObject= function(dataMatrix, resolution = 0.1, 
@@ -113,7 +113,7 @@ computeNBHDVsCTObject= function(dataMatrix, resolution = 0.1,
 #' @importFrom igraph V E V<- E<-
 #' @export
 #' @examples
-#' NBHDByCTSeurat = make.getExample()('NBHDByCTSeurat')
+#' NBHDByCTSeurat = make.getExample()('NBHDByCTSeurat',toy=TRUE)
 #' objWithEmbedding = computeGraphEmbedding(NBHDByCTSeurat)
 computeGraphEmbedding = function(seuratObj, graph=defaultGraph(seuratObj),
                                  returnType='Seurat'){
@@ -380,8 +380,8 @@ computeNeighbourEnrichment = function(spatialGraph, cellTypes, nSim = 1000,
 #' @export
 #' @examples
 #' getExample = make.getExample()
-#' smallXenium = getExample('smallXenium')
-#' extendedNeighbours = getExample('extendedNeighbours')
+#' smallXenium = getExample('smallXenium',toy=TRUE)
+#' extendedNeighbours = getExample('extendedNeighbours',toy=TRUE)
 #' agg = aggregateGeneExpression(smallXenium,extendedNeighbours,verbose=FALSE)
 aggregateGeneExpression = function(f,neighbourhoods,verbose=TRUE,
                                          returnType='Seurat')
@@ -486,8 +486,8 @@ computeMoransI = function(M,nbhdList){
 #' @export
 #' @examples
 #' getExample = make.getExample()
-#' smallXenium = getExample('smallXenium')
-#' delaunayNeighbours = getExample('delaunayNeighbours')
+#' smallXenium = getExample('smallXenium',toy=TRUE)
+#' delaunayNeighbours = getExample('delaunayNeighbours',toy=TRUE)
 #' moransI = runMoransI(smallXenium, delaunayNeighbours, assay = "SCT", 
 #' layer = "data", nSim = 10, verbose = FALSE)
 

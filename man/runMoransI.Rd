@@ -50,8 +50,8 @@ and a neighbourhood list, and computes Moran's I.
 }
 \examples{
 getExample = make.getExample()
-smallXenium = getExample('smallXenium')
-delaunayNeighbours = getExample('delaunayNeighbours')
+smallXenium = getExample('smallXenium',toy=TRUE)
+delaunayNeighbours = getExample('delaunayNeighbours',toy=TRUE)
 moransI = runMoransI(smallXenium, delaunayNeighbours, assay = "SCT", 
 layer = "data", nSim = 10, verbose = FALSE)
 }

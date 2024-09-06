@@ -60,8 +60,8 @@ the set.
 }
 \examples{
 getExample = make.getExample()
-STranspose = getExample('STranspose')
-hallmark = getExample('hallmark')
+STranspose = getExample('STranspose',toy=TRUE)
+hallmark = getExample('hallmark',toy=TRUE)
 geneSubset = intersect(colnames(STranspose),hallmark[[1]])
 stats = getObjectSubsetClusteringStatistics(STranspose,geneSubset,100)
 }

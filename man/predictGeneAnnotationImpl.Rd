@@ -62,8 +62,8 @@ neighbours.
 }
 \examples{
 getExample = make.getExample()
-STranspose = getExample('STranspose')
-hallmark = getExample('hallmark')
+STranspose = getExample('STranspose',toy=TRUE)
+hallmark = getExample('hallmark',toy=TRUE)
 genesAnno = annotateGenesByGeneSet(hallmark)
 predictions = predictGeneAnnotationImpl('Myc',STranspose,genesAnno,
 radius=.5,metric='umap')

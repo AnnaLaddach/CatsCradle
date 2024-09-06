@@ -257,7 +257,7 @@ symmetric.
 
 ```{r}
 cellTypesPerCellTypePValues = computeNeighbourEnrichment(delaunayNeighbours, 
-                                                     clusters, verbose = FALSE)
+                                          clusters, nSim=100,verbose = FALSE)
 ```
 
 
@@ -471,15 +471,17 @@ sankeyFromMatrix(averageExpMatrix)
 
 ## Detection of genes with spatially variable expression.
 
-Given a neighbour graph describing the spatial relationships between cells, 
-we can compute spatial autocorrelation (here we use Moran's I). This describes
-how clustered gene expression values are in space. We derive an upper tail p 
-value based on permutation testing where expression values for genes are permuted. N.B 
-in this implementation equal weights are given to all neighbours of a cell.
+Given a neighbour graph describing the spatial relationships between
+cells, we can compute spatial autocorrelation (here we use Moran's
+I). This describes how clustered gene expression values are in
+space. We derive an upper tail p value based on permutation testing
+where expression values for genes are permuted. N.B in this
+implementation equal weights are given to all neighbours of a cell.
+Minimum values are limited by nSim, the number of permutations used.
 
 ```{r}
 moransI = runMoransI(smallXenium, delaunayNeighbours, assay = "SCT", 
-                     layer = "data", nSim = 100, verbose = FALSE)
+                     layer = "data", nSim = 20, verbose = FALSE)
 ```
 Look at most spatially autocorrelated genes.
 ```{r}

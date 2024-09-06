@@ -220,7 +220,7 @@ getExtendedNBHDs = function(spatialGraph, n){
 #'     are connected.
 #' @export
 #' @examples
-#' extendedNeighboursList = make.getExample()('extendedNeighboursList')
+#' extendedNeighboursList = make.getExample()('extendedNeighboursList',toy=TRUE)
 #' extendedNeighbours = collapseExtendedNBHDs(extendedNeighboursList, 4)
 collapseExtendedNBHDs = function(extendedNeighboursList,
                                  n = length(extendedNeighboursList)){ 

@@ -61,7 +61,7 @@ on the functions of their neighbours.
 }
 \examples{
 getExample = make.getExample()
-STranspose = getExample('STranspose')
-hallmark = getExample('hallmark')
+STranspose = getExample('STranspose',toy=TRUE)
+hallmark = getExample('hallmark',toy=TRUE)
 predictions = predictAnnotationAllGenes(hallmark,STranspose,radius=.5)
 }

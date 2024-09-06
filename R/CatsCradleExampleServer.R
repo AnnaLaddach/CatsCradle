@@ -19,10 +19,11 @@ make.getExample = function()
 {
     
     alreadyFound = list()
+    toysFound = list()
 
     
     
-    getExample = function(whichOne)
+    getExample = function(whichOne,toy=FALSE)
     {
         packageVars = c('exSeuratObj',
                         'smallXenium',
@@ -32,6 +33,19 @@ make.getExample = function()
                         'hallmark',
                         'humanLRN',
                         'mouseLRN')
+
+        if(whichOne %in% names(alreadyFound) & !toy)
+        {
+            answer = alreadyFound[[whichOne]]
+            return(answer)
+        }
+
+        if(whichOne %in% names(toysFound) & toy)
+        {
+            answer = toysFound[[whichOne]]
+            return(answer)
+        }
+   
         
         if(whichOne %in% packageVars)
         {
@@ -39,12 +53,23 @@ make.getExample = function()
             {
                 data(exSeuratObj,envir=environment())
                 answer = exSeuratObj
+                if(toy)
+                {
+                    data(seuratGenes,envir=environment())
+                    data(seuratCells,envir=environment())
+                    answer = answer[seuratGenes,seuratCells]
+                }
             }
 
             if(whichOne == 'smallXenium')
             {
                 data(smallXenium,envir=environment())
                 answer = smallXenium
+                if(toy)
+                {
+                    data(xeniumCells,envir=environment())
+                    answer = answer[,xeniumCells]
+                }
             }
 
             if(whichOne == 'ligandReceptorResults')
@@ -85,13 +110,7 @@ make.getExample = function()
         }
             
 
-        
-        if(whichOne %in% names(alreadyFound))
-        {
-            answer = alreadyFound[[whichOne]]
-            return(answer)
-        }
-        
+             
         if(whichOne == 'list')
             return(names(alreadyFound))
         
@@ -106,39 +125,39 @@ make.getExample = function()
         
         if(whichOne == 'STranspose')
         {
-            exSeuratObj = getExample('exSeuratObj')
+            exSeuratObj = getExample('exSeuratObj',toy)
             answer = transposeObject(exSeuratObj)
         }
         
         if(whichOne == 'S_sce')
         {
-            exSeuratObj = getExample('exSeuratObj')
+            exSeuratObj = getExample('exSeuratObj',toy)
             answer = SeuratToSCE(exSeuratObj)
         }
         
         if(whichOne == 'STranspose_sce')
         {
-            STranspose = getExample('STranspose')
+            STranspose = getExample('STranspose',toy)
             answer = SeuratToSCE(STranspose)
         }
         
         if(whichOne == 'delaunayNeighbours')
         {
-            centroids = getExample('centroids')
+            centroids = getExample('centroids',toy)
             delaunayNeighbours = computeNeighboursDelaunay(centroids)
             answer = delaunayNeighbours
         }
         
         if(whichOne == 'NBHDByCTSeuratExtended')
         {
-            NBHDByCTMatrixExtended = getExample('NBHDByCTMatrixExtended')
+            NBHDByCTMatrixExtended = getExample('NBHDByCTMatrixExtended',toy)
             answer = computeNBHDVsCTObject(NBHDByCTMatrixExtended,
                                            verbose=FALSE)
         }
 
         if(whichOne == 'NBHDByCTSingleCellExtended_sce')
         {
-            NBHDByCTSeuratExtended = getExample('NBHDByCTSeuratExtended')
+            NBHDByCTSeuratExtended = getExample('NBHDByCTSeuratExtended',toy)
             answer = SeuratToSCE(NBHDByCTSeuratExtended)
         }
         
@@ -149,14 +168,14 @@ make.getExample = function()
         
         if(whichOne == 'edgeSeurat')
         {
-            ligandReceptorResults = getExample('ligandReceptorResults')
-            centroids = getExample('centroids')
+            ligandReceptorResults = getExample('ligandReceptorResults',toy)
+            centroids = getExample('centroids',toy)
             answer = computeEdgeObject(ligandReceptorResults, centroids)
         }
         
         if(whichOne == 'centroids')
         {
-            smallXenium = getExample('smallXenium')
+            smallXenium = getExample('smallXenium',toy)
             centroids = GetTissueCoordinates(smallXenium)
             rownames(centroids) = centroids$cell
             answer = centroids
@@ -164,37 +183,37 @@ make.getExample = function()
         
         if(whichOne == 'clusters')
         {
-            smallXenium = getExample('smallXenium')
+            smallXenium = getExample('smallXenium',toy)
             answer = smallXenium@active.ident
         }
         
         if(whichOne == 'extendedNeighbours')
         {
-            extendedNeighboursList = getExample('extendedNeighboursList')
+            extendedNeighboursList = getExample('extendedNeighboursList',toy)
             answer = collapseExtendedNBHDs(extendedNeighboursList, 4)
         }
         
         if(whichOne == 'extendedNeighboursList')
         {
-            delaunayNeighbours = getExample('delaunayNeighbours')
+            delaunayNeighbours = getExample('delaunayNeighbours',toy)
             answer = getExtendedNBHDs(delaunayNeighbours,4)
         }
         
         if(whichOne == 'NBHDByCTSeurat')
         {
-            NBHDByCTMatrix = getExample('NBHDByCTMatrix')
+            NBHDByCTMatrix = getExample('NBHDByCTMatrix',toy)
             answer = computeNBHDVsCTObject(NBHDByCTMatrix,verbose=FALSE)
         }
         
         if(whichOne == 'NN')
         {
-            STranspose = getExample('STranspose')
+            STranspose = getExample('STranspose',toy)
             answer = getNearestNeighbourLists(STranspose)
         }
         
         if(whichOne == 'CTByNBHDSeurat')
         {
-            NBHDByCTMatrix = getExample('NBHDByCTMatrix')
+            NBHDByCTMatrix = getExample('NBHDByCTMatrix',toy)
             answer =
                 computeNBHDVsCTObject(t(NBHDByCTMatrix), npcs = 10, 
                                       transpose = TRUE, resolution = 1,
@@ -204,7 +223,7 @@ make.getExample = function()
         
         if(whichOne == 'edgeNeighbours')
         {
-            delaunayNeighbours = getExample('delaunayNeighbours')
+            delaunayNeighbours = getExample('delaunayNeighbours',toy)
             answer =  computeEdgeGraph(delaunayNeighbours)
         }
         
@@ -234,27 +253,27 @@ make.getExample = function()
         
         if(whichOne == 'euclideanNeighbours')
         {
-            centroids = getExample('centroids')
+            centroids = getExample('centroids',toy)
             answer =  computeNeighboursEuclidean(centroids,threshold=20)
         }
         
         if(whichOne == 'NBHDByCTMatrixExtended')
         {
-            extendedNeighbours = getExample('extendedNeighbours')
-            clusters = getExample('clusters')
+            extendedNeighbours = getExample('extendedNeighbours',toy)
+            clusters = getExample('clusters',toy)
             answer =  computeNBHDByCTMatrix(extendedNeighbours, clusters)
         }
         
         if(whichOne == 'NBHDByCTMatrix')
         {
-            delaunayNeighbours = getExample('delaunayNeighbours')
-            clusters = getExample('clusters')
+            delaunayNeighbours = getExample('delaunayNeighbours',toy)
+            clusters = getExample('clusters',toy)
             answer = computeNBHDByCTMatrix(delaunayNeighbours, clusters) 
         }
         
         if(whichOne == 'shorterHallmark')
         {
-            hallmark = getExample('hallmark')
+            hallmark = getExample('hallmark',toy)
             answer = hallmark[seq_len(10)]
         }
         
@@ -265,41 +284,45 @@ make.getExample = function()
         
         if(whichOne == 'cellTypesPerCellTypeMatrixExtended')
         {
-            NBHDByCTMatrixExtended = getExample('NBHDByCTMatrixExtended')
+            NBHDByCTMatrixExtended = getExample('NBHDByCTMatrixExtended',toy)
             clusters = getExample('clusters')
-            answer = computeCellTypesPerCellTypeMatrix(NBHDByCTMatrixExtended,clusters)
+            answer = computeCellTypesPerCellTypeMatrix(NBHDByCTMatrixExtended,
+                                                       clusters)
         }
         
         if(whichOne == 'cellTypesPerCellTypeMatrix')
         {
-            NBHDByCTMatrix = getExample('NBHDByCTMatrix')
-            clusters = getExample('clusters')
+            NBHDByCTMatrix = getExample('NBHDByCTMatrix',toy)
+            clusters = getExample('clusters',toy)
             answer = computeCellTypesPerCellTypeMatrix(NBHDByCTMatrix,clusters)
         }
         
         if(whichOne == 'cellTypesPerCellTypePValues')
         {
-            delaunayNeighbours = getExample('delaunayNeighbours')
-            clusters = getExample('clusters')
+            delaunayNeighbours = getExample('delaunayNeighbours',toy)
+            clusters = getExample('clusters',toy)
             answer = computeNeighbourEnrichment(delaunayNeighbours, 
                                                 clusters, verbose = FALSE)
         }
 
         if(whichOne == 'averageExpMatrix')
         {
-            exSeuratObj = getExample('exSeuratObj')
-            STranspose = getExample('STranspose')
+            exSeuratObj = getExample('exSeuratObj',toy)
+            STranspose = getExample('STranspose',toy)
             answer = getAverageExpressionMatrix(exSeuratObj,STranspose,layer='data')
         }
 
         if(whichOne == 'X_sce')
         {
-            smallXenium = getExample('smallXenium')
+            smallXenium = getExample('smallXenium',toy)
             answer = SeuratToSCE(smallXenium,spatial=TRUE)
         }
                 
         ## Save and return:
-        alreadyFound[[whichOne]] <<- answer
+        if(! toy)
+            alreadyFound[[whichOne]] <<- answer
+        if(! toy)
+            toysFound[[whichOne]] <<- answer
 
         return(answer)
     }

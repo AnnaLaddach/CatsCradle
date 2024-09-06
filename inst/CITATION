@@ -1,9 +1,10 @@
 citHeader("To cite CatsCradle in publications use:")
 
 bibentry(
-entry    = 'Misc',
+bibtype    = 'Misc',
 title    = 'CatsCradle',
-author   = 'Anna Laddach and Michael Shapiro',
+author   = c(person(given='Anna',family='Laddach'),
+             person(given='Michael',family='Shapiro')),
 year     = '2024',
 url      = 'https://github.com/AnnaLaddach/CatsCradle',
 textVersion = paste('Anna Laddach and Michael Shapiro,',

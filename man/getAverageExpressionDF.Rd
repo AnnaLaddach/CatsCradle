@@ -22,6 +22,6 @@ data frame.
 }
 \examples{
 getExample = make.getExample()
-averageExpMatrix = getExample('averageExpMatrix')
+averageExpMatrix = getExample('averageExpMatrix',toy=TRUE)
 averageExpDF = getAverageExpressionDF(averageExpMatrix)
 }

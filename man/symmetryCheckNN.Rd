@@ -22,6 +22,6 @@ symmetric.  This tests whether the nearest neighbor graph
 retrieved from a Seurat object is.
 }
 \examples{
- NN = make.getExample()('NN')
+ NN = make.getExample()('NN',toy=TRUE)
 symmetryTest = symmetryCheckNN(NN)
 }

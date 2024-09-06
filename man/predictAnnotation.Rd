@@ -75,9 +75,9 @@ its neighboring genes.
 }
 \examples{
 getExample = make.getExample()
-STranspose = getExample('STranspose')
-STranspose_sce = getExample('STranspose_sce')
-hallmark = getExample('hallmark')
+STranspose = getExample('STranspose',toy=TRUE)
+STranspose_sce = getExample('STranspose_sce',toy=TRUE)
+hallmark = getExample('hallmark',toy=TRUE)
 set.seed(100)
 genes = sample(colnames(STranspose),5)
 predictions = predictAnnotation(genes,hallmark,STranspose,radius=.5)

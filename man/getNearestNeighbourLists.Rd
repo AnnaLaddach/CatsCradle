@@ -31,6 +31,6 @@ This function extracts a shared nearest neighbor network
 from a Seurat object
 }
 \examples{
-STranspose = make.getExample()('STranspose')
+STranspose = make.getExample()('STranspose',toy=TRUE)
 NN = getNearestNeighbourLists(STranspose)
 }

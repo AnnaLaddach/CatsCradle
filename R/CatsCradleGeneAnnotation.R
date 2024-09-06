@@ -23,16 +23,19 @@
 #' @param returnType - Will return a SingleCellExperiment if this is either
 #' of SCE, SingleCellExperiment or their lower-case equivalents.  Otherwise,
 #' returns a Seurat object
+#' @param verbose - Controls whether to display trace from the Seurat
+#'     functions. Defaults to FALSE
 #' @return A Seurat object or SingleCellExperiment
 #' @export
 #' @import Seurat
 #' @examples
-#' exSeuratObj = make.getExample()('exSeuratObj')
+#' exSeuratObj = make.getExample()('exSeuratObj',toy=TRUE)
 #' STranspose = transposeObject(exSeuratObj)
 #' STransposeAsSCE = transposeObject(exSeuratObj,returnType='SCE')
 transposeObject = function(f,active.assay='RNA',
                            npcs=30,dims=seq_len(20),res=1,
-                           returnType='Seurat')
+                           returnType='Seurat',
+                           verbose=FALSE)
  {
     f = acceptor(f)
 
@@ -44,12 +47,12 @@ transposeObject = function(f,active.assay='RNA',
     fPrime[[active.assay]]$data = data
     ## fPrime[[active.assay]]$counts = NULL
 
-    fPrime = ScaleData(fPrime)
-    fPrime = FindVariableFeatures(fPrime,assay=active.assay)
-    fPrime = RunPCA(fPrime,npcs=npcs)
-    fPrime = RunUMAP(fPrime,reduction='pca',dims=dims)
-    fPrime = FindNeighbors(fPrime)
-    fPrime = FindClusters(fPrime,resolution=res)
+    fPrime = ScaleData(fPrime,verbose=verbose)
+    fPrime = FindVariableFeatures(fPrime,assay=active.assay,verbose=verbose)
+    fPrime = RunPCA(fPrime,npcs=npcs,verbose=verbose)
+    fPrime = RunUMAP(fPrime,reduction='pca',dims=dims,verbose=verbose)
+    fPrime = FindNeighbors(fPrime,verbose=verbose)
+    fPrime = FindClusters(fPrime,resolution=res,verbose=verbose)
 
     return(returnAs(fPrime,returnType))
  }
@@ -72,10 +75,10 @@ transposeObject = function(f,active.assay='RNA',
 #' @export
 #' @examples
 #' getExample = make.getExample()
-#' STranspose = getExample('STranspose')
+#' STranspose = getExample('STranspose',toy=TRUE)
 #' clusterDF = data.frame(gene=colnames(STranspose),
 #'                        geneCluster=STranspose$seurat_clusters)
-#' hallmark = getExample('hallmark')
+#' hallmark = getExample('hallmark',toy=TRUE)
 #' geneSet = intersect(hallmark[[1]],colnames(STranspose))
 #' pvalueMatrix = geneSetsVsGeneClustersPValueMatrix(geneSet,
 #'                                               clusterDF,
@@ -141,8 +144,8 @@ geneSetsVsGeneClustersPValueMatrix = function(geneSets,
 #' @examples
 #' library(Seurat)
 #' getExample = make.getExample()
-#' STranspose = getExample('STranspose')
-#' NN = getExample('NN')
+#' STranspose = getExample('STranspose',toy=TRUE)
+#' NN = getExample('NN',toy=TRUE)
 #' neighbors = getGeneNeighbors("Ccl6",STranspose)
 #' neighborsAgain = getGeneNeighbors("Ccl6",NN)
 getGeneNeighbors = function(gene,NN)
@@ -177,10 +180,10 @@ getGeneNeighbors = function(gene,NN)
 #' @export
 #' @examples
 #' getExample = make.getExample()
-#' NN = getExample('NN')
-#' STranspose = getExample('STranspose')
+#' NN = getExample('NN',toy=TRUE)
+#' STranspose = getExample('STranspose',toy=TRUE)
 #' spheres = combinatorialSpheres(NN,'Ccl6',3)
-#' hallmark = getExample('hallmark')
+#' hallmark = getExample('hallmark',toy=TRUE)
 #' geneSet = intersect(hallmark[[1]],colnames(STranspose))
 #' sphereAroundSet = combinatorialSpheres(NN,geneSet,1)
 combinatorialSpheres = function(NN,origin,radius)
@@ -344,9 +347,9 @@ annotateGeneAsVector = function(gene,geneSets,normalise=FALSE)
 #' @export
 #' @examples
 #' getExample = make.getExample()
-#' STranspose = getExample('STranspose')
-#' STranspose_sce = getExample('STranspose_sce')
-#' hallmark = getExample('hallmark')
+#' STranspose = getExample('STranspose',toy=TRUE)
+#' STranspose_sce = getExample('STranspose_sce',toy=TRUE)
+#' hallmark = getExample('hallmark',toy=TRUE)
 #' set.seed(100)
 #' genes = sample(colnames(STranspose),5)
 #' predictions = predictAnnotation(genes,hallmark,STranspose,radius=.5)
@@ -419,8 +422,8 @@ predictAnnotation = function(genes,
 #' @export 
 #' @examples
 #' getExample = make.getExample()
-#' STranspose = getExample('STranspose')
-#' hallmark = getExample('hallmark')
+#' STranspose = getExample('STranspose',toy=TRUE)
+#' hallmark = getExample('hallmark',toy=TRUE)
 #' genesAnno = annotateGenesByGeneSet(hallmark)
 #' predictions = predictGeneAnnotationImpl('Myc',STranspose,genesAnno,
 #' radius=.5,metric='umap')
@@ -487,8 +490,8 @@ predictGeneAnnotationImpl = function(gene,fPrime,genesAnno,
 #' @export
 #' @examples
 #' getExample = make.getExample()
-#' STranspose = getExample('STranspose')
-#' hallmark = getExample('hallmark')
+#' STranspose = getExample('STranspose',toy=TRUE)
+#' hallmark = getExample('hallmark',toy=TRUE)
 #' predictions = predictAnnotationAllGenes(hallmark,STranspose,radius=.5)
 predictAnnotationAllGenes = function(geneSets,
                                      fPrime,
@@ -532,8 +535,8 @@ predictAnnotationAllGenes = function(geneSets,
 #' @export
 #' @examples
 #' getExample = make.getExample()
-#' STranspose = getExample('STranspose')
-#' hallmark = getExample('hallmark')
+#' STranspose = getExample('STranspose',toy=TRUE)
+#' hallmark = getExample('hallmark',toy=TRUE)
 #' geneSet = intersect(colnames(STranspose),hallmark[[1]])
 #' geometricallyNearby = getNearbyGenes(STranspose,geneSet,radius=0.2,metric='umap')
 #' combinatoriallyNearby = getNearbyGenes(STranspose,geneSet,radius=1,metric='NN')
@@ -681,7 +684,7 @@ orderGeneSetPValues = function(M,ascending=TRUE,cutoff=NULL,nameTag='')
 #' @return A vector of these unique values in order
 #' @export
 #' @examples
-#' STranspose = make.getExample()('STranspose')
+#' STranspose = make.getExample()('STranspose',toy=TRUE)
 #' geneClusters = getClusterOrder(STranspose)
 getClusterOrder = function(f)
 {

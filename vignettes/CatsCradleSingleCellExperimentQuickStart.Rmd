@@ -59,6 +59,7 @@ expressed in.
 
 ```{r}
 STranspose_sce = getExample('STranspose_sce')
+print(STranspose_sce)
 df = as.data.frame(reducedDim(STranspose_sce,'UMAP'))
 df$seurat_clusters = STranspose_sce$seurat_clusters
 h = ggplot(df,aes(x=umap_1,y=umap_2,color=seurat_clusters)) +

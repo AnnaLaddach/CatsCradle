@@ -43,7 +43,7 @@ each cell cluster and returns the result as a matrix
 }
 \examples{
 getExample = make.getExample()
-STranspose = getExample('STranspose')
-exSeuratObj = getExample('exSeuratObj')
+STranspose = getExample('STranspose',toy=TRUE)
+exSeuratObj = getExample('exSeuratObj',toy=TRUE)
 M = getAverageExpressionMatrix(exSeuratObj,STranspose,layer='data')
 }

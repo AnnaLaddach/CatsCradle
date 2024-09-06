@@ -10,7 +10,8 @@ transposeObject(
   npcs = 30,
   dims = seq_len(20),
   res = 1,
-  returnType = "Seurat"
+  returnType = "Seurat",
+  verbose = FALSE
 )
 }
 \arguments{
@@ -40,6 +41,11 @@ defaults to 1:20
 of SCE, SingleCellExperiment or their lower-case equivalents.  Otherwise,
 returns a Seurat object
 }}
+
+\item{verbose}{\itemize{
+\item Controls whether to display trace from the Seurat
+functions. Defaults to FALSE
+}}
 }
 \value{
 A Seurat object or SingleCellExperiment
@@ -51,7 +57,7 @@ also be a SingleCellExperiment which will be converted to a
 Seurat object
 }
 \examples{
-exSeuratObj = make.getExample()('exSeuratObj')
+exSeuratObj = make.getExample()('exSeuratObj',toy=TRUE)
 STranspose = transposeObject(exSeuratObj)
 STransposeAsSCE = transposeObject(exSeuratObj,returnType='SCE')
 }

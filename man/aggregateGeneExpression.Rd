@@ -52,7 +52,7 @@ the cells in each neighbourhood
 }
 \examples{
 getExample = make.getExample()
-smallXenium = getExample('smallXenium')
-extendedNeighbours = getExample('extendedNeighbours')
+smallXenium = getExample('smallXenium',toy=TRUE)
+extendedNeighbours = getExample('extendedNeighbours',toy=TRUE)
 agg = aggregateGeneExpression(smallXenium,extendedNeighbours,verbose=FALSE)
 }

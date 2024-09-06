@@ -28,8 +28,8 @@
 #' @importFrom stringr str_split str_split_fixed
 #' @examples
 #' getExample = make.getExample()
-#' STranspose = getExample('STranspose')
-#' exSeuratObj = getExample('exSeuratObj')
+#' STranspose = getExample('STranspose',toy=TRUE)
+#' exSeuratObj = getExample('exSeuratObj',toy=TRUE)
 #' M = getAverageExpressionMatrix(exSeuratObj,STranspose,layer='data')
 getAverageExpressionMatrix = function(f,fPrime,
                                       clusteringName='seurat_clusters',
@@ -88,7 +88,7 @@ getAverageExpressionMatrix = function(f,fPrime,
 #' @export
 #' @examples
 #' getExample = make.getExample()
-#' averageExpMatrix = getExample('averageExpMatrix')
+#' averageExpMatrix = getExample('averageExpMatrix',toy=TRUE)
 #' averageExpMatrix = tagRowAndColNames(averageExpMatrix,'cellCluster_','geneCluster_')
 tagRowAndColNames = function(M,ccTag='CC_',gcTag='GC_')
 {
@@ -109,7 +109,7 @@ tagRowAndColNames = function(M,ccTag='CC_',gcTag='GC_')
 #' @export
 #' @examples
 #' getExample = make.getExample()
-#' averageExpMatrix = getExample('averageExpMatrix')
+#' averageExpMatrix = getExample('averageExpMatrix',toy=TRUE)
 #' averageExpDF = getAverageExpressionDF(averageExpMatrix)
 getAverageExpressionDF = function(M)
 {
@@ -223,8 +223,8 @@ sankeyFromMatrix = function(M,disambiguation=c('R_','C_'),
 #' @export
 #' @examples
 #' getExample = make.getExample()
-#' exSeuratObj = getExample('exSeuratObj')
-#' STranspose = getExample('STranspose')
+#' exSeuratObj = getExample('exSeuratObj',toy=TRUE)
+#' STranspose = getExample('STranspose',toy=TRUE)
 #' clusterExpression = getGeneClusterAveragesPerCell(exSeuratObj,STranspose)
 getGeneClusterAveragesPerCell = function(f,
                                          fPrime,
@@ -271,8 +271,8 @@ getGeneClusterAveragesPerCell = function(f,
 #' @export
 #' @examples
 #' getExample = make.getExample()
-#' exSeuratObj = getExample('exSeuratObj')
-#' STranspose = getExample('STranspose')
+#' exSeuratObj = getExample('exSeuratObj',toy=TRUE)
+#' STranspose = getExample('STranspose',toy=TRUE)
 #' g = meanGeneClusterOnCellUMAP(exSeuratObj,STranspose,geneCluster=0)
 meanGeneClusterOnCellUMAP = function(f,fPrime,geneCluster)
 {

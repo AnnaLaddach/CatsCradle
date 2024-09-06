@@ -27,10 +27,11 @@ CatsCradle has a slightly unusual way of delivering example data.  In
 order to save space we have tried to minimise the number and size of
 the .rda data.  We have limited these to objects which are necessary
 to compute other objects (e.g., certain Seurat objects), objects which
-are necessary to the functioning of the package (e.g., human and
-mouse ligand receptor networks), and objects which take a long time to
+are necessary to the functioning of the package (e.g., human and mouse
+ligand receptor networks), and objects which take a long time to
 compute (e.g., ligandReceptorResults).  These package variables are
-documented in the usual way and are loaded when invoked.
+documented in the usual way and are loaded when invoked with
+data(variable name).
 
 Other variables are computed from these as needed.  The function which
 computes these additional objects also stores them internally for
@@ -43,14 +44,19 @@ On the first invocation this computes STranspose:
 
 ```{r}
 library(CatsCradle,quietly=TRUE)
+library(tictoc)
 getExample = make.getExample()
+tic()
 STranspose = getExample('STranspose')
+toc()
 ```
 
 On subsequent invocations it retrieves it:
 
 ```{r}
+tic()
 STranspose = getExample('STranspose')
+toc()
 ```
 
 getExample() also retrieves package variables.
@@ -59,8 +65,21 @@ getExample() also retrieves package variables.
 smallXenium = getExample('smallXenium')
 ```
 
-Invoking this option has no effect on things that aren't rectangular.
+getExample() also supports the option toy, which is FALSE by default.
+Setting toy=TRUE will result in the initial Seurat objects being
+subset to smaller copies of themselves and all further computations
+being performed using these smaller objects.  This is done to speed up
+the running of the code examples.
 
+```{r}
+exSeuratObj = getExample('exSeuratObj')
+toySeurat = getExample('exSeuratObj',toy=TRUE)
+dim(exSeuratObj)
+dim(toySeurat)
+toyXenium = getExample('smallXenium',toy=TRUE)
+dim(smallXenium)
+dim(toyXenium)
+```
 
 A complete list of the example objects available via the function
 exampleObjects().  Here we document some of the more prominent of

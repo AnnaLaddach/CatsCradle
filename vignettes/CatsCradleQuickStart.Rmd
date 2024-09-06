@@ -52,6 +52,7 @@ expressed in.
 ```{r}
 getExample = make.getExample()
 STranspose = getExample('STranspose')
+print(STranspose)
 DimPlot(STranspose,cols='polychrome')
 ```
 

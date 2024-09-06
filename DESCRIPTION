@@ -1,15 +1,15 @@
 Package: CatsCradle
 Title: This package provides methods for analysing spatial transcriptomics data and for discovering gene clusters
-Version: 0.99.11
+Version: 0.99.12
 Authors@R: 
     c(person(given = "Anna",
         family = "Laddach",
-        role = c("aut", "cre"),
+        role = c("aut"),
         email = "anna.laddach@crick.ac.uk",
         comment = c(ORCID = "0000-0001-5552-6534")),
     person(given = "Michael",
         family = "Shapiro",
-        role = c("aut"),
+        role = c("aut","cre"),
         email = "michael.shapiro@crick.ac.uk",
         comment = c(ORCID = "0000-0002-2769-9320")))
 Description: This package addresses two broad areas.  It allows for in-depth analysis of spatial transcriptomic data by identifying tissue neighbourhoods.  These are contiguous regions of tissue surrounding individual cells.  'CatsCradle' allows for the categorisation of neighbourhoods by the cell types contained in them and the genes expressed in them.  In particular, it produces Seurat objects whose individual elements are neighbourhoods rather than cells.  In addition, it enables the categorisation and annotation of genes by producing Seurat objects whose elements are genes.
@@ -41,7 +41,8 @@ Imports: Seurat (>= 5.0.1),
 Suggests: fossil,
 	  interp,
 	  knitr,
-	  BiocStyle
+	  BiocStyle,
+	  tictoc
 Depends: R (>= 4.4.0)
 LazyData: false
 VignetteBuilder: knitr

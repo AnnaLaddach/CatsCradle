@@ -246,8 +246,8 @@ g = ggplot() +
     geom_point(data=df,aes(x=umap_1,y=umap_2),color='gray') +
     geom_point(data=df[geneSetIdx,],aes(x=umap_1,y=umap_2),color='blue') +
     geom_point(data=df[nearbyIdx,],aes(x=umap_1,y=umap_2),color='red') +
-    ggtitle(paste0(c('Genes within geometric radius 0.2 (red) of \n',
-                     'HALLMARK_INTERFERON_ALPHA_RESPONSE (blue)')))
+    ggtitle(paste0('Genes within geometric radius 0.2 (red) of \n',
+                     'HALLMARK_INTERFERON_ALPHA_RESPONSE (blue)'))
 print(g)
 ```
 
@@ -285,7 +285,7 @@ These are named vectors whose names are the Hallmark sets. Myc is a
 
 ```{r}
 predicted = predictAnnotation('Myc',hallmark,STranspose,radius=.5)
-predicted$Myc
+predicted$Myc[1:10]
 ```
 
 predictAnnotation() accepts a vector of genes and returns a list of

@@ -33,10 +33,10 @@ graph of a Seurat object.
 }
 \examples{
 getExample = make.getExample()
-NN = getExample('NN')
-STranspose = getExample('STranspose')
+NN = getExample('NN',toy=TRUE)
+STranspose = getExample('STranspose',toy=TRUE)
 spheres = combinatorialSpheres(NN,'Ccl6',3)
-hallmark = getExample('hallmark')
+hallmark = getExample('hallmark',toy=TRUE)
 geneSet = intersect(hallmark[[1]],colnames(STranspose))
 sphereAroundSet = combinatorialSpheres(NN,geneSet,1)
 }

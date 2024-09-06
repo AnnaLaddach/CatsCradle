@@ -46,10 +46,10 @@ genes.
 }
 \examples{
 getExample = make.getExample()
-STranspose = getExample('STranspose')
+STranspose = getExample('STranspose',toy=TRUE)
 clusterDF = data.frame(gene=colnames(STranspose),
                        geneCluster=STranspose$seurat_clusters)
-hallmark = getExample('hallmark')
+hallmark = getExample('hallmark',toy=TRUE)
 geneSet = intersect(hallmark[[1]],colnames(STranspose))
 pvalueMatrix = geneSetsVsGeneClustersPValueMatrix(geneSet,
                                               clusterDF,

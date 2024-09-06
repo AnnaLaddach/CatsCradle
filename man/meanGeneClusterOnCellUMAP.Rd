@@ -30,7 +30,7 @@ given gene cluster on cell umap.
 }
 \examples{
 getExample = make.getExample()
-exSeuratObj = getExample('exSeuratObj')
-STranspose = getExample('STranspose')
+exSeuratObj = getExample('exSeuratObj',toy=TRUE)
+STranspose = getExample('STranspose',toy=TRUE)
 g = meanGeneClusterOnCellUMAP(exSeuratObj,STranspose,geneCluster=0)
 }

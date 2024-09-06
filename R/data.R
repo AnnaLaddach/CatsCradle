@@ -148,4 +148,60 @@
 #' For more informations see the CatsCradleSpatial vignette.
 "moransILigandReceptor"
 
+## ####################################################
+#' seuratGenes
+#'
+#' A vector of genes used for subsetting exSeuratObj
+#'
+#' @format A vector of genes
+#'
+#' \describe{
+#' A vector of the top 100 most variable genes in exSeuratObj
+#' used to subset this object to give toy examples.
+#' }
+#'
+#' @source Computed by retrieving the data layer from exSeuratObj and
+#' subsetting to the 100 genes with the highest standard deviation.
+"seuratGenes"
+
+## ####################################################
+#' seuratCells
+#'
+#' A vector of cells used for subsetting exSeuratObj
+#'
+#' @format A vector of cells
+#'
+#' \describe{
+#' A vector of cells consisting of half the cells from
+#' each seurat_cluster in exSeuratObj used to subset this
+#' object to give toy examples.
+#' }
+#'
+#' @source Computed by retrieving half the cells from each
+#' cluster in exSeuratObj
+"seuratCells"
+
+## ####################################################
+#' xeniumCells
+#'
+#' A vector of cells used for subsetting exSeuratObj
+#'
+#' @format A vector of cells
+#'
+#' \describe{
+#' A vector of cells consisting of approximately one
+#' quarter of the cells in smallXenium used to subset
+#' this object to give toy examples.
+#' }
+#'
+#' @source We extracted a rectangle whose width and
+#' height were one half the width and height of smallXenium
+#' and which was centered in the field of view of
+#' smallXenium
+"xeniumCells"
+
+
+
+
+
 

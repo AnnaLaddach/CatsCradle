@@ -19,7 +19,7 @@
 #' weight - edge weight
 #' @export
 #' @examples
-#' STranspose = make.getExample()('STranspose')
+#' STranspose = make.getExample()('STranspose',toy=TRUE)
 #' NN = getNearestNeighbourLists(STranspose)
 getNearestNeighbourLists = function(f, graph=defaultGraph(f)){
 
@@ -50,7 +50,7 @@ getNearestNeighbourLists = function(f, graph=defaultGraph(f)){
 #' undirected edge.
 #' @export
 #' @examples
-#' NN = make.getExample()('NN')
+#' NN = make.getExample()('NN',toy=TRUE)
 #' print(dim(NN))
 #' NNN = desymmetriseNN(NN)
 #' print(dim(NNN))
@@ -137,7 +137,7 @@ randomiseNodeIndices = function(neighborListDf, n = 100, useWeights = FALSE){
 #' @return TRUE or FALSE
 #' @export
 #' @examples
-#'  NN = make.getExample()('NN')
+#'  NN = make.getExample()('NN',toy=TRUE)
 #' symmetryTest = symmetryCheckNN(NN)
 symmetryCheckNN = function(NN)
 {
@@ -164,7 +164,7 @@ symmetryCheckNN = function(NN)
 #' 
 #' @export
 #' @examples
-#' NN = make.getExample()('NN')
+#' NN = make.getExample()('NN',toy=TRUE)
 #' NNStar = symmetriseNN(NN)
 symmetriseNN = function(NN)
 {

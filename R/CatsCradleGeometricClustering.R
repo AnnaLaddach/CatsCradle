@@ -33,8 +33,8 @@
 #' @export
 #' @examples
 #' getExample = make.getExample()
-#' STranspose = getExample('STranspose')
-#' hallmark = getExample('hallmark')
+#' STranspose = getExample('STranspose',toy=TRUE)
+#' hallmark = getExample('hallmark',toy=TRUE)
 #' geneSubset = intersect(colnames(STranspose),hallmark[[1]])
 #' p = getObjectSubsetClusteringPValue(STranspose,geneSubset,100)
 getObjectSubsetClusteringPValue = function(fPrime,
@@ -90,8 +90,8 @@ getObjectSubsetClusteringPValue = function(fPrime,
 #' @export
 #' @examples
 #' getExample = make.getExample()
-#' STranspose = getExample('STranspose')
-#' hallmark = getExample('hallmark')
+#' STranspose = getExample('STranspose',toy=TRUE)
+#' hallmark = getExample('hallmark',toy=TRUE)
 #' geneSubset = intersect(colnames(STranspose),hallmark[[1]])
 #' stats = getObjectSubsetClusteringStatistics(STranspose,geneSubset,100)
 getObjectSubsetClusteringStatistics = function(fPrime,
@@ -150,8 +150,8 @@ getObjectSubsetClusteringStatistics = function(fPrime,
 #' @examples
 #' library(Seurat)
 #' getExample = make.getExample()
-#' STranspose = getExample('STranspose')
-#' hallmark = getExample('hallmark')
+#' STranspose = getExample('STranspose',toy=TRUE)
+#' hallmark = getExample('hallmark',toy=TRUE)
 #' S = data.matrix(FetchData(STranspose,c('umap_1','umap_2')))
 #' geneSubset = rownames(S) %in% hallmark[[1]]
 #' geneClustering = runGeometricClusteringTrials(S,geneSubset,100)
@@ -300,8 +300,8 @@ medianComplementDistance = function(S,idx)
 #' @examples
 #' library(Seurat)
 #' getExample = make.getExample()
-#' STranspose = getExample('STranspose')
-#' hallmark = getExample('hallmark')
+#' STranspose = getExample('STranspose',toy=TRUE)
+#' hallmark = getExample('hallmark',toy=TRUE)
 #' S = data.matrix(FetchData(STranspose,c('umap_1','umap_2')))
 #' idx = colnames(STranspose) %in% hallmark[[1]]
 #' mcpv = medianComplementPValue(S,idx,numTrials=100)
