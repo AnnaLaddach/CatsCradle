@@ -36,7 +36,7 @@ this is done based on the similarities and differences in the genes
 cells express.  Here we see a UMAP where the points are cells, coloured by
 their seurat_clusters.  
 
-```{r}
+```{r [QS1], message=FALSE}
 library(Seurat,quietly=TRUE)
 library(CatsCradle,quietly=TRUE)
 data(exSeuratObj)
@@ -49,7 +49,7 @@ cells.  Genes now have their own UMAP and their own clusters.  This is all done
 on the basis of the similarities and differences in the cells they are
 expressed in.
 
-```{r}
+```{r [QS2]}
 getExample = make.getExample()
 STranspose = getExample('STranspose')
 print(STranspose)
@@ -74,7 +74,7 @@ object) superimposed in green and black on the gene cluster UMAP.
 
 
 
-```{r}
+```{r [QS3], message=FALSE}
 library(ggplot2,quietly=TRUE)
 hallmark = getExample('hallmark')
 h = 'HALLMARK_OXIDATIVE_PHOSPHORYLATION'
@@ -120,7 +120,7 @@ CatsCradle provides extensive tools for the analysis of spatial
 transcriptomics data.  Here we see cell type plotted on the cell
 centroids of our example data.
 
-```{r}
+```{r [QS4]}
 smallXenium = getExample('smallXenium')
 ImageDimPlot(smallXenium,cols='polychrome')
 ```
@@ -143,7 +143,7 @@ where each neighbourhood consists of a cell and its immediate
 neighbours.  This is an undirected graph in which each cell has an
 edge connecting it to each of these neighbours.
 
-```{r}
+```{r [QS5]}
 delaunayNeighbours = getExample('delaunayNeighbours')
 head(delaunayNeighbours,10)
 ```
@@ -166,7 +166,7 @@ of cells of type B. Here we only display an arrow from A to B when
 cells of type B compose at least 5 percent of the cells in
 neighbourhoods around type A.
 
-```{r}
+```{r [QS6]}
 NBHDByCTMatrixExtended = getExample('NBHDByCTMatrixExtended')
 clusters = getExample('clusters')
 colours = getExample('colours')
@@ -199,7 +199,7 @@ Seurat object (created by computeNBHDVsCTObject()) to our original
 spatial object and visualize the neighbourhood clusters on the tissue
 coordinates. (Again, we are using extended neighbourhoods.)
 
-```{r}
+```{r [QS7]}
 NBHDByCTSeuratExtended = getExample('NBHDByCTSeuratExtended')
 smallXenium$NBHDClusterExtended= 
   NBHDByCTSeuratExtended@active.ident
@@ -227,7 +227,7 @@ clustering (here giving another clustering of the neighbourhoods). In
 addition, we can find the marker genes which characterise the transcriptomic
 differences between the neighbourhood types.
 
-```{r}
+```{r [QS8]}
 extendedNeighbours = getExample('extendedNeighbours')
 agg = aggregateGeneExpression(smallXenium,extendedNeighbours,
                                     verbose=FALSE)
@@ -245,7 +245,7 @@ are subsumed into cell type neighbourhood cluster 0.  More generally,
 we see that clustering based on aggregate gene expression tends to
 subdivide that based on the cell types in each neighbourhood.
 
-```{r}
+```{r [QS9], message=FALSE}
 library(pheatmap)
 tab = table(smallXenium@meta.data[,c("aggregateNBHDClusters",
                                      "NBHDClusterExtended" )])
@@ -262,7 +262,7 @@ It can vary between -1 and 1.  It takes the value 1 when these
 classifications denote the same subsets and 0 when they agree at a
 level no better than chance.
 
-```{r}
+```{r [QS10], message=FALSE}
 library(fossil,quietly=TRUE)
 adjustedRandIndex = adj.rand.index(agg@active.ident,
                                    NBHDByCTSeuratExtended@active.ident)
@@ -290,7 +290,7 @@ ligand-receptor relationship is directed.  Accordingly, in
 interactionsOnEdges, a given edge appears as both the pair cell A -
 cell B and as the pair cell B - cell A.  
 
-```{r}
+```{r [QS11]}
 ligandReceptorResults = getExample('ligandReceptorResults')
 ligandReceptorResults$interactionsOnEdges[1:10,1:10]
 ```
@@ -323,7 +323,7 @@ conversions, other information may be lost.
 
 
 
-```{r}
+```{r [QS12]}
 sessionInfo()
 ```
 

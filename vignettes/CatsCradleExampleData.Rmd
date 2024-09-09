@@ -42,7 +42,7 @@ created once in each session.
 
 On the first invocation this computes STranspose:
 
-```{r}
+```{r [Ex1], message=FALSE}
 library(CatsCradle,quietly=TRUE)
 library(tictoc)
 getExample = make.getExample()
@@ -53,7 +53,7 @@ toc()
 
 On subsequent invocations it retrieves it:
 
-```{r}
+```{r [Ex2]}
 tic()
 STranspose = getExample('STranspose')
 toc()
@@ -61,7 +61,7 @@ toc()
 
 getExample() also retrieves package variables.
 
-```{r}
+```{r [Ex3], message=FALSE}
 smallXenium = getExample('smallXenium')
 ```
 
@@ -71,7 +71,7 @@ subset to smaller copies of themselves and all further computations
 being performed using these smaller objects.  This is done to speed up
 the running of the code examples.
 
-```{r}
+```{r [Ex4], message=FALSE}
 exSeuratObj = getExample('exSeuratObj')
 toySeurat = getExample('exSeuratObj',toy=TRUE)
 dim(exSeuratObj)
@@ -126,7 +126,7 @@ significance for the enrichment of cell types in the neighbourhoods of
 each cell type.
 
 
-```{r}
+```{r [Ex5]}
 sessionInfo()
 ```
 

@@ -49,8 +49,8 @@ getExample = make.getExample()
 STranspose = getExample('STranspose',toy=TRUE)
 clusterDF = data.frame(gene=colnames(STranspose),
                        geneCluster=STranspose$seurat_clusters)
-hallmark = getExample('hallmark',toy=TRUE)
-geneSet = intersect(hallmark[[1]],colnames(STranspose))
+hallmark = getExample('hallmark')
+geneSet = intersect(hallmark[["HALLMARK_TNFA_SIGNALING_VIA_NFKB"]],colnames(STranspose))
 pvalueMatrix = geneSetsVsGeneClustersPValueMatrix(geneSet,
                                               clusterDF,
                                               colnames(STranspose))

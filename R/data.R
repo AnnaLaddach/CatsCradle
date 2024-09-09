@@ -17,18 +17,6 @@
 "exSeuratObj"
 
 ## ####################################################
-#' hallmark
-#'
-#' The mouse hallmark gene sets.
-#'
-#' @format A named list
-#' \describe{
-#' The mouse hallmark gene sets.
-#' }
-#' @source https://www.gsea-msigdb.org/gsea/msigdb/mouse/collections.jsp
-"hallmark"
-
-## ####################################################
 #' humanLRN
 #'
 #' A data frame giving 12019 human ligand receptor pairs

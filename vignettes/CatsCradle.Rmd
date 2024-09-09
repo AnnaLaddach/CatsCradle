@@ -38,7 +38,7 @@ matrix $M$, we can use the same methods to produce lower-dimensional
 representations of the genes and cluster the genes into groups that
 show similar patterns of expression.
 
-```{r}
+```{r [CC1], message=FALSE}
 library(CatsCradle,quietly=TRUE)
 getExample = make.getExample()
 exSeuratObj = getExample('exSeuratObj')
@@ -56,13 +56,13 @@ The Louvain clustering of the genes is now encoded in
 STranspose$seurat_clusters. As with the cells, we can observe these
 clusters on UMAP, tSNE or PCA.
 
-```{r}
+```{r [CC2], message=FALSE}
 library(Seurat,quietly=TRUE)
 library(ggplot2,quietly=TRUE)
 DimPlot(exSeuratObj,cols='polychrome') + ggtitle('Cell clusters on UMAP')
 ```
 
-```{r}
+```{r [CC3]}
 DimPlot(STranspose,cols='polychrome') + ggtitle('Gene clusters on UMAP')
 ```
 
@@ -74,7 +74,7 @@ identity.  We recommend using plotly to produce a browseable version
 of the gene UMAP.  This allows one to hover over the individual points
 and discover the genes in each cluster. Typical code might be
 
-```{r eval = FALSE}
+```{r [CC4], eval = FALSE}
 library(plotly,quietly=TRUE)
 umap = FetchData(STranspose,c('UMAP_1','UMAP_2','seurat_clusters'))
 umap$gene = colnames(STranspose)
@@ -91,7 +91,7 @@ examine which cells each of the gene clusters is expressed in.  Here
 we give a heatmap of average expression of each gene cluster (columns)
 across each cell cluster (rows).
 
-```{r}
+```{r [CC5], message=FALSE}
 library(pheatmap,quietly=TRUE)
 averageExpMatrix = getAverageExpressionMatrix(exSeuratObj,STranspose,layer='data')
 averageExpMatrix = tagRowAndColNames(averageExpMatrix,
@@ -121,7 +121,7 @@ CatsCradle. Here the up-regulated gene sets are shown in cyan, the
 down-regulated sets in pink.  The image was produced with the
 following code.
 
-```{r eval = FALSE}
+```{r [CC6], eval = FALSE}
 catsCradle = sankeyFromMatrix(averageExpMatrix,
                               disambiguation=c('cells_','genes_'),
                               plus='cyan',minus='pink',
@@ -145,7 +145,7 @@ association with cluster 4 and with the border between clusters 0 and
 the most strongly clustered.
 
 
-```{r}
+```{r [CC7]}
 hallmark = getExample('hallmark')
 h = 'HALLMARK_G2M_CHECKPOINT'
 umap = FetchData(STranspose,c('umap_1','umap_2'))
@@ -177,7 +177,7 @@ this median complement distance for $X \subset S$ with those for
 randomly chosen sets $X_i \subset S$ allows us to assess the
 clustering of $X$.  (These $X_i$ are chosen to be the same size as
 $X$.)
-```{r}
+```{r [CC8]}
 g2mGenes = intersect(colnames(STranspose),
                      hallmark[['HALLMARK_G2M_CHECKPOINT']])
 stats = getObjectSubsetClusteringStatistics(STranspose,
@@ -193,7 +193,7 @@ distances and its z-score.  Here we report a p-value of
 0.001. However, as can be seen from the figure, the actual p-value is
 lower by many orders of magnitude.
 
-```{r}
+```{r [CC9]}
 statsPlot = ggplot(data.frame(medianComplementDistance=stats$randomSubsetDistance),
                   aes(x=medianComplementDistance)) +
     geom_histogram(bins=50) +
@@ -206,7 +206,7 @@ Here we have shown the statistics for one of the gene sets that is
 most tightly clustered on UMAP.  However, of the 50 Hallmark gene
 sets 31 cluster with a p-value better than 0.05.
 
-```{r}
+```{r [CC10]}
 df = read.table('hallmarkPValues.txt',header=TRUE,sep='\t')
 g = ggplot(df,aes(x=logPValue)) +
     geom_histogram() +
@@ -231,7 +231,7 @@ have a close relation to UMAP distance. This function will also return
 weighted combinatorial distance from a single gene where distance is
 the reciprocal of edge weight.
 
-```{r}
+```{r [CC11]}
 geneSet = intersect(colnames(STranspose),
                     hallmark[['HALLMARK_INTERFERON_ALPHA_RESPONSE']])
 geometricallyNearbyGenes = getNearbyGenes(STranspose,geneSet,radius=0.2,metric='umap')
@@ -266,14 +266,14 @@ collect the annotations is belongs to.  The function annotateGenesByGeneSet()
 inverts the gene sets to give a list of the sets each gene belongs
 to. 
 
-```{r}
+```{r [CC12]}
 annotatedGenes = annotateGenesByGeneSet(hallmark)
 names(annotatedGenes[['Myc']])
 ```
 We see that Myc belongs to ten hallmark sets.  We can also give the
 annotations of a gene as a vector.
 
-```{r}
+```{r [CC13]}
  Myc = annotateGeneAsVector('Myc',hallmark)
  MycNormalised = annotateGeneAsVector('Myc',hallmark,TRUE)
 ```
@@ -283,7 +283,7 @@ These are named vectors whose names are the Hallmark sets. Myc is a
  when we wish to weight the contributions of nearby genes as they are
  more likely to belong to larger gene sets.
 
-```{r}
+```{r [CC14]}
 predicted = predictAnnotation('Myc',hallmark,STranspose,radius=.5)
 predicted$Myc[1:10]
 ```
@@ -305,7 +305,7 @@ randomised predictions produces the following comparison.
 ![comparing real and randomised predictions](actualVsRandomisedPredictions.jpg){width=6in}
 
 
-```{r}
+```{r [CC15]}
 sessionInfo()
 ```
 

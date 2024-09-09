@@ -5,7 +5,6 @@
 ## ####################################################
 
 
-
 ## ###################################################
 #' Create the transpose of a Seurat object
 #'
@@ -78,8 +77,8 @@ transposeObject = function(f,active.assay='RNA',
 #' STranspose = getExample('STranspose',toy=TRUE)
 #' clusterDF = data.frame(gene=colnames(STranspose),
 #'                        geneCluster=STranspose$seurat_clusters)
-#' hallmark = getExample('hallmark',toy=TRUE)
-#' geneSet = intersect(hallmark[[1]],colnames(STranspose))
+#' hallmark = getExample('hallmark')
+#' geneSet = intersect(hallmark[["HALLMARK_TNFA_SIGNALING_VIA_NFKB"]],colnames(STranspose))
 #' pvalueMatrix = geneSetsVsGeneClustersPValueMatrix(geneSet,
 #'                                               clusterDF,
 #'                                               colnames(STranspose))
@@ -183,8 +182,8 @@ getGeneNeighbors = function(gene,NN)
 #' NN = getExample('NN',toy=TRUE)
 #' STranspose = getExample('STranspose',toy=TRUE)
 #' spheres = combinatorialSpheres(NN,'Ccl6',3)
-#' hallmark = getExample('hallmark',toy=TRUE)
-#' geneSet = intersect(hallmark[[1]],colnames(STranspose))
+#' hallmark = getExample('hallmark')
+#' geneSet = intersect(hallmark[["HALLMARK_TNFA_SIGNALING_VIA_NFKB"]],colnames(STranspose))
 #' sphereAroundSet = combinatorialSpheres(NN,geneSet,1)
 combinatorialSpheres = function(NN,origin,radius)
 {
@@ -536,8 +535,8 @@ predictAnnotationAllGenes = function(geneSets,
 #' @examples
 #' getExample = make.getExample()
 #' STranspose = getExample('STranspose',toy=TRUE)
-#' hallmark = getExample('hallmark',toy=TRUE)
-#' geneSet = intersect(colnames(STranspose),hallmark[[1]])
+#' hallmark = getExample('hallmark')
+#' geneSet = intersect(colnames(STranspose),hallmark[["HALLMARK_TNFA_SIGNALING_VIA_NFKB"]])
 #' geometricallyNearby = getNearbyGenes(STranspose,geneSet,radius=0.2,metric='umap')
 #' combinatoriallyNearby = getNearbyGenes(STranspose,geneSet,radius=1,metric='NN')
 #' weightedNearby = getNearbyGenes(STranspose,'Myc',radius=1,metric='NN',weights=TRUE)

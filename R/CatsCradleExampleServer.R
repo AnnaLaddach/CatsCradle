@@ -8,6 +8,7 @@
 #' object it has found for quicker return.  Using the value 'list'
 #' causes it to return the list of all objects found so far.
 #' @importFrom SummarizedExperiment assays
+#' @importFrom msigdbr msigdbr
 #' @export
 #' @examples
 #' getExample = make.getExample()
@@ -30,7 +31,6 @@ make.getExample = function()
                         'ligandReceptorResults',
                         'moransI',
                         'moransILigandReceptor',
-                        'hallmark',
                         'humanLRN',
                         'mouseLRN')
 
@@ -88,12 +88,6 @@ make.getExample = function()
             {
                 data(moransILigandReceptor,envir=environment())
                 answer = moransILigandReceptor
-            }
-
-            if(whichOne == 'hallmark')
-            {
-                data(hallmark,envir=environment())
-                answer = hallmark
             }
 
             if(whichOne == 'humanLRN')
@@ -250,6 +244,16 @@ make.getExample = function()
             names(colours) = clusterNames
             answer = colours
         }
+
+        if(whichOne == 'hallmark')
+        {
+            h = msigdbr(species = "mouse", category = "H")
+            N = unique(h$gs_name)
+            
+            answer = list()
+            for(ell in N)
+                answer[[ell]] = h$gene_symbol[h$gs_name == ell]
+        }
         
         if(whichOne == 'euclideanNeighbours')
         {
@@ -321,7 +325,7 @@ make.getExample = function()
         ## Save and return:
         if(! toy)
             alreadyFound[[whichOne]] <<- answer
-        if(! toy)
+        if(toy)
             toysFound[[whichOne]] <<- answer
 
         return(answer)

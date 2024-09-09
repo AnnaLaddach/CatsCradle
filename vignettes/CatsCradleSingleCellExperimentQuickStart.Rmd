@@ -9,7 +9,7 @@ vignette: >
     %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, include = FALSE, warning = FALSE}
+```{r [SCE1] setup, include = FALSE, warning = FALSE}
 knitr::opts_chunk$set(
     collapse = TRUE,
     fig.dim = c(6,6),
@@ -37,7 +37,7 @@ this is done based on the similarities and differences in the genes
 cells express.  Here we see a UMAP where the points are cells, coloured by
 their clusters.  
 
-```{r}
+```{r [SCE2], message=FALSE}
 library(SingleCellExperiment,quietly=TRUE)
 library(CatsCradle,quietly=TRUE)
 library(ggplot2,quietly=TRUE)
@@ -57,7 +57,7 @@ cells.  Genes now have their own UMAP and their own clusters.  This is all done
 on the basis of the similarities and differences in the cells they are
 expressed in.
 
-```{r}
+```{r [SCE3]}
 STranspose_sce = getExample('STranspose_sce')
 print(STranspose_sce)
 df = as.data.frame(reducedDim(STranspose_sce,'UMAP'))
@@ -89,7 +89,7 @@ gene cluster UMAP.
 
 
 
-```{r}
+```{r [SCE4]}
 hallmark = getExample('hallmark')
 h = 'HALLMARK_OXIDATIVE_PHOSPHORYLATION'
 
@@ -137,7 +137,7 @@ CatsCradle provides extensive tools for the analysis of spatial
 transcriptomics data.  Here we see cell type plotted on the cell
 centroids of our example data.
 
-```{r}
+```{r [SCE5], message=FALSE}
 library(SpatialExperiment)
 X_sce = getExample('X_sce')
 cellCoords = as.data.frame(spatialCoords(X_sce))
@@ -166,7 +166,7 @@ where each neighbourhood consists of a cell and its immediate
 neighbours.  This is an undirected graph in which each cell has an
 edge connecting it to each of these neighbours.
 
-```{r}
+```{r [SCE6]}
 delaunayNeighbours = getExample('delaunayNeighbours')
 head(delaunayNeighbours,10)
 ```
@@ -189,7 +189,7 @@ high proportion of cells of type B. Here we only display an arrow from
 A to B when cells of type B compose at least 5 percent of the cells in
 neighbourhoods around type A.
 
-```{r}
+```{r [SCE7]}
 NBHDByCTMatrixExtended = getExample('NBHDByCTMatrixExtended')
 clusters = getExample('clusters')
 colours = getExample('colours')
@@ -225,7 +225,7 @@ object (created by computeNBHDVsCTObject()) to our original spatial
 object and visualize the neighbourhood clusters on the tissue
 coordinates. (Again, we are using extended neighbourhoods.)
 
-```{r}
+```{r [SCE8]}
 NBHDByCTSingleCellExtended_sce = getExample('NBHDByCTSingleCellExtended_sce')
 cellCoords$neighbourhood_clusters =
   NBHDByCTSingleCellExtended_sce$neighbourhood_clusters
@@ -255,7 +255,7 @@ clustering (here giving another clustering of the neighbourhoods). In
 addition, we can find the marker genes which characterise the transcriptomic
 differences between the neighbourhood types.
 
-```{r}
+```{r [SCE9]}
 extendedNeighbours = getExample('extendedNeighbours')
 smallXenium = getExample('smallXenium')
 agg_sce = aggregateGeneExpression(smallXenium,extendedNeighbours,
@@ -277,7 +277,7 @@ are subsumed into cell type neighbourhood cluster 0.  More generally,
 we see that clustering based on aggregate gene expression tends to
 subdivide that based on the cell types in each neighbourhood.
 
-```{r}
+```{r [SCE10], message=FALSE}
 library(pheatmap)
 tab = table(cellCoords[,c('aggregation_clusters','neighbourhood_clusters')])
                              
@@ -294,7 +294,7 @@ It can vary between -1 and 1.  It takes the value 1 when these
 classifications denote the same subsets and 0 when they agree at a
 level no better than chance.
 
-```{r}
+```{r [SCE11], message=FALSE}
 library(fossil,quietly=TRUE)
 adjustedRandIndex = adj.rand.index(agg_sce$aggregation_clusters,
                        NBHDByCTSingleCellExtended_sce$neighbourhood_clusters)
@@ -322,7 +322,7 @@ ligand-receptor relationship is directed.  Accordingly, in
 interactionsOnEdges, a given edge appears as both the pair cell A -
 cell B and as the pair cell B - cell A.  
 
-```{r}
+```{r [SCE12]}
 ligandReceptorResults = getExample('ligandReceptorResults')
 ligandReceptorResults$interactionsOnEdges[1:10,1:10]
 ```
@@ -355,7 +355,7 @@ SpatialExperiment object.  Because of the shallow nature of these
 conversions, other information may be lost.
 
 
-```{r}
+```{r [SCE13]}
 sessionInfo()
 ```
 

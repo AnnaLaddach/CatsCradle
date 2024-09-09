@@ -47,8 +47,8 @@ subsets of the same size.
 library(Seurat)
 getExample = make.getExample()
 STranspose = getExample('STranspose',toy=TRUE)
-hallmark = getExample('hallmark',toy=TRUE)
+hallmark = getExample('hallmark')
 S = data.matrix(FetchData(STranspose,c('umap_1','umap_2')))
-idx = colnames(STranspose) \%in\% hallmark[[1]]
+idx = colnames(STranspose) \%in\% hallmark[["HALLMARK_TNFA_SIGNALING_VIA_NFKB"]]
 mcpv = medianComplementPValue(S,idx,numTrials=100)
 }

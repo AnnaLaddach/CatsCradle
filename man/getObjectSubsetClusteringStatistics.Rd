@@ -61,7 +61,7 @@ the set.
 \examples{
 getExample = make.getExample()
 STranspose = getExample('STranspose',toy=TRUE)
-hallmark = getExample('hallmark',toy=TRUE)
-geneSubset = intersect(colnames(STranspose),hallmark[[1]])
+hallmark = getExample('hallmark')
+geneSubset = intersect(colnames(STranspose),hallmark[["HALLMARK_TNFA_SIGNALING_VIA_NFKB"]])
 stats = getObjectSubsetClusteringStatistics(STranspose,geneSubset,100)
 }

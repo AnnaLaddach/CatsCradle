@@ -42,8 +42,8 @@ mean distance of the complement to the subset.
 library(Seurat)
 getExample = make.getExample()
 STranspose = getExample('STranspose',toy=TRUE)
-hallmark = getExample('hallmark',toy=TRUE)
+hallmark = getExample('hallmark')
 S = data.matrix(FetchData(STranspose,c('umap_1','umap_2')))
-geneSubset = rownames(S) \%in\% hallmark[[1]]
+geneSubset = rownames(S) \%in\% hallmark[["HALLMARK_TNFA_SIGNALING_VIA_NFKB"]]
 geneClustering = runGeometricClusteringTrials(S,geneSubset,100)
 }

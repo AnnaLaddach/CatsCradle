@@ -9,7 +9,7 @@ vignette: >
     %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, include = FALSE, warning = FALSE}
+```{r  [Sp1] setup, include = FALSE, warning = FALSE}
 knitr::opts_chunk$set(
     collapse = TRUE,
     fig.dim = c(6,6),
@@ -38,7 +38,7 @@ using RCTD along with a reference dataset
 followed by minimal manual curation. Please note these assignments are
 not definitive and are for illustratory purporses only.
 
-```{r}
+```{r [Sp2], message=FALSE}
 library(Seurat,quietly=TRUE)
 library(CatsCradle,quietly=TRUE)
 getExample = make.getExample()
@@ -71,7 +71,7 @@ its immediate neighbours.  We compute these as a Delaunay
 triangulation using the centroids of the cells:
 
 
-```{r}
+```{r [Sp3]}
 centroids = GetTissueCoordinates(smallXenium)
 rownames(centroids) = centroids$cell
 clusters = smallXenium@active.ident
@@ -82,7 +82,7 @@ head(delaunayNeighbours)
 Two cells are neighbours if they appear on the same row.  The
 neighbourhood of the cell 16307 consists of the following 7 cells:
 
-```{r}
+```{r [Sp4]}
 idx = (delaunayNeighbours$nodeA == 16307 |
        delaunayNeighbours$nodeB == 16307)
 nbhd = unique(c(delaunayNeighbours$nodeA[idx],
@@ -97,14 +97,14 @@ data frame with each row giving a pair of cells in a common extended
 neighbourhood.  In this case we are building an extended neighbourhood
 of combinatorial radius 4.
 
-```{r}
+```{r [Sp5]}
 extendedNeighboursList = getExtendedNBHDs(delaunayNeighbours, 4)
 extendedNeighbours = collapseExtendedNBHDs(extendedNeighboursList, 4)
 ```
 
 Now the extended neighbourhood of  cell 16307 consists of 92 cells:
 
-```{r}
+```{r [Sp6]}
 idx = (extendedNeighbours$nodeA == 16307 |
        extendedNeighbours$nodeB == 16307)
 nbhd = unique(c(extendedNeighbours$nodeA[idx],
@@ -115,7 +115,7 @@ length(nbhd)
 We can also create neighbours based on Euclidean distance in the tissue.
 
 
-```{r}
+```{r [Sp7]}
 euclideanNeighbours = computeNeighboursEuclidean(centroids,
 threshold=20)
 ```
@@ -152,7 +152,7 @@ in each of our extended neighbourhoods and display the clustering of
 the neighbourhoods (called aggregation_clusters) both on the tissue
 plot and on the resulting UMAP.
 
-```{r}
+```{r [Sp8]}
 agg = aggregateGeneExpression(smallXenium,extendedNeighbours,
                                     verbose=FALSE)
 smallXenium$aggregateNBHDClusters = agg@active.ident
@@ -178,7 +178,7 @@ genes based on their expression across the different neighbourhoods.
 Given any of the spatial graphs describing neighbourhoods calculated above,
 we can now calculate the cell type composition of neighbourhoods.
 
-```{r}
+```{r [Sp9]}
 NBHDByCTMatrix = computeNBHDByCTMatrix(delaunayNeighbours, clusters)
 ```
 
@@ -187,7 +187,7 @@ The values in the matrix indicate the number of cells of a given type within a
 neighbourhood. 
 
 Let's do the same for our extended neighbourhoods.
-```{r}
+```{r [Sp10]}
 NBHDByCTMatrixExtended = 
   computeNBHDByCTMatrix(extendedNeighbours, clusters)
 ```
@@ -196,7 +196,7 @@ NBHDByCTMatrixExtended =
 
 We can go on to calculate a matrix which gives the fraction of contacts cells of
 a given type make with cells of another cell type.
-```{r}
+```{r [Sp11]}
 cellTypesPerCellTypeMatrix = 
   computeCellTypesPerCellTypeMatrix(NBHDByCTMatrix,clusters)
 ```
@@ -211,7 +211,7 @@ display contact based interactions that constitute at least 5% of a cell type's
 interactions. Of note, this graph is directed as, for example, 50% of cell type
 A's interactions might be with cell type B, but only 5% of cell type B's 
 interactions might be with cell type A.   
-```{r}
+```{r [Sp12]}
 colours = DiscretePalette(length(levels(clusters)), palette = "polychrome")
 names(colours) = levels(clusters)
 
@@ -233,14 +233,14 @@ these edges is symmetric.  However, numbers of cells of types A and B
 are not necessarily equal, and this accounts for the assymmetry in the
 fractions. 
 
-```{r}
+```{r [Sp13], message=FALSE}
 library(pheatmap,quietly=TRUE)
 pheatmap(cellTypesPerCellTypeMatrix)
 ```
 
 Let's do the same for our extended nighbourhoods.
 
-```{r}
+```{r [Sp14]}
 cellTypesPerCellTypeMatrixExtended = computeCellTypesPerCellTypeMatrix(NBHDByCTMatrixExtended,clusters)
 
 cellTypesPerCellTypeGraphFromCellMatrix(cellTypesPerCellTypeMatrixExtended,
@@ -255,7 +255,7 @@ each vertice is preserved. As this is carried out on the level of
 counts of undirected edges between celltypes the p value matrix is
 symmetric.
 
-```{r}
+```{r [Sp15]}
 cellTypesPerCellTypePValues = computeNeighbourEnrichment(delaunayNeighbours, 
                                           clusters, nSim=100,verbose = FALSE)
 ```
@@ -264,7 +264,7 @@ cellTypesPerCellTypePValues = computeNeighbourEnrichment(delaunayNeighbours,
 
 
 Let's plot -log10(pvalue)
-```{r}
+```{r [Sp16]}
 cellTypesPerCellTypePValuesNegLog = -log10(cellTypesPerCellTypePValues)
 pheatmap(cellTypesPerCellTypePValuesNegLog)
 ```
@@ -278,17 +278,17 @@ reduction and clustering based on neighbourhood composition. As the
 dimensionality of the feature space is relatively low (number of cell
 types) we calculate the UMAP using features rather than PCs.
 
-```{r}
+```{r [Sp17]}
 NBHDByCTSeurat = computeNBHDVsCTObject(NBHDByCTMatrix,verbose=FALSE)
 ```
 
 Add cell type information to the neighbourhoodSeurat object.
-```{r}
+```{r [Sp18]}
 NBHDByCTSeurat$cellType = clusters
 ```
 
 Visualise neighbourhood clusters.
-```{r}
+```{r [Sp19]}
 DimPlot(NBHDByCTSeurat, group.by = c("cellType"), cols = "polychrome", reduction = "umap")
 DimPlot(NBHDByCTSeurat, group.by = c("neighbourhood_clusters"), cols = "polychrome", reduction = "umap")
 ```
@@ -298,23 +298,23 @@ We can now add information on neighbourhood clusters to our original
 Xenium object and visualise these on the tissue.
 
 
-```{r}
+```{r [Sp20]}
 smallXenium$NBHDCluster = NBHDByCTSeurat@active.ident
 ImageDimPlot(smallXenium, group.by = "NBHDCluster", size = 1, cols = "polychrome")
 ```
 
 Let's try the same thing with our extended neighbourhoods up to degree 4.
-```{r}
+```{r [Sp21]}
 NBHDByCTSeuratExtended = computeNBHDVsCTObject(NBHDByCTMatrixExtended,
                                                verbose=FALSE)
 ```
 Add cell type information to the NBHDByCTSeuratExtended object.
-```{r}
+```{r [Sp22]}
 NBHDByCTSeuratExtended$cellType = clusters
 ```
 
 Visualise extended neighbourhood clusters.
-```{r}
+```{r [Sp23]}
 DimPlot(NBHDByCTSeuratExtended, group.by = c("cellType"), cols = "polychrome", reduction = "umap")
 DimPlot(NBHDByCTSeuratExtended, group.by = c("neighbourhood_clusters"), cols = "polychrome", reduction = "umap")
 ```
@@ -322,7 +322,7 @@ DimPlot(NBHDByCTSeuratExtended, group.by = c("neighbourhood_clusters"), cols = "
 We can now add information on extended neighbourhood clusters to our
 original Xenium object and visualise these on the tissue.
 
-```{r}
+```{r [Sp24]}
 smallXenium$NBHDClusterExtended= 
   NBHDByCTSeuratExtended@active.ident
 ImageDimPlot(smallXenium, group.by = c("NBHDClusterExtended"), 
@@ -347,7 +347,7 @@ each cell type A and each neighbourhood type B, we can ask what
 percentage of the time a cell of type A sits at the center of a
 neighbourhood of type B.
 
-```{r}
+```{r [Sp25]}
 CTByNBHDCluster = table(NBHDByCTSeurat$cellType,NBHDByCTSeurat@active.ident)
 CTByNBHDCluster = CTByNBHDCluster/rowSums(CTByNBHDCluster)
 
@@ -367,7 +367,7 @@ This allows us to see which cell types share the same niche (neighbourhood
 clusters). Let's also perform this analysis using the extended neighbourhoods. 
 
 
-```{r}
+```{r [Sp26]}
 CTByNBHDClusterExtended = table(NBHDByCTSeuratExtended$cellType,NBHDByCTSeuratExtended@active.ident)
 CTByNBHDClusterExtended = CTByNBHDClusterExtended/rowSums(CTByNBHDClusterExtended)
 
@@ -396,7 +396,7 @@ large feature space (number of cells) however a low number of observations
 the low number of observations we need to set a lower value for n.neighbours.
 
 
-```{r}
+```{r [Sp27]}
 CTByNBHDSeurat = 
   computeNBHDVsCTObject(t(NBHDByCTMatrix), npcs = 10, 
                         transpose = TRUE, resolution = 1, n.neighbors = 5,
@@ -414,7 +414,7 @@ neighbourhoods.
 
 We can also compute a force-directed graph embedding.
 
-```{r}
+```{r [Sp28]}
 CTByNBHDSeurat= computeGraphEmbedding(CTByNBHDSeurat)
 
 DimPlot(CTByNBHDSeurat,group.by = "cellType", cols = "alphabet", reduction = "graph", label = TRUE)
@@ -423,26 +423,26 @@ DimPlot(CTByNBHDSeurat,group.by = "cellType", cols = "alphabet", reduction = "gr
 From this  11_oligo and 5_Astro appear to be in neighbourhoods distinct from the 
 other cell types. Looking at cell type localisation in the tissue shows that 
 they colocalise.
-```{r}
+```{r [Sp29]}
 ImageDimPlot(smallXenium, cols = "polychrome", size = 1)
 ```
 
 
 Clustering cell types using the Louvain algorithm acheives only one cluster. 
 Let's try hierachical clustering.
-```{r}
+```{r [Sp30]}
 pca = Embeddings(CTByNBHDSeurat, reduction = "pca")
 res = pheatmap(pca)
 ```
 
 Here we decide to cut the tree at the correct level to form 11 clusters.
-```{r}
+```{r [Sp31]}
 CTClust = cutree(res$tree_row, k = 11)
 CTByNBHDSeurat$neighbourhood_clusters = factor(CTClust)
 ```
 
 Let's look at the celltype composition of these clusters.
-```{r}
+```{r [Sp32]}
 CTComposition = table(CTByNBHDSeurat$cellType, CTByNBHDSeurat$neighbourhood_clusters)
 pheatmap(CTComposition)
 ```
@@ -452,7 +452,7 @@ contains several cell types. We anticipate this analysis may be more informative
 when performed on a larger tissue area, as some cell types are poorly 
 represented in this subset. To this end we demonstrate how to explore the 
 relationship between neighbourhood clusters and cell type clusters.
-```{r}
+```{r [Sp33]}
 averageExpMatrix = getAverageExpressionMatrix(NBHDByCTSeurat,
                            CTByNBHDSeurat,
 			    clusteringName='neighbourhood_clusters')
@@ -479,27 +479,27 @@ where expression values for genes are permuted. N.B in this
 implementation equal weights are given to all neighbours of a cell.
 Minimum values are limited by nSim, the number of permutations used.
 
-```{r}
+```{r [Sp34]}
 moransI = runMoransI(smallXenium, delaunayNeighbours, assay = "SCT", 
                      layer = "data", nSim = 20, verbose = FALSE)
 ```
 Look at most spatially autocorrelated genes.
-```{r}
+```{r [Sp35]}
 head(moransI)
 ```
 
 Look at least spatially autocorrelated genes.
-```{r}
+```{r [Sp36]}
 tail(moransI)
 ```
 
 Here we visualise the most spatially autocorrelated gene.
-```{r}
+```{r [Sp37]}
 ImageFeaturePlot(smallXenium, "Nwd2")
 ```
 
 Here we visualise the least spatially autocorrelated gene.
-```{r}
+```{r [Sp38]}
 ImageFeaturePlot(smallXenium, "Trbc2")
 ```
 
@@ -523,10 +523,13 @@ simulated data - this allows us to assign a pvalue for the enrichment
 of these interactions.
 
 
-```{r}
+```{r [Sp39]}
 
-ligandReceptorResults = performLigandReceptorAnalysis(smallXenium, delaunayNeighbours, 
-                                                "mouse", clusters,verbose=FALSE)
+## Running this example takes a while:
+## ligandReceptorResults = performLigandReceptorAnalysis(smallXenium, delaunayNeighbours, 
+##                                                "mouse", clusters,verbose=FALSE)
+## Accordingly, we retrieve precomputed results:
+ligandReceptorResults = getExample('ligandReceptorResults')
 ```
 
 
@@ -534,28 +537,28 @@ We look at interactions on edges.  For concision, we display the
 first six of our 28 ligand-receptor pairs.  Since ligand-receptor
 interactions are directed, each undirected edge will show up both as
 cell A - cell B and as cell B - cell A.
-```{r}
+```{r [Sp40]}
 head(ligandReceptorResults$interactionsOnEdges[,1:10],10)
 ```
 
 Look at total interactions between/within clusters:
-```{r}
+```{r [Sp41]}
 head(ligandReceptorResults$totalInteractionsByCluster[,1:10],10)
 ```
 
 Look at mean interactions per edge between/within clusters (sum of ligand 
 receptor interactions on A-B edges)/(total A-B edges):
-```{r}
+```{r [Sp42]}
 head(ligandReceptorResults$meanInteractionsByCluster[,1:10],10)
 ```
 
 Look at number of times observed interactions are more frequent than expected:
-```{r}
+```{r [Sp43]}
 head(ligandReceptorResults$simResults[,1:10],10)
 ```
 
 Look at pvalues (upper tail) for the enrichment of interactions.
-```{r}
+```{r [Sp44]}
 head(ligandReceptorResults$pValues,10)
 ```
 
@@ -563,12 +566,12 @@ head(ligandReceptorResults$pValues,10)
 Plot a heatmap showing -log10(pvalues) for the enrichment of ligand-receptor 
 interactions between pairs of clusters. 
 
-```{r}
+```{r [Sp45]}
 ligRecMatrix = makeLRInteractionHeatmap(ligandReceptorResults, clusters, colours = colours, labelClusterPairs = FALSE)
 ```
 
 Make a heatmap of total ligand-receptor interactions between clusters.
-```{r}
+```{r [Sp46]}
 cellTypePerCellTypeLigRecMatrix = makeSummedLRInteractionHeatmap(ligandReceptorResults, clusters, "total")
 ```
 
@@ -576,24 +579,24 @@ Make a heatmap of summed mean ligand/receptor interactions between
 clusters i.e., (sum of all ligand receptor interactions on A-B edges)/(total
 A-B edges)
 
-```{r}
+```{r [Sp47]}
 cellTypePerCellTypeLigRecMatrix = makeSummedLRInteractionHeatmap(ligandReceptorResults, clusters, "mean", logScale = TRUE)
 ```
 
 Look at a histogram of values for summed mean ligand/receptor interactions between clusters.
-```{r}
+```{r [Sp48]}
 hist(cellTypePerCellTypeLigRecMatrix)
 ```
 
 Visualise in graph format.
-```{r}
+```{r [Sp49]}
 cellTypesPerCellTypeGraphFromCellMatrix(cellTypePerCellTypeLigRecMatrix, 
                                     minWeight = 0.4, colours = colours)
 ```
 Here the arrows are very thick - we can scale by a constant factor to improve the
 presentation.
 
-```{r}
+```{r [Sp50]}
 scaleFactor = 3
 cellTypesPerCellTypeGraphFromCellMatrix(cellTypePerCellTypeLigRecMatrix/scaleFactor, 
                                     minWeight = 0.4/scaleFactor, colours = colours)
@@ -610,13 +613,13 @@ slightly separate but both between the centroids of cells A and B. The
 interaction (ligand receptor pair) on an edge. This is useful for
 visualising where ligand receptor interactions occur spatially.
 
-```{r}
+```{r [Sp51]}
 edgeSeurat = computeEdgeObject(ligandReceptorResults, centroids)
 ```
 
 
 For example we can visualise the Pdyn-Npy2r interaction.
-```{r}
+```{r [Sp52]}
 ImageFeaturePlot(edgeSeurat, features = "Pdyn-Npy2r")
 ```
 
@@ -633,35 +636,35 @@ become nodes and A-B edges (in the original graph) become connected to all
 A- edges and all B- edges. This allows us to perfom graph-based
 analyses associated with 
 the spatial localisation of ligand receptor pairs on edges.  
-```{r}
+```{r [Sp53]}
 edgeNeighbours = computeEdgeGraph(delaunayNeighbours)
 ```
 
 Compute Moran's I for the spatial autocorrelation of ligand-receptor interactions.
-```{r, eval=FALSE}
+```{r [Sp54] , eval=FALSE}
 moransILigandReceptor = runMoransI(edgeSeurat, edgeNeighbours, assay = "RNA", 
                      layer = "counts", nSim = 100)
 ```
 
 View most spatially autocorrelated ligand-receptor interactions.
-```{r}
+```{r [Sp55]}
 moransILigandReceptor = getExample('moransILigandReceptor')
 head(moransILigandReceptor)
 ```
 
 View least spatially autocorrelated ligand-receptor interactions.
-```{r}
+```{r [Sp56]}
 tail(moransILigandReceptor)
 ```
 
 
 View ligand-receptor interaction with the highest spatial autocorrelation (Moran's I).
-```{r}
+```{r [Sp57]}
 ImageFeaturePlot(edgeSeurat, "Penk-Htr1f")
 ```
 
 View ligand-receptor interaction with the lowest spatial autocorrelation (Moran's I).
-```{r}
+```{r [Sp58]}
 ImageFeaturePlot(edgeSeurat, "Sst-Gpr17")
 ```
 
@@ -684,7 +687,7 @@ the edges based on cutoffs.
 This functions annotates edges with their lengths and the cell types
 of the two cells in question.
 
-```{r}
+```{r [Sp59]}
 annEdges =
 edgeLengthsAndCellTypePairs(delaunayNeighbours,clusters,centroids)
 head(annEdges)
@@ -696,7 +699,7 @@ Here we visualise the distribution of edge lengths together with
 proposed cutoffs.  We will say more in a moment about how these
 proposed cutoffs are calculated.
 
-```{r}
+```{r [Sp60]}
 cutoffDF = edgeCutoffsByPercentile(annEdges,percentileCutof=95)
 g = edgeLengthPlot(annEdges,cutoffDF,whichPairs=60)
 print(g)
@@ -721,7 +724,7 @@ pair.
 
 #### edgeCutoffsByClustering
 
-```{r}
+```{r [Sp61]}
 cutoffDF = edgeCutoffsByClustering(annEdges)
 ```
 
@@ -737,7 +740,7 @@ produce a spurious cutoff.
 #### edgeCutoffsByPercentile
 
 
-```{r}
+```{r [Sp62]}
 cutoffDF = edgeCutoffsByPercentile(annEdges,percentileCutoff=95)
 ```
 
@@ -751,7 +754,7 @@ cell type pairs.
 #### edgeCutoffsByZScore
 
 
-```{r}
+```{r [Sp63]}
 cutoffDF = edgeCutoffsByZScore(annEdges,zCutoff=1.5)
 ```
 
@@ -762,7 +765,7 @@ percentile.
 #### edgeCutoffsByWatershed
 
 
-```{r}
+```{r [Sp64]}
 cutoffDF = edgeCutoffsByWatershed(annEdges,nbins=15,tolerance=10)
 ```
 
@@ -777,7 +780,7 @@ algorithm.
 
 #### cullEdges
 
-```{r}
+```{r [Sp65]}
 cutoffDF = edgeCutoffsByWatershed(annEdges,nbins=15,tolerance=10)
 culledEdges = cullEdges(annEdges,cutoffDF)
 nrow(annEdges)
@@ -789,7 +792,7 @@ can be a cutoff data frame as produced by any of the edgeCutoff
 functions or can be a single number in which case all the cell type
 pairs will be trimmed to the same cutoff.
 
-```{r}
+```{r [Sp66]}
 sessionInfo()
 ```
 
