@@ -292,5 +292,130 @@ meanGeneClusterOnCellUMAP = function(f,fPrime,geneCluster)
     return(g)
 }
 
+## ####################################################
+#' This gets z-scores for the values of features
+#'
+#' @param f - a Seurat object of cells or SingleCellExperiment to
+#' be converted to a Seurat object
+#' @param featurs - a set of features to retrieve z-scores for,
+#' defaults to rownames(f)
+#' @param layer - the data layer to retrieve
+#' @return This returns a data frame with a column for each
+#' feature and a row for each cell
+#' @export
+#' @examples
+#' getExample = make.getExample()
+#' exSeuratObj = getExample('exSeuratObj',toy=TRUE)
+#' df = getFeatureZScores(exSeuratObj)
+getFeatureZScores = function(f,features=rownames(f),layer='data')
+{
+    f = acceptor(f)
+    
+    df = FetchData(f,features,layer=layer)
+    
+    for(i in 1:ncol(df))
+        df[,i] = (df[,i] - mean(df[,i])) / sd(df[,i])
+
+    return(df)
+}
+
+## ####################################################
+#' This finds the mean z-score for features in subsets
+#' of cells e.g., in each of the seurat_clusters
+#'
+#' @param f - a Seurat object of cells or SingleCellExperiment to
+#' be converted to a Seurat object
+#' @param features - a set of features of f
+#' @param clusterBy - the name of the column of f@meta.data to
+#' be used to subset the cells
+#' @param layer - the data layer to be used for z-scores
+#' @return This returns a data frame each of whose columns
+#' corresponds to a value of the clusterBy data.  In the case
+#' where the clusterBy data is a factor or numeric, it prepends
+#' cluster_ to the column name.
+#' @export
+#' @examples
+#' getExample = make.getExample()
+#' exSeuratObj = getExample('exSeuratObj',toy=TRUE)
+#' STranspose = getExample('STranspose',toy=TRUE)
+#' df = meanZPerCluster(exSeuratObj,features=colnames(STranspose),
+#'                      clusterBy='shortName')
+meanZPerCluster = function(f,
+                           features,
+                           clusterBy='seurat_clusters',
+                           layer='data')
+{
+    f = acceptor(f)
+    
+    clusters = unique(f@meta.data[,clusterBy])
+    clusters = clusters[order(clusters)]
+    if(isa(clusters,'numeric') |
+       isa(clusters,'factor'))
+    {
+        Clusters = paste0('cluster_',clusters)
+    } else {
+        Clusters = as.character(clusters)
+    }
+
+    z = getFeatureZScores(f,features=features,layer=layer)
+
+    df = list()
+    for(i in 1:length(clusters))
+    {
+        cluster = clusters[i]
+        Cluster = Clusters[i]
+
+        cells = colnames(f)[f@meta.data[,clusterBy] == cluster]
+        meanZ = colMeans(z[cells,])
+
+        df[[Cluster]] = meanZ
+    }
+    df = as.data.frame(df)
+    rownames(df) = features
+
+    return(df)
+}
+
+## ####################################################
+#' This collects together mean z-score data together with
+#' UMAP coordinates from the gene seurat object for plotting.
+#'
+#' @param f - a Seurat object of cells or SingleCellExperiment to
+#' be converted to a Seurat object
+#' @param fPrime - the corresponding Seurat object of genes
+#' SingleCellExperiment to be converted to a Seurat object
+#' @param clusterBy - the name of the column of f@meta.data to
+#' be used to subset the cells
+#' @param layer - the data layer to be used for z-scores
+#' @return This returns a data frame with the UMAP coordinates
+#' of the gene Seurat object and the average z-score for each
+#' gene within each of the cell clusters defined by the clusterBy
+#' column of the meta.data of f.
+#' @export
+#' @examples
+#' getExample = make.getExample()
+#' exSeuratObj = getExample('exSeuratObj',toy=TRUE)
+#' STranspose = getExample('STranspose',toy=TRUE)
+#' df = meanZPerClusterOnUMAP(exSeuratObj,STranspose,clusterBy='shortName')
+meanZPerClusterOnUMAP = function(f,
+                                 fPrime,
+                                 clusterBy='seurat_clusters',
+                                 layer='data')
+{
+    f = acceptor(f)
+    fPrime = acceptor(fPrime)
+    
+    umap = FetchData(fPrime,c('umap_1','umap_2'))
+    umap = cbind(gene=colnames(fPrime),umap)
+    rownames(umap) = umap$gene
+
+    meanZ = meanZPerCluster(f,
+                            features=colnames(fPrime),
+                            clusterBy=clusterBy,
+                            layer=layer)
+    umap = cbind(umap,meanZ)
+
+    return(umap)
+}
 
 
