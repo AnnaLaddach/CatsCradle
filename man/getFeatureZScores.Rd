@@ -12,13 +12,13 @@ getFeatureZScores(f, features = rownames(f), layer = "data")
 be converted to a Seurat object
 }}
 
-\item{layer}{\itemize{
-\item the data layer to retrieve
-}}
-
-\item{featurs}{\itemize{
+\item{features}{\itemize{
 \item a set of features to retrieve z-scores for,
 defaults to rownames(f)
+}}
+
+\item{layer}{\itemize{
+\item the data layer to retrieve
 }}
 }
 \value{

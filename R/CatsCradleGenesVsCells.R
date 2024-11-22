@@ -297,7 +297,7 @@ meanGeneClusterOnCellUMAP = function(f,fPrime,geneCluster)
 #'
 #' @param f - a Seurat object of cells or SingleCellExperiment to
 #' be converted to a Seurat object
-#' @param featurs - a set of features to retrieve z-scores for,
+#' @param features - a set of features to retrieve z-scores for,
 #' defaults to rownames(f)
 #' @param layer - the data layer to retrieve
 #' @return This returns a data frame with a column for each

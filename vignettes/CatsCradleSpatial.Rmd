@@ -257,10 +257,27 @@ symmetric.
 
 ```{r [Sp15]}
 cellTypesPerCellTypePValues = computeNeighbourEnrichment(delaunayNeighbours, 
-                                          clusters, nSim=100,verbose = FALSE)
+                                          clusters, nSim=100,
+					  randomiseBy='graph',verbose = FALSE)
 ```
 
-
+This function uses permutation testing to compute p values for the
+enrichment of each cell type in the neighbourhoods of cells of a each
+cell type.  This requires randomisation of the actual data and this
+function offers two methods of randomisation, controlled by the
+parameter randomiseBy.  With the value randomiseBy='cells', the
+default, randomisaiton is carried out by fixing the underlying graph
+(e.g., Delaunay neigbhours graph) and permuting the cell types.  For
+counting purposes, we keep the actual cell type at the center of each
+neighbourhood and count the permuted cell types surrounding it.  With
+the value randomiseBy = 'graph' we use the function randomiseGraph()
+to permute the underlying graph.  This uses a heuristic to produce a
+random graph which preserves the degrees of the vertices.  When
+applied to a Delaunay neighbours graph this can produce a small number
+of self-edges and a small number of duplicated edges.  In our
+experience, these are sufficiently few in number as to not interfere
+with the use of this randomisation method for permutation testing.
+randomiseBy='cells' is quicker.
 
 
 Let's plot -log10(pvalue)
