@@ -214,6 +214,42 @@ g = ggplot(df,aes(x=logPValue)) +
     ggtitle('Hallmark gene set p-values')
 print(g)
 ```
+
+We have referred to median complement distance p-values as detecting
+clustering, but it might be more accurate to describe it as curdling.
+That is, it does not detect the tendency of the subset to co-locate in
+one region of the superset.  Rather, it detects the tendency of points
+in the subset to stick close to each other.  Accordingly, it makes
+sense to look at clustering within the subset.  To do this, we analyse
+the Delaunay triangulation of the subset within the gene UMAP.  We
+then classify the edges in this triangulation into shorter and longer
+edges which are assumed to be intra-subcluster and inter-subcluster
+edges.  We discard the longer edges and look for the components of the
+resulting graph.
+
+```{r [CC10.5]}
+h = "HALLMARK_ALLOGRAFT_REJECTION"
+theSubset = hallmark[[h]]
+theSubset = intersect(theSubset,colnames(STranspose))
+alpha = .5
+clusters = getSubsetComponents(STranspose,theSubset,alpha)
+umap = FetchData(STranspose,c('umap_1','umap_2'))
+umap$gene = rownames(umap)
+numClusters = length(clusters)
+umap$component = 0
+for(i in 1:length(clusters))
+    umap[clusters[[i]],'component'] = i
+umap$component = factor(umap$component)
+title = paste(h,'alpha =',alpha)
+idx = umap$component != 0
+g = ggplot() +
+    geom_point(data=umap,aes(x=umap_1,y=umap_2),color='grey') +
+    geom_point(data=umap[idx,],aes(x=umap_1,y=umap_2),color='black',size=3.5) +
+    geom_point(data=umap[idx,],aes(x=umap_1,y=umap_2,color=component),size=3) +
+    ggtitle(title)
+print(g)
+```
+
 ## Gene z-scores on gene UMAP
 
 Here we show that gene UMAP can reveal co-location of the genes that

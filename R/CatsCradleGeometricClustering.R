@@ -336,3 +336,93 @@ medianComplementPValue = function(S,idx,numTrials=1000,returnTrials=FALSE)
 }
 
  
+## ####################################################
+#' This is designed to dectect the components of a
+#' gene subset in the case where median complement
+#' distance detects clustering.
+#'
+#' @param fPrime - a gene Seurat object or
+#' SingleCellExperiment
+#' @param theSubset - a subset of the genes
+#' @param alpha - a parameter typically less than
+#' one controling the granularity of the components.
+#' Defaults to .5
+#' edgeCut - the maximum length of edges included in
+#' the subgraph whose components are returned.  If it
+#' is NA (the default) it is computed using alpha.
+#' Otherwise, it can be supplied directly.
+#' @return A list of the components of the subset
+#' treated as a graph whose edges are determined by
+#' their distance in UMAP coordinates.
+#' @export
+getSubsetComponents = function(fPrime,
+                               theSubset,
+                               alpha=.5,
+                               edgeCut=NA)
+{
+    fPrime = acceptor(fPrime)
+    
+    ## Subset to the gene subset in question:
+    fSubset = fPrime[,theSubset]
+    centroids = FetchData(fSubset,c('umap_1','umap_2'))
+
+    ## Triangulate the subset:
+    triangulation = computeNeighboursDelaunay(centroids)
+    edgeLengths = c()
+
+    ## Get the edge lengths:
+    for(i in 1:nrow(triangulation))
+    {
+        a = as.numeric(centroids[triangulation$nodeA[i],])
+        b = as.numeric(centroids[triangulation$nodeB[i],])
+        delta = a - b
+                       
+        edgeLengths[i] = Norm(delta)
+    }
+
+
+    if(is.na(edgeCut))
+    {
+        ## Find the cut by 2-means clustering of edge lengths:
+        k = kmeans(edgeLengths,centers=c(min(edgeLengths),max(edgeLengths)))
+        M1 = max(edgeLengths[k$cluster==1])
+        m2 = min(edgeLengths[k$cluster==2])
+
+        cut = mean(M1,m2)
+        edgeCut = alpha * cut
+    }
+
+    ## Subset triangulation to shorter edges:
+    idx = edgeLengths <= edgeCut
+    subgraph = triangulation[idx,]
+    vertices = unique(c(subgraph$nodeA,subgraph$nodeB))
+    vertices = vertices[order(vertices)]
+    numVertices = length(vertices)
+
+    ## Get adjacency matrix:
+    M = matrix(0,nrow=numVertices,ncol=numVertices)
+    rownames(M) = vertices
+    colnames(M) = vertices
+    for(i in 1:nrow(subgraph))
+    {
+        a = subgraph$nodeA[i]
+        b = subgraph$nodeB[i]
+        M[a,b] = 1
+        M[b,a] = 1
+    }
+
+    ## Get igraph:
+    subsetAsIgraph = igraph::graph_from_adjacency_matrix(M)
+    components = igraph::components(subsetAsIgraph)
+
+    theComponents = list()
+    for(i in 1:components$no)
+    {
+        idx = components$membership == i
+        theComponents[[i]] = vertices[idx]
+    }
+
+    return(theComponents)
+}
+
+
