@@ -3,8 +3,10 @@
 \name{computeNeighbourEnrichment}
 \alias{computeNeighbourEnrichment}
 \title{This function calculates P values for whether cell types are more frequently
-neighbours than expected by chance. It does this by comparison to randomised
-neighbour graphs where edges are randomised but the degree of each node is
+neighbours than expected by chance.  It offers two distinct randomisations.
+One is by permuting the cell types on the neighbour (e.g., delaunay)
+graph.  The other is by comparison to randomised  neighbour graphs
+where edges are randomised but the degree of each node is
 preserved.}
 \usage{
 computeNeighbourEnrichment(
@@ -12,6 +14,7 @@ computeNeighbourEnrichment(
   cellTypes,
   nSim = 1000,
   maxTries = 1000,
+  randomiseBy = "cells",
   verbose = TRUE
 )
 }
@@ -35,18 +38,29 @@ calculation.
 graph randomisation. If self edges are remeining this will be reported.
 }}
 
+\item{randomiseBy}{\itemize{
+\item This takes either the value 'cells' (the default)
+or 'graph'.  In the former case randomisation is carried out by permuting
+the cell types on the existing graph.  In the latter case, the graph is
+permuted using the function randomiseGraph() which is a heuristic
+algorithm to preserve the distribution of vertex degrees.
+}}
+
 \item{verbose}{\itemize{
 \item whether to print trace.  Defaults to TRUE
 }}
 }
 \value{
-A square matrix containing upper tail p values describing whether two
-cell types are more frequently found together than expected by chance.
+A square matrix containing upper tail p values describing
+whether two  cell types are more frequently found together than
+expected by chance.
 }
 \description{
 This function calculates P values for whether cell types are more frequently
-neighbours than expected by chance. It does this by comparison to randomised
-neighbour graphs where edges are randomised but the degree of each node is
+neighbours than expected by chance.  It offers two distinct randomisations.
+One is by permuting the cell types on the neighbour (e.g., delaunay)
+graph.  The other is by comparison to randomised  neighbour graphs
+where edges are randomised but the degree of each node is
 preserved.
 }
 \examples{

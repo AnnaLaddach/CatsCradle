@@ -13,11 +13,12 @@ randomiseGraph(spatialGraph, maxTries = 1000)
 
 \item{maxTries}{\itemize{
 \item the maximum number of tries to remove self edges during
-graph randomisation. If self edges are remeining this will be reported.
+graph randomisation. If self edges are remaining this will be reported.
 }}
 }
 \value{
 A randomised graph where degree from the original graph is preserved.
+We also report any duplicated edges.
 }
 \description{
 This function performs degree-preserving randomisation of neighbour graphs.

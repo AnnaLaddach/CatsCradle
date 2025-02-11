@@ -123,7 +123,7 @@ neighbourhoods around cells of that type and reports their average
 composition as to the cell types they contain.
 * __cellTypesPerCellTypePValues__ This gives the statistical
 significance for the enrichment of cell types in the neighbourhoods of
-each cell type.
+each cell type, computed using randomiseBy = 'cells'.
 
 
 ```{r [Ex5]}

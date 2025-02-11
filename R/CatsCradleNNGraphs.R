@@ -190,8 +190,10 @@ symmetriseNN = function(NN)
 #'
 #' @param spatialGraph - a spatial graph in neighbour list format.
 #' @param maxTries - the maximum number of tries to remove self edges during 
-#' graph randomisation. If self edges are remeining this will be reported.
+#' graph randomisation. If self edges are remaining this will be reported.
 #' @return A randomised graph where degree from the original graph is preserved.
+#' We also report any duplicated edges.
+#' @export
 randomiseGraph = function(spatialGraph, maxTries = 1000){
   n = nrow(spatialGraph)
   toFlip = sample(seq_len(n), size = round(n/2))
@@ -212,6 +214,11 @@ randomiseGraph = function(spatialGraph, maxTries = 1000){
   if (nSelf > 0){
     print(paste0(nSelf, " self edges not removed"))
   }
+  ndup = sum(duplicated(simGraph))
+  if(ndup > 0) {
+      print(paste0(ndup," duplicated edges"))
+  }
+      
   return(simGraph)
 }
 
