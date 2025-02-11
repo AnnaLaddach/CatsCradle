@@ -1,6 +1,6 @@
 Package: CatsCradle
 Title: This package provides methods for analysing spatial transcriptomics data and for discovering gene clusters
-Version: 1.1.0
+Version: 1.1.1
 Authors@R: 
     c(person(given = "Anna",
         family = "Laddach",
