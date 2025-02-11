@@ -243,6 +243,7 @@ collapseExtendedNBHDs = function(extendedNeighboursList,
 #' @param neighbourhoods - neighbourhoods given as a
 #' data frame with columns nodeA and nodeB, for example
 #' the output of collapseNeighbourhoods
+#' @param self - include cell in its neighbourhood, defaults to FALSE
 #' @return a named list with memberships of the neighbourhoods
 #' of cells
 #' @export
@@ -251,16 +252,21 @@ collapseExtendedNBHDs = function(extendedNeighboursList,
 #' cells = unique(c(delaunayNeighbours[,'nodeA'],delaunayNeighbours[,'nodeB']))
 #' nbhdsList = nbhdsAsEdgesToNbhdsAsList(cells,delaunayNeighbours)
 nbhdsAsEdgesToNbhdsAsList = function(cells,
-                                     neighbourhoods)
+                                     neighbourhoods, self = FALSE)
 {
     nbhdList = list()
-    for(cell in cells)
-    {
-        nbhdList[[cell]] = c(cell,
-                             neighbourhoods$nodeB[neighbourhoods$nodeA == cell])
+    if (self) {
+      for(cell in cells)
+      {
+          nbhdList[[cell]] = c(cell,
+                               neighbourhoods$nodeB[neighbourhoods$nodeA == cell])
+      }
+    } else {
+      for(cell in cells)
+      {
+        nbhdList[[cell]] = c(neighbourhoods$nodeB[neighbourhoods$nodeA == cell])
+      }
     }
-
     return(nbhdList)
 }
-
 
