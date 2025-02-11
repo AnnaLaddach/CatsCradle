@@ -411,6 +411,7 @@ computeNeighbourEnrichment = function(spatialGraph, cellTypes, nSim = 1000,
 #' collapsed expanded edge graph, as produced by
 #' collapseNeighbourhoods. In particular, each cell should
 #' appear as nodeA.
+#' @param self - include cell in its neighbourhood, defaults to FALSE
 #' @param verbose - used to control trace, defaults to TRUE
 #' @param returnType - Will return a SingleCellExperiment if this is either
 #' of SCE, SingleCellExperiment or their lower-case equivalents.  Otherwise,
@@ -424,7 +425,7 @@ computeNeighbourEnrichment = function(spatialGraph, cellTypes, nSim = 1000,
 #' smallXenium = getExample('smallXenium',toy=TRUE)
 #' extendedNeighbours = getExample('extendedNeighbours',toy=TRUE)
 #' agg = aggregateGeneExpression(smallXenium,extendedNeighbours,verbose=FALSE)
-aggregateGeneExpression = function(f,neighbourhoods,verbose=TRUE,
+aggregateGeneExpression = function(f, neighbourhoods, self = FALSE, verbose=TRUE,
                                          returnType='Seurat')
 {
     f = acceptor(f)
@@ -443,7 +444,7 @@ aggregateGeneExpression = function(f,neighbourhoods,verbose=TRUE,
     counts = data.matrix(counts)
 
     nbhdList =nbhdsAsEdgesToNbhdsAsList(cells,
-                                        neighbourhoods)
+                                        neighbourhoods, self = self)
     
     C = aggregateFeatureMatrix(counts, nbhdList, rowSums)
 
