@@ -22,7 +22,10 @@ SingleCellExperiment
 \item a parameter typically less than
 one controling the granularity of the components.
 Defaults to .5
-edgeCut - the maximum length of edges included in
+}}
+
+\item{edgeCut}{\itemize{
+\item the maximum length of edges included in
 the subgraph whose components are returned.  If it
 is NA (the default) it is computed using alpha.
 Otherwise, it can be supplied directly.

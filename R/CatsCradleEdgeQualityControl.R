@@ -22,32 +22,13 @@
 #' annEdges = edgeLengthsAndCellTypePairs(delaunayNeighbours,clusters,centroids)
 edgeLengthsAndCellTypePairs = function(edges,clusters,centroids)
 {
-    centr = data.matrix(centroids[,seq_len(2)])
-    delta = centr[edges$nodeA,] - centr[edges$nodeB,]
-
-    getLength = function(i)
-    {
-        return(Norm(delta[i,]))
-    }
-
-    theRun = seq_len(nrow(delta))
-    edges$length = unlist(lapply(theRun,getLength))
-
-    getClusterPair = function(i)
-    {
-        thePair = c(clusters[edges$nodeA[i]],
-                    clusters[edges$nodeB[i]])
-        thePair = thePair[order(thePair)]
-        tag = paste(thePair,collapse='_')
-
-        return(tag)
-    }
-
-    edges$cellTypePair = unlist(lapply(theRun,getClusterPair))
-    
-    return(edges)                      
+  coords  = cbind(centroids[edges$nodeA,c("x","y")],centroids[edges$nodeB,c("x","y")])
+  colnames(coords)= c("x1","y1","x2","y2")
+  edges$length = sqrt((coords$x2 - coords$x1)^2 + (coords$y2 - coords$y1)^2)
+  sortedClusters = t(apply(cbind(clusters[edges$nodeA], clusters[edges$nodeB]), 1, sort))
+  edges$cellTypePair = paste(sortedClusters[,1], sortedClusters[,2], sep = "_")
+  return(edges)    
 }
-
 
 ## ####################################################
 #' This finds proposed cutoffs for edge lengths by clustering

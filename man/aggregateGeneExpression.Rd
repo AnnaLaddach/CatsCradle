@@ -11,6 +11,7 @@ the cells in each neighbourhood}
 aggregateGeneExpression(
   f,
   neighbourhoods,
+  self = FALSE,
   verbose = TRUE,
   returnType = "Seurat"
 )
@@ -26,6 +27,10 @@ to be turned into a Seurat object
 collapsed expanded edge graph, as produced by
 collapseNeighbourhoods. In particular, each cell should
 appear as nodeA.
+}}
+
+\item{self}{\itemize{
+\item include cell in its neighbourhood, defaults to FALSE
 }}
 
 \item{verbose}{\itemize{

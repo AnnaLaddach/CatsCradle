@@ -4,7 +4,7 @@
 \alias{nbhdsAsEdgesToNbhdsAsList}
 \title{nbhdsAsEdgesToNbhdsAsList}
 \usage{
-nbhdsAsEdgesToNbhdsAsList(cells, neighbourhoods)
+nbhdsAsEdgesToNbhdsAsList(cells, neighbourhoods, self = FALSE)
 }
 \arguments{
 \item{cells}{\itemize{
@@ -16,6 +16,10 @@ extract.
 \item neighbourhoods given as a
 data frame with columns nodeA and nodeB, for example
 the output of collapseNeighbourhoods
+}}
+
+\item{self}{\itemize{
+\item include cell in its neighbourhood, defaults to FALSE
 }}
 }
 \value{

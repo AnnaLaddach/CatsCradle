@@ -347,7 +347,7 @@ medianComplementPValue = function(S,idx,numTrials=1000,returnTrials=FALSE)
 #' @param alpha - a parameter typically less than
 #' one controling the granularity of the components.
 #' Defaults to .5
-#' edgeCut - the maximum length of edges included in
+#' @param edgeCut - the maximum length of edges included in
 #' the subgraph whose components are returned.  If it
 #' is NA (the default) it is computed using alpha.
 #' Otherwise, it can be supplied directly.
