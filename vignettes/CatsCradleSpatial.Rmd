@@ -257,15 +257,21 @@ symmetric.
 
 ```{r [Sp15]}
 cellTypesPerCellTypePValues = computeNeighbourEnrichment(delaunayNeighbours, 
-                                          clusters, nSim=100,
-					  randomiseBy='graph',verbose = FALSE)
+                                          clusters)
 ```
 
-This function uses permutation testing to compute p values for the
-enrichment of each cell type in the neighbourhoods of cells of a each
-cell type.  This requires randomisation of the actual data and this
-function offers two methods of randomisation, controlled by the
-parameter randomiseBy.  With the value randomiseBy='cells', the
+By default it calculates p-values 
+analytically using a hypergeometric test on the edges, where the arguments 
+to the  R phyper function are as follows:
+  q = number of edges between cell type A and B 
+  m = number of edges between cell type B and any other cell type
+  n = the number of edges between any cell type apart from cell type B
+  k =  number of edges between cell type B and any other cell type
+
+This method is faster than permutation testing, however for legacy purposes, and 
+user flexibility, we allow for the calculation of P values by comparison to 
+randomised graphs. The function offers two methods of randomisation, controlled 
+by the parameter randomiseBy.  With the value randomiseBy='cells', the
 default, randomisaiton is carried out by fixing the underlying graph
 (e.g., Delaunay neigbhours graph) and permuting the cell types.  For
 counting purposes, we keep the actual cell type at the center of each
@@ -282,7 +288,7 @@ randomiseBy='cells' is quicker.
 
 Let's plot -log10(pvalue)
 ```{r [Sp16]}
-cellTypesPerCellTypePValuesNegLog = -log10(cellTypesPerCellTypePValues)
+cellTypesPerCellTypePValuesNegLog = -log10(cellTypesPerCellTypePValues + 0.001)
 pheatmap(cellTypesPerCellTypePValuesNegLog)
 ```
 
@@ -533,20 +539,35 @@ involving diffusable ligands. We also analyse the number
 of ligand receptor interactions that occur between cells from the same
 cluster and between cells from different clusters. Note that clusters
 may represent cell type, or another property of the cells such as
-their neighbourhood type. We leave this for the user to decide. We
-then calculate how frequently the number of ligand-receptor
-interactions observed between/within clusters is higher than in
-simulated data - this allows us to assign a pvalue for the enrichment
-of these interactions.
+their neighbourhood type. We leave this for the user to decide. 
 
+We then calculate an analytical p-value for the enrichment of ligand-receptor 
+interactions between clusters. Specifically probability of a cell being positive 
+for a gene is calculated using the hypergeometric distribution (R phyper 
+function), with:
+  q = number of cells of a specific cluster positive for a given gene.
+  m = number of cells in total positive for a given gene.
+  n = number of cells negative for a given gene.
+  k = total number of cells in a specific cluster.
+This is calculated for cluster A being positive for a ligand (pL), and 
+cluster B being positive for a receptor (pR). The upper tail p value for 
+observing a given number of A-B edges positive for a given interaction is 
+then calculated using a binomial test (R pbinom function) where:
+  q = number of A-B edges positive for an interaction
+  size = total number of A-B edges   
+  prob = pL*pR  
+
+This analytical method to calculate p-values has a faster run time than the 
+permutation-based method previously implemented in this package, however the 
+user can optionally choose to calculate permutation-based p-values by using 
+method = "permutation". Of note the speed of this method has also increased due 
+to the use of sparse matrices. 
 
 ```{r [Sp39]}
-
-## Running this example takes a while:
-## ligandReceptorResults = performLigandReceptorAnalysis(smallXenium, delaunayNeighbours, 
-##                                                "mouse", clusters,verbose=FALSE)
-## Accordingly, we retrieve precomputed results:
-ligandReceptorResults = getExample('ligandReceptorResults')
+ligandReceptorResults = performLigandReceptorAnalysis(smallXenium, delaunayNeighbours, 
+                                                "mouse", clusters, 
+                                                method = "analytical", 
+                                                minEdgesPos = 10)
 ```
 
 

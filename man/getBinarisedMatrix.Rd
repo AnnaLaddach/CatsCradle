@@ -5,7 +5,7 @@
 \title{This functions retrieves an expression matrix from a
 seurat object or SingleCellExperiment and binarises it.}
 \usage{
-getBinarisedMatrix(obj, cutoff = 0, layer = "count")
+getBinarisedMatrix(obj, cutoff = 0, layer = "counts")
 }
 \arguments{
 \item{obj}{\itemize{
@@ -22,8 +22,8 @@ turned into a Seurat object
 }}
 }
 \value{
-A binarised expression matrix where rows are genes and columns are
-cells.
+A binarised sparse expression matrix where rows are genes and
+columns are cells.
 }
 \description{
 This functions retrieves an expression matrix from a

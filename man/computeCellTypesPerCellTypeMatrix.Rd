@@ -3,10 +3,10 @@
 \name{computeCellTypesPerCellTypeMatrix}
 \alias{computeCellTypesPerCellTypeMatrix}
 \title{For each cell type, this function looks at the neighbourhoods
-around cells of that type and discovers the fractions of those
-cells of each type.}
+around cells of that type and discovers the fractions (or numbers if
+normalise = F) of those cells of each type.}
 \usage{
-computeCellTypesPerCellTypeMatrix(nbhdByCellType, cellTypes)
+computeCellTypesPerCellTypeMatrix(nbhdByCellType, cellTypes, normalise = TRUE)
 }
 \arguments{
 \item{nbhdByCellType}{\itemize{
@@ -19,6 +19,10 @@ cell types, and whose entries are counts.
 \item named vector of cell types where names are each cell and
 cell types are a factor
 }}
+
+\item{normalise}{\itemize{
+\item boolean, defaults to TRUE
+}}
 }
 \value{
 A square matrix whose rownames and colnames are the
@@ -29,8 +33,8 @@ of each type.
 }
 \description{
 For each cell type, this function looks at the neighbourhoods
-around cells of that type and discovers the fractions of those
-cells of each type.
+around cells of that type and discovers the fractions (or numbers if
+normalise = F) of those cells of each type.
 }
 \examples{
 getExample = make.getExample()
