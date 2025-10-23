@@ -10,13 +10,14 @@ q = number of edges between cell type A and B
 m = number of edges between cell type B and any other cell type
 n = the number of edges between any cell type apart from cell type B
 k =  number of edges between cell type B and any other cell type
-For legacy purposes, and for user flexibility, it allows for the
-calculation of P values by comparison to randomised graphs.
-It offers two distinct randomisations.
-One is by permuting the cell types on the neighbour (e.g., delaunay)
-graph.  The other is by comparison to randomised  neighbour graphs
-where edges are randomised but the degree of each node is
-preserved.}
+The purist may object to the use of the hypergeometric test here.
+We may think of "edges out of a cell of type A" as being the random draw
+balls (here, edges) from the urn and "edges out of cells of type B" as being
+success. However, all edges out of a given cell of type A are in this
+"random draw". Clearly the edges in this draw are not independent. However,
+empirically we find that p-values computed using this method correspond very
+closely to those computed using permutation while the computation time is
+orders of magnitude faster.}
 \usage{
 computeNeighbourEnrichment(
   spatialGraph,
@@ -73,14 +74,6 @@ whether two  cell types are more frequently found together than
 expected by chance.
 }
 \description{
-This function calculates P values for whether cell types are more frequently
-neighbours than expected by chance. By default it calculates P values
-analytically using a hypergeometric test on the edges, where the arguments
-to the  R phyper function are as follows:
-q = number of edges between cell type A and B
-m = number of edges between cell type B and any other cell type
-n = the number of edges between any cell type apart from cell type B
-k =  number of edges between cell type B and any other cell type
 For legacy purposes, and for user flexibility, it allows for the
 calculation of P values by comparison to randomised graphs.
 It offers two distinct randomisations.

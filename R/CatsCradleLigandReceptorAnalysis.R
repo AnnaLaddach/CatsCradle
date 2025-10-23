@@ -1,7 +1,7 @@
 
 ## ####################################################
 ## These functions focus of analysing ligand-receptor
-## interactions between neighbouring cells is spatail
+## interactions between neighbouring cells is spatial
 ## data,
 ## ####################################################
 
@@ -159,7 +159,7 @@ getBinarisedMatrix = function(obj, cutoff = 0, layer = 'counts'){
   M = M > 0
   rownames(M) = str_replace(rownames(M),"-",".")
   M = t(M)
-  M = as(M, "dgCMatrix")
+  M = as(M, "dMatrix")
   return(M)
 }
 
@@ -238,26 +238,27 @@ annotateLRInteractionCounts = function(interactionCounts,obj,nbhdObj)
     return(annotated)
 }
 
-## ####################################################
 #' Given a seurat object, a spatial graph, clusters and
 #' species this function identifies ligand-receptor 
 #' interactions between neighbouring cells, identifies
 #' ligand-receptor interactions within and between clusters
 #' and calculates whether these are observed more frequently 
-#' than expected by chance. If the "analytical" method is selected, the 
-#' probability of a cell being positive for a gene is calculated using the 
-#' hypergeometric distribution (R phyper function), with:
-#'  q = number of cells of a specific cluster positive for a given gene.
-#'  m = number of cells in total positive for a given gene.
-#'  n = number of cells negative for a given gene.
-#'  k = total number of cells in a specific cluster.
-#' This is calculated for cluster A being positive for a ligand (pL), and 
-#' cluster B being positive for a receptor (pR). The upper tail p value for 
-#' observing a given number of A-B edges positive for a given interaction is 
-#' then calculated using a binomial test (R pbinom function) where:
+#' than expected by chance. If the "analytical" method is selected, an upper 
+#' tail p-value for observing a given number of A-B edges positive for a given 
+#' interaction is calculated using a binomial test (R pbinom function) where:
 #'  q = number of A-B edges positive for an interaction
 #'  size = total number of A-B edges   
-#'  prob = pL*pR  
+#'  prob = pL*pR
+#' Where pL is the probability of a cell expressing a specific ligand (number 
+#' of cells positive for a ligand/total cells), 
+#' and pR is the probability of a cell expressing a specific receptor (number 
+#' of cells positive for a receptor/total cells). 
+#' If conditional = True  p-values will be calculated given the proportion of 
+#' cells that express ligands and receptors in the specific clusters (pL = 
+#' number of cells in cluster A positive for a ligand/number of cells in cluster
+#' A, pR = number of cells in cluster B positive for a receptor/number of cells
+#' in cluster B).
+#'   
 #' We recommend to use the analytical method, which has a much faster runtime 
 #' than the permutation-based method, however for legacy purposes and user 
 #' flexibility we retain the permutation-based method.
@@ -270,11 +271,15 @@ annotateLRInteractionCounts = function(interactionCounts,obj,nbhdObj)
 #' @param method - method for computing p-values. Defaults to "analytical". 
 #' If "permutation" is selected p-values are calculated by comparison to 
 #' randomised graphs (note this is slower than the analytical approach).
+#' @param conditional - if method is "analytical" and conditional is true, 
+#' p-values will be calculated given the proportion of cells that express 
+#' ligands and receptors in the specific clusters. Otherwise global proportions 
+#' of ligand and receptor expressions are used. Defaults to FALSE.
 #' @param minEdgesPos - the minimum edges that need to be positive for a 
 #' ligand-receptor interaction between two clusters for a p-value to be 
 #' calculated. Only taken into consideration when the analytical method is 
 #' selected.   
-#' @param nSim - number of simulations to perform for p value calculation.
+#' @param nSim - number of simulations to perform for pvalue calculation.
 #' @param lrn - a ligand-receptor network, i.e., a
 #' data frame with columns from and to.  By default, it
 #' retrieves the nichenetr ligand receptor network
@@ -317,6 +322,7 @@ annotateLRInteractionCounts = function(interactionCounts,obj,nbhdObj)
 
 performLigandReceptorAnalysis = function(obj, spatialGraph, species, clusters,
                                       method = "analytical",
+                                      conditional = FALSE,
                                       minEdgesPos = 10,
                                       nSim = 1000, 
                                       lrn = getLigandReceptorNetwork(species),
@@ -325,7 +331,9 @@ performLigandReceptorAnalysis = function(obj, spatialGraph, species, clusters,
   stopifnot(method %in% c('analytical','permutation')) 
   if (method == "analytical"){
     results = performLigandReceptorAnalysisAnalytical(obj, spatialGraph, 
-                                            species, clusters, lrn = lrn,
+                                            species, clusters, 
+                                            conditional = conditional,
+                                            lrn = lrn,
                                             minEdgesPos = minEdgesPos)
   }
   if (method == "permutation"){
@@ -483,7 +491,7 @@ performLigandReceptorAnalysisPermutation = function(obj, spatialGraph, species,
     rownames(simResults) = rownames(totalInteractionsByCluster)
     pValues = abs((simResults - nSim)/nSim) 
     pValues = pmax(pValues, (1/nSim))
-    pValues = pValues[totalInteractionsByCluster < minEdgesPos] = NA
+    pValues[totalInteractionsByCluster < minEdgesPos] = NA
     return(list("interactionsOnEdges" = interactionsOnEdges, 
                 "interactionsOnEdgesMeta" = interactionsOnEdgesMetaData,
                 "totalInteractionsByCluster" = totalInteractionsByCluster,
@@ -519,7 +527,8 @@ performLigandReceptorAnalysisPermutation = function(obj, spatialGraph, species,
 #' retrieves the nichenetr ligand receptor network
 #' @param minEdgesPos - the minimum edges that need to be positive for a 
 #' ligand-receptor interaction between two clusters for a p-value to be 
-#' calculated. Only taken into consideration when the analytical method is
+#' calculated. 
+#' @importFrom stats pbinom phyper
 #' @return A list containing:
 #' interactionsOnEdges - a sparse matrix where the rownames give pairs of 
 #' neighbouring cells and column names give ligand-receptor pairs. 
@@ -543,6 +552,7 @@ performLigandReceptorAnalysisPermutation = function(obj, spatialGraph, species,
 #' frequently between 2 clusters than expected.
 #' totalEdges - a vector of total edges between cluster pairs.
 performLigandReceptorAnalysisAnalytical = function(obj, spatialGraph, species, clusters,
+                                                    conditional = FALSE,
                                                     lrn = getLigandReceptorNetwork(species),
                                                     minEdgesPos = 10)
   {
@@ -610,14 +620,18 @@ performLigandReceptorAnalysisAnalytical = function(obj, spatialGraph, species, c
     CTs = str_split_1(CTPair, "-")
     for (genePair in colnames(totalInteractionsByCluster)){
       genes = str_split_1(genePair, "_")
-      pCT1 = phyper(q = clusterMatrix[CTs[1], genes[1]], m = geneTotals[genes[1]], n = (totalCells - geneTotals[genes[1]]), k = clusterTotals[CTs[1]], lower.tail = F)
-      pCT2 = phyper(q = clusterMatrix[CTs[2], genes[2]], m = geneTotals[genes[2]], n = (totalCells - geneTotals[genes[2]]), k = clusterTotals[CTs[2]], lower.tail = F)
+      if (conditional){
+        pG1 = clusterMatrix[CTs[1],genes[1]]/clusterTotals[CTs[1]]
+        pG2 = clusterMatrix[CTs[2],genes[2]]/clusterTotals[CTs[2]]
+      } else {
+      pG1 = geneTotals[genes[1]]/totalCells
+      pG2 = geneTotals[genes[2]]/totalCells
+      }
       nEdgePos =   totalInteractionsByCluster[CTPair,genePair] 
       if(nEdgePos >= minEdgesPos){
-        pValues[CTPair,genePair] = pbinom(nEdgePos,totalEdges[CTPair],pCT1*pCT2, lower.tail = F)
+        pValues[CTPair,genePair] = pbinom(nEdgePos,totalEdges[CTPair],pG1*pG2, lower.tail = F)
       }
     }
-    
   } 
   
   interactionsOnEdgesMetaData = cbind(spatialGraph, clusters[spatialGraph$nodeA], clusters[spatialGraph$nodeB])
@@ -759,6 +773,94 @@ makeSummedLRInteractionHeatmap = function(ligandReceptorResults, clusters, type,
     return(summedInteractionsByClusterMatrix)
   }
 }
+
+
+## ####################################################
+#' This is a utility function for converting entries in ligandReceptorResults 
+#' to long format. 
+#'
+#' @param data - item from ligandReceptorResults
+#' @param name - name to give column of returned data
+#' @importFrom reshape2 melt
+#' @return dataframe with item from ligandReceptorResults in long format
+formatData = function(data, name){
+  data$clusterPair = rownames(data)
+  data = melt(data, id.vars = c("clusterPair"), variable.name = "interaction")
+  names(data)[3] = name
+  return(data)
+}
+
+
+## ####################################################
+#' This is a utility function for converting ligandReceptor cluster-level 
+#' results to long format and calculates adjusted p-values.
+#'
+#' @param ligandReceptorResults - ligandReceptorReults calculated using 
+#' performLigandReceptorAnalysis()
+#' @importFrom stringr str_split_fixed
+#' @return ligand receptor results in long format
+
+convertToLong = function(ligandReceptorResults){
+  meanLong = formatData(ligandReceptorResults$meanInteractionsByCluster, "mean")
+  totalLong = formatData(ligandReceptorResults$totalInteractionsByCluster, "total")
+  pvalLong = formatData(ligandReceptorResults$pValues, "pValue")
+  resultsLong = cbind(totalLong, meanLong$mean, pvalLong$pValue)
+  resultsLong = cbind(resultsLong, str_split_fixed(resultsLong$clusterPair, pattern = "-", 2))
+  names(resultsLong)[4:7] = c("mean","pValue","sender","receiver")
+  resultsLong$negLog10PValue = -log10(resultsLong$pValue + 0.001)
+  resultsLong$padj = p.adjust(resultsLong$pValue, method = "fdr")
+  return(resultsLong)
+}
+
+
+## ####################################################
+#' This is a function to create a dotplot using the ligand receptor results
+#'
+#' @param ligandReceptorResults - ligandReceptorResults calculated using 
+#' performLigandReceptorAnalysis().
+#' @param senderClusters - sender clusters to plot (defaults to all).
+#' @param receiverClusters - receiver clusters to plot (defaults to all).
+#' @param padjCutoff - only plot results with p-adj < padjCutoff (defaults to 
+#' 0.05).
+#' @param pvalCutoff - only plot results with p-value < pvalCutoff (defaults to 
+#' False in which case padjCutoff is used).
+#' @param pvalCutoff - only plot results with p-value < pvalCutoff (defaults to 
+#' False in which case padjCutoff is used).
+#' @param splitBy - split plots by "sender" or "receiver" cell types (defaults 
+#' to sender).
+#' @importFrom stringr str_split_fixed
+#' @import ggplot2
+#' @return matrix of total ligand receptor interactions that underlies the heatmap.
+#' @export
+#' @examples
+#' getExample = make.getExample()
+#' centroids = getExample('centroids')
+#' ligandReceptorResults = getExample('ligandReceptorResults')
+#' p = plotLRDotplot(ligandReceptorResults)
+plotLRDotplot = function(ligandReceptorResults, senderClusters = unique(ligandReceptorResults$interactionsOnEdgesMeta$cellTypeA),
+                         receiverClusters = unique(ligandReceptorResults$interactionsOnEdgesMeta$cellTypeB),  padjCutoff = 0.05,pvalCutoff = F, splitBy = "sender"){
+  ligandReceptorResultsLong = convertToLong(ligandReceptorResults)
+  resultsLongSelected = ligandReceptorResultsLong[(ligandReceptorResultsLong$sender %in% senderClusters)
+                                            & (ligandReceptorResultsLong$receiver %in%  receiverClusters),]
+  resultsLongSelected = resultsLongSelected[!(is.na(resultsLongSelected$padj)),]
+  if (pvalCutoff){
+    resultsLongSelected = resultsLongSelected[resultsLongSelected$pValue < pvalCutoff,]
+  } else {resultsLongSelected = resultsLongSelected[resultsLongSelected$padj < padjCutoff,]}
+  if (splitBy == "receiver"){
+  p = ggplot(resultsLongSelected, aes(x=interaction, y=sender)) + geom_point(aes(size = mean,color = negLog10PValue)) +  facet_wrap(~receiver) +
+    theme_classic() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + scale_colour_gradient(low = "#ffcccb", high = "#8B0000") +
+    guides(color=guide_legend(title="-Log10(p-val + 0.001)"), size=guide_legend(title="Mean")) + ylab("Sender") + xlab("") + ggtitle("Receiver")
+  }
+  if (splitBy == "sender"){
+    p = ggplot(resultsLongSelected, aes(x=interaction, y=receiver)) + geom_point(aes(size = mean,color = negLog10PValue)) +  facet_wrap(~sender) +
+    theme_classic() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + scale_colour_gradient(low = "#ffcccb", high = "#8B0000") +
+    guides(color=guide_legend(title="-Log10(p-val + 0.001)"), size=guide_legend(title="Mean")) + ylab("Receiver") + xlab("") + ggtitle("Sender")
+  }
+  print(p)
+  return(p)
+}
+
+
 
 ## ####################################################
 #' This function takes interactionResults and creates a seurat object where 

@@ -317,10 +317,19 @@ cellTypesPerCellTypeGraphFromNbhdMatrix = function(nbhdByCellType,
 #' neighbours than expected by chance. By default it calculates P values 
 #' analytically using a hypergeometric test on the edges, where the arguments 
 #' to the  R phyper function are as follows:
-#' q = number of edges between cell type A and B 
-#' m = number of edges between cell type B and any other cell type
-#' n = the number of edges between any cell type apart from cell type B
-#' k =  number of edges between cell type B and any other cell type
+#'  q = number of edges between cell type A and B 
+#'  m = number of edges between cell type B and any other cell type
+#'  n = the number of edges between any cell type apart from cell type B
+#'  k =  number of edges between cell type B and any other cell type
+#' The purist may object to the use of the hypergeometric test here.
+#' We may think of "edges out of a cell of type A" as being the random draw 
+#' balls (here, edges) from the urn and "edges out of cells of type B" as being 
+#' success. However, all edges out of a given cell of type A are in this 
+#' "random draw". Clearly the edges in this draw are not independent. However, 
+#' empirically we find that p-values computed using this method correspond very 
+#' closely to those computed using permutation while the computation time is 
+#' orders of magnitude faster.
+#' 
 #' For legacy purposes, and for user flexibility, it allows for the 
 #' calculation of P values by comparison to randomised graphs. 
 #' It offers two distinct randomisations.
@@ -349,7 +358,7 @@ cellTypesPerCellTypeGraphFromNbhdMatrix = function(nbhdByCellType,
 #' @return A square matrix containing upper tail p values describing
 #' whether two  cell types are more frequently found together than
 #' expected by chance.
-#' 
+#' @importFrom stats phyper
 #' @importFrom abind abind
 #' @export
 #' @examples

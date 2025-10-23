@@ -14,6 +14,7 @@ performLigandReceptorAnalysisAnalytical(
   spatialGraph,
   species,
   clusters,
+  conditional = FALSE,
   lrn = getLigandReceptorNetwork(species),
   minEdgesPos = 10
 )
@@ -46,7 +47,7 @@ retrieves the nichenetr ligand receptor network
 \item{minEdgesPos}{\itemize{
 \item the minimum edges that need to be positive for a
 ligand-receptor interaction between two clusters for a p-value to be
-calculated. Only taken into consideration when the analytical method is
+calculated.
 }}
 }
 \value{

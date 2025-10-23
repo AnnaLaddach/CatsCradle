@@ -7,20 +7,22 @@ species this function identifies ligand-receptor
 interactions between neighbouring cells, identifies
 ligand-receptor interactions within and between clusters
 and calculates whether these are observed more frequently
-than expected by chance. If the "analytical" method is selected, the
-probability of a cell being positive for a gene is calculated using the
-hypergeometric distribution (R phyper function), with:
-q = number of cells of a specific cluster positive for a given gene.
-m = number of cells in total positive for a given gene.
-n = number of cells negative for a given gene.
-k = total number of cells in a specific cluster.
-This is calculated for cluster A being positive for a ligand (pL), and
-cluster B being positive for a receptor (pR). The upper tail p value for
-observing a given number of A-B edges positive for a given interaction is
-then calculated using a binomial test (R pbinom function) where:
+than expected by chance. If the "analytical" method is selected, an upper
+tail p-value for observing a given number of A-B edges positive for a given
+interaction is calculated using a binomial test (R pbinom function) where:
 q = number of A-B edges positive for an interaction
 size = total number of A-B edges
 prob = pL*pR
+Where pL is the probability of a cell expressing a specific ligand (number
+of cells positive for a ligand/total cells),
+and pR is the probability of a cell expressing a specific receptor (number
+of cells positive for a receptor/total cells).
+If conditional = True  p-values will be calculated given the proportion of
+cells that express ligands and receptors in the specific clusters (pL =
+number of cells in cluster A positive for a ligand/number of cells in cluster
+A, pR = number of cells in cluster B positive for a receptor/number of cells
+in cluster B).
+
 We recommend to use the analytical method, which has a much faster runtime
 than the permutation-based method, however for legacy purposes and user
 flexibility we retain the permutation-based method.}
@@ -31,6 +33,7 @@ performLigandReceptorAnalysis(
   species,
   clusters,
   method = "analytical",
+  conditional = FALSE,
   minEdgesPos = 10,
   nSim = 1000,
   lrn = getLigandReceptorNetwork(species),
@@ -62,6 +65,13 @@ If "permutation" is selected p-values are calculated by comparison to
 randomised graphs (note this is slower than the analytical approach).
 }}
 
+\item{conditional}{\itemize{
+\item if method is "analytical" and conditional is true,
+p-values will be calculated given the proportion of cells that express
+ligands and receptors in the specific clusters. Otherwise global proportions
+of ligand and receptor expressions are used. Defaults to FALSE.
+}}
+
 \item{minEdgesPos}{\itemize{
 \item the minimum edges that need to be positive for a
 ligand-receptor interaction between two clusters for a p-value to be
@@ -70,7 +80,7 @@ selected.
 }}
 
 \item{nSim}{\itemize{
-\item number of simulations to perform for p value calculation.
+\item number of simulations to perform for pvalue calculation.
 }}
 
 \item{lrn}{\itemize{
@@ -117,20 +127,22 @@ species this function identifies ligand-receptor
 interactions between neighbouring cells, identifies
 ligand-receptor interactions within and between clusters
 and calculates whether these are observed more frequently
-than expected by chance. If the "analytical" method is selected, the
-probability of a cell being positive for a gene is calculated using the
-hypergeometric distribution (R phyper function), with:
-q = number of cells of a specific cluster positive for a given gene.
-m = number of cells in total positive for a given gene.
-n = number of cells negative for a given gene.
-k = total number of cells in a specific cluster.
-This is calculated for cluster A being positive for a ligand (pL), and
-cluster B being positive for a receptor (pR). The upper tail p value for
-observing a given number of A-B edges positive for a given interaction is
-then calculated using a binomial test (R pbinom function) where:
+than expected by chance. If the "analytical" method is selected, an upper
+tail p-value for observing a given number of A-B edges positive for a given
+interaction is calculated using a binomial test (R pbinom function) where:
 q = number of A-B edges positive for an interaction
 size = total number of A-B edges
 prob = pL*pR
+Where pL is the probability of a cell expressing a specific ligand (number
+of cells positive for a ligand/total cells),
+and pR is the probability of a cell expressing a specific receptor (number
+of cells positive for a receptor/total cells).
+If conditional = True  p-values will be calculated given the proportion of
+cells that express ligands and receptors in the specific clusters (pL =
+number of cells in cluster A positive for a ligand/number of cells in cluster
+A, pR = number of cells in cluster B positive for a receptor/number of cells
+in cluster B).
+
 We recommend to use the analytical method, which has a much faster runtime
 than the permutation-based method, however for legacy purposes and user
 flexibility we retain the permutation-based method.
