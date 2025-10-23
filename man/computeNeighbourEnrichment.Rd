@@ -3,15 +3,26 @@
 \name{computeNeighbourEnrichment}
 \alias{computeNeighbourEnrichment}
 \title{This function calculates P values for whether cell types are more frequently
-neighbours than expected by chance.  It offers two distinct randomisations.
-One is by permuting the cell types on the neighbour (e.g., delaunay)
-graph.  The other is by comparison to randomised  neighbour graphs
-where edges are randomised but the degree of each node is
-preserved.}
+neighbours than expected by chance. By default it calculates P values
+analytically using a hypergeometric test on the edges, where the arguments
+to the  R phyper function are as follows:
+q = number of edges between cell type A and B
+m = number of edges between cell type B and any other cell type
+n = the number of edges between any cell type apart from cell type B
+k =  number of edges between cell type B and any other cell type
+The purist may object to the use of the hypergeometric test here.
+We may think of "edges out of a cell of type A" as being the random draw
+balls (here, edges) from the urn and "edges out of cells of type B" as being
+success. However, all edges out of a given cell of type A are in this
+"random draw". Clearly the edges in this draw are not independent. However,
+empirically we find that p-values computed using this method correspond very
+closely to those computed using permutation while the computation time is
+orders of magnitude faster.}
 \usage{
 computeNeighbourEnrichment(
   spatialGraph,
   cellTypes,
+  method = "analytical",
   nSim = 1000,
   maxTries = 1000,
   randomiseBy = "cells",
@@ -28,9 +39,16 @@ computeNeighbourEnrichment(
 cell types are a factor.
 }}
 
+\item{method}{\itemize{
+\item method for computing p-values. Defaults to "analytical", in
+which case an edge-based hypergeometric test is performed. If "permutation"
+is selected p-values are calculated by comparison to randomised graphs (note
+this is slower than the analytical approach).
+}}
+
 \item{nSim}{\itemize{
 \item the number of randomised graphs to create for pvalue
-calculation.
+calculation, if the method is set to permutation.
 }}
 
 \item{maxTries}{\itemize{
@@ -56,8 +74,9 @@ whether two  cell types are more frequently found together than
 expected by chance.
 }
 \description{
-This function calculates P values for whether cell types are more frequently
-neighbours than expected by chance.  It offers two distinct randomisations.
+For legacy purposes, and for user flexibility, it allows for the
+calculation of P values by comparison to randomised graphs.
+It offers two distinct randomisations.
 One is by permuting the cell types on the neighbour (e.g., delaunay)
 graph.  The other is by comparison to randomised  neighbour graphs
 where edges are randomised but the degree of each node is
@@ -68,5 +87,5 @@ getExample = make.getExample()
 delaunayNeighbours = getExample('delaunayNeighbours')
 clusters = getExample('clusters')
 cellTypesPerCellTypePValues = computeNeighbourEnrichment(delaunayNeighbours, 
-                                        clusters, nSim = 10, verbose = FALSE)
+                                        clusters, verbose = FALSE)
 }

@@ -7,13 +7,34 @@ species this function identifies ligand-receptor
 interactions between neighbouring cells, identifies
 ligand-receptor interactions within and between clusters
 and calculates whether these are observed more frequently
-than expected by chance.}
+than expected by chance. If the "analytical" method is selected, an upper
+tail p-value for observing a given number of A-B edges positive for a given
+interaction is calculated using a binomial test (R pbinom function) where:
+q = number of A-B edges positive for an interaction
+size = total number of A-B edges
+prob = pL*pR
+Where pL is the probability of a cell expressing a specific ligand (number
+of cells positive for a ligand/total cells),
+and pR is the probability of a cell expressing a specific receptor (number
+of cells positive for a receptor/total cells).
+If conditional = True  p-values will be calculated given the proportion of
+cells that express ligands and receptors in the specific clusters (pL =
+number of cells in cluster A positive for a ligand/number of cells in cluster
+A, pR = number of cells in cluster B positive for a receptor/number of cells
+in cluster B).
+
+We recommend to use the analytical method, which has a much faster runtime
+than the permutation-based method, however for legacy purposes and user
+flexibility we retain the permutation-based method.}
 \usage{
 performLigandReceptorAnalysis(
   obj,
   spatialGraph,
   species,
   clusters,
+  method = "analytical",
+  conditional = FALSE,
+  minEdgesPos = 10,
   nSim = 1000,
   lrn = getLigandReceptorNetwork(species),
   verbose = TRUE
@@ -38,8 +59,28 @@ cell pairs.
 clusters are a factor
 }}
 
+\item{method}{\itemize{
+\item method for computing p-values. Defaults to "analytical".
+If "permutation" is selected p-values are calculated by comparison to
+randomised graphs (note this is slower than the analytical approach).
+}}
+
+\item{conditional}{\itemize{
+\item if method is "analytical" and conditional is true,
+p-values will be calculated given the proportion of cells that express
+ligands and receptors in the specific clusters. Otherwise global proportions
+of ligand and receptor expressions are used. Defaults to FALSE.
+}}
+
+\item{minEdgesPos}{\itemize{
+\item the minimum edges that need to be positive for a
+ligand-receptor interaction between two clusters for a p-value to be
+calculated. Only taken into consideration when the analytical method is
+selected.
+}}
+
 \item{nSim}{\itemize{
-\item number of simulations to perform for p value calculation.
+\item number of simulations to perform for pvalue calculation.
 }}
 
 \item{lrn}{\itemize{
@@ -54,30 +95,31 @@ retrieves the nichenetr ligand receptor network
 }
 \value{
 A list containing:
-interactionsOnEdges - a data frame whose first two columns give
-the neighbouring cells and next two columns give their corresponding
-clusters. Each of the remaining columns is a logical
-corresponding to a ligand-receptor pair telling whether the ligand
-is expressed in the first cell and the receptor is expressed in the
-second cell.
-totalInteractionsByCluster - a dataframe where the first column gives a
-directed (sender-receiver) pair of clusters. The second column gives the
-total number of edges between those clusters. The remaining columns give the
-total numbers of edges on which particular ligand receptor interactions are
-present.
-meanInteractionsByCluster - a dataframe where the first column gives a
-directed (sender-receiver) pair of clusters. The second column gives the
-total number of edges between those clusters. The remaining columns give the
-total numbers of edges on which particular ligand receptor interactions are
-present (for that cluster pair) divided by the total number of edges between
-those clusters.
-simResults - a dataframe where the rownames are sender-receiver cluster pairs
-and column names are ligand receptor pairs. Values give the number of
-simulations for which observed values are greater than simulated values.
+interactionsOnEdges - a sparse matrix where the rownames give pairs of
+neighbouring cells and column names give ligand-receptor pairs.
+Entries are TRUE if the ligand is expressed in the first cell and the receptor is expressed in
+the second cell and FALSE if not.
+interactionsOnEdgesMeta - a dataframe where the first two columns are the
+cells that comprise the edges in interactionsOnEdges, and the next two
+columns are their clusters.
+totalInteractionsByCluster - a dataframe where the rownames are
+sender-receiver cluster pairs and column names are ligand receptor pairs.
+Entries are total numbers of edges on which particular ligand receptor
+interactions are present.
+meanInteractionsByCluster - a dataframe where the rownames are
+sender-receiver cluster pairs and column names are ligand receptor pairs.
+Entries are total numbers of edges on which particular ligand receptor i
+nteractions are present (for that cluster pair) divided by the total number
+of edges between those clusters.
+simResults - a dataframe where the rownames are sender-receiver cluster
+pairs and column names are ligand receptor pairs.
+Values give the number of simulations for which observed values are greater
+than simulated values. Only returned if method = "permutation".
 pValues - a dataframe where the rownames are sender-receiver cluster pairs
-and column names are ligand receptor pairs. Entries are uppertail pvalues
+and column names are ligand receptor pairs. Entries are uppertail p-values
 describing whether a particular ligand receptor interaction is observed more
 frequently between 2 clusters than expected.
+totalEdges - a vector of total edges between cluster pairs.
 }
 \description{
 Given a seurat object, a spatial graph, clusters and
@@ -85,7 +127,25 @@ species this function identifies ligand-receptor
 interactions between neighbouring cells, identifies
 ligand-receptor interactions within and between clusters
 and calculates whether these are observed more frequently
-than expected by chance.
+than expected by chance. If the "analytical" method is selected, an upper
+tail p-value for observing a given number of A-B edges positive for a given
+interaction is calculated using a binomial test (R pbinom function) where:
+q = number of A-B edges positive for an interaction
+size = total number of A-B edges
+prob = pL*pR
+Where pL is the probability of a cell expressing a specific ligand (number
+of cells positive for a ligand/total cells),
+and pR is the probability of a cell expressing a specific receptor (number
+of cells positive for a receptor/total cells).
+If conditional = True  p-values will be calculated given the proportion of
+cells that express ligands and receptors in the specific clusters (pL =
+number of cells in cluster A positive for a ligand/number of cells in cluster
+A, pR = number of cells in cluster B positive for a receptor/number of cells
+in cluster B).
+
+We recommend to use the analytical method, which has a much faster runtime
+than the permutation-based method, however for legacy purposes and user
+flexibility we retain the permutation-based method.
 }
 \examples{
 getExample = make.getExample()
@@ -93,6 +153,5 @@ smallXenium = getExample('smallXenium')
 delaunayNeighbours = getExample('delaunayNeighbours')
 clusters = getExample('clusters')
 performLigandReceptorAnalysis(smallXenium, delaunayNeighbours, 
-                                      "mouse", clusters, nSim = 10,
-                                       verbose=FALSE)
+                                      "mouse", clusters)
 }

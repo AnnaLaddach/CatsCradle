@@ -257,15 +257,31 @@ symmetric.
 
 ```{r [Sp15]}
 cellTypesPerCellTypePValues = computeNeighbourEnrichment(delaunayNeighbours, 
-                                          clusters, nSim=100,
-					  randomiseBy='graph',verbose = FALSE)
+                                          clusters)
 ```
 
-This function uses permutation testing to compute p values for the
-enrichment of each cell type in the neighbourhoods of cells of a each
-cell type.  This requires randomisation of the actual data and this
-function offers two methods of randomisation, controlled by the
-parameter randomiseBy.  With the value randomiseBy='cells', the
+By default it calculates p-values 
+analytically using a hypergeometric test on the edges, where the arguments 
+to the  R phyper function are as follows:
+  q = number of edges between cell type A and B 
+  m = number of edges between cell type B and any other cell type
+  n = the number of edges between any cell type apart from cell type B
+  k =  number of edges between cell type B and any other cell type
+
+The purist may object to the use of the hypergeometric test here.
+We may think of "edges out of a cell of type A" as being the random draw 
+balls (here, edges) from the urn and "edges out of cells of type B" as being 
+success. However, all edges out of a given cell of type A are in this 
+"random draw". Clearly the edges in this draw are not independent. However, 
+empirically we find that p-values computed using this method correspond very 
+closely to those computed using permutation while the computation time is 
+orders of magnitude faster.
+
+
+For legacy purposes, and user flexibility, we allow for the calculation of 
+p-values by comparison to randomised graphs. 
+The function offers two methods of randomisation, controlled 
+by the parameter randomiseBy.  With the value randomiseBy='cells', the
 default, randomisaiton is carried out by fixing the underlying graph
 (e.g., Delaunay neigbhours graph) and permuting the cell types.  For
 counting purposes, we keep the actual cell type at the center of each
@@ -282,7 +298,7 @@ randomiseBy='cells' is quicker.
 
 Let's plot -log10(pvalue)
 ```{r [Sp16]}
-cellTypesPerCellTypePValuesNegLog = -log10(cellTypesPerCellTypePValues)
+cellTypesPerCellTypePValuesNegLog = -log10(cellTypesPerCellTypePValues + 0.001)
 pheatmap(cellTypesPerCellTypePValuesNegLog)
 ```
 
@@ -533,29 +549,46 @@ involving diffusable ligands. We also analyse the number
 of ligand receptor interactions that occur between cells from the same
 cluster and between cells from different clusters. Note that clusters
 may represent cell type, or another property of the cells such as
-their neighbourhood type. We leave this for the user to decide. We
-then calculate how frequently the number of ligand-receptor
-interactions observed between/within clusters is higher than in
-simulated data - this allows us to assign a pvalue for the enrichment
-of these interactions.
+their neighbourhood type. We leave this for the user to decide. 
 
+We then calculate an analytical p-value for the enrichment of ligand-receptor 
+interactions between clusters.  Specifically an upper 
+tail p-value for observing a given number of A-B edges positive for a given 
+interaction is calculated using a binomial test (R pbinom function) where:
+  q = number of A-B edges positive for an interaction
+  size = total number of A-B edges   
+  prob = pL*pR
+Where pL is the probability of a cell expressing a specific ligand (number 
+of cells positive for a ligand/total cells), 
+and pR is the probability of a cell expressing a specific receptor (number 
+of cells positive for a receptor/total cells). 
+If conditional = True  p-values will be calculated given the proportion of 
+cells that express ligands and receptors in the specific clusters (pL = 
+number of cells in cluster A positive for a ligand/number of cells in cluster
+A, pR = number of cells in cluster B positive for a receptor/number of cells
+in cluster B).
+
+The analytical method to calculate p-values has a faster run time than the 
+permutation-based method previously implemented in this package, however the 
+user can optionally choose to calculate permutation-based p-values by using 
+method = "permutation". Of note, the speed of this method has also increased due 
+to the use of sparse matrices. 
 
 ```{r [Sp39]}
-
-## Running this example takes a while:
-## ligandReceptorResults = performLigandReceptorAnalysis(smallXenium, delaunayNeighbours, 
-##                                                "mouse", clusters,verbose=FALSE)
-## Accordingly, we retrieve precomputed results:
-ligandReceptorResults = getExample('ligandReceptorResults')
+ligandReceptorResults = performLigandReceptorAnalysis(smallXenium, delaunayNeighbours, 
+                                                "mouse", clusters, 
+                                                method = "analytical", 
+                                                conditional = FALSE,
+                                                minEdgesPos = 10)
 ```
 
 
 We look at interactions on edges.  For concision, we display the
-first six of our 28 ligand-receptor pairs.  Since ligand-receptor
+first ten of our 28 ligand-receptor pairs.  Since ligand-receptor
 interactions are directed, each undirected edge will show up both as
 cell A - cell B and as cell B - cell A.
 ```{r [Sp40]}
-head(ligandReceptorResults$interactionsOnEdges[,1:10],10)
+head(as.matrix(ligandReceptorResults$interactionsOnEdges[,1:10]),10)
 ```
 
 Look at total interactions between/within clusters:
@@ -569,26 +602,26 @@ receptor interactions on A-B edges)/(total A-B edges):
 head(ligandReceptorResults$meanInteractionsByCluster[,1:10],10)
 ```
 
-Look at number of times observed interactions are more frequent than expected:
-```{r [Sp43]}
-head(ligandReceptorResults$simResults[,1:10],10)
-```
 
-Look at pvalues (upper tail) for the enrichment of interactions.
-```{r [Sp44]}
-head(ligandReceptorResults$pValues,10)
+Look at p-values (upper tail) for the enrichment of interactions. Of note these 
+are set to NA if less than 10 edges are positive for a ligand-receptor 
+interaction. This threshold can be changed using the "minEdgesPos" argument of
+performLigandReceptorAnalysis().
+
+```{r [Sp43]}
+head(ligandReceptorResults$pValues,10) 
 ```
 
 
 Plot a heatmap showing -log10(pvalues) for the enrichment of ligand-receptor 
 interactions between pairs of clusters. 
 
-```{r [Sp45]}
+```{r [Sp44]}
 ligRecMatrix = makeLRInteractionHeatmap(ligandReceptorResults, clusters, colours = colours, labelClusterPairs = FALSE)
 ```
 
 Make a heatmap of total ligand-receptor interactions between clusters.
-```{r [Sp46]}
+```{r [Sp45]}
 cellTypePerCellTypeLigRecMatrix = makeSummedLRInteractionHeatmap(ligandReceptorResults, clusters, "total")
 ```
 
@@ -596,24 +629,37 @@ Make a heatmap of summed mean ligand/receptor interactions between
 clusters i.e., (sum of all ligand receptor interactions on A-B edges)/(total
 A-B edges)
 
-```{r [Sp47]}
+```{r [Sp46]}
 cellTypePerCellTypeLigRecMatrix = makeSummedLRInteractionHeatmap(ligandReceptorResults, clusters, "mean", logScale = TRUE)
+```
+Make a dotplot of ligand-receptor interactions.
+
+```{r [Sp47]}
+p = plotLRDotplot(ligandReceptorResults, padjCutoff = 0.05, pvalCutoff = F, splitBy = "sender")
+```
+Here we choose to plot interactions with a p-adj value < 0.05 and split the 
+data by sender populations. It is also possible to create dotplots of ligand-receptor 
+interactions for specific populations:
+
+```{r [Sp48]}
+plotLRDotplot(ligandReceptorResults, senderClusters = c("6_VLMC","7_Granule"), 
+              padjCutoff = 0.05, pvalCutoff = F, splitBy = "sender")
 ```
 
 Look at a histogram of values for summed mean ligand/receptor interactions between clusters.
-```{r [Sp48]}
+```{r [Sp49]}
 hist(cellTypePerCellTypeLigRecMatrix)
 ```
 
 Visualise in graph format.
-```{r [Sp49]}
+```{r [Sp50]}
 cellTypesPerCellTypeGraphFromCellMatrix(cellTypePerCellTypeLigRecMatrix, 
                                     minWeight = 0.4, colours = colours)
 ```
 Here the arrows are very thick - we can scale by a constant factor to improve the
 presentation.
 
-```{r [Sp50]}
+```{r [Sp51]}
 scaleFactor = 3
 cellTypesPerCellTypeGraphFromCellMatrix(cellTypePerCellTypeLigRecMatrix/scaleFactor, 
                                     minWeight = 0.4/scaleFactor, colours = colours)
@@ -630,13 +676,13 @@ slightly separate but both between the centroids of cells A and B. The
 interaction (ligand receptor pair) on an edge. This is useful for
 visualising where ligand receptor interactions occur spatially.
 
-```{r [Sp51]}
+```{r [Sp52]}
 edgeSeurat = computeEdgeObject(ligandReceptorResults, centroids)
 ```
 
 
 For example we can visualise the Pdyn-Npy2r interaction.
-```{r [Sp52]}
+```{r [Sp53]}
 ImageFeaturePlot(edgeSeurat, features = "Pdyn-Npy2r")
 ```
 
@@ -653,35 +699,35 @@ become nodes and A-B edges (in the original graph) become connected to all
 A- edges and all B- edges. This allows us to perfom graph-based
 analyses associated with 
 the spatial localisation of ligand receptor pairs on edges.  
-```{r [Sp53]}
+```{r [Sp54]}
 edgeNeighbours = computeEdgeGraph(delaunayNeighbours)
 ```
 
 Compute Moran's I for the spatial autocorrelation of ligand-receptor interactions.
-```{r [Sp54] , eval=FALSE}
+```{r [Sp55] , eval=FALSE}
 moransILigandReceptor = runMoransI(edgeSeurat, edgeNeighbours, assay = "RNA", 
                      layer = "counts", nSim = 100)
 ```
 
 View most spatially autocorrelated ligand-receptor interactions.
-```{r [Sp55]}
+```{r [Sp56]}
 moransILigandReceptor = getExample('moransILigandReceptor')
 head(moransILigandReceptor)
 ```
 
 View least spatially autocorrelated ligand-receptor interactions.
-```{r [Sp56]}
+```{r [Sp57]}
 tail(moransILigandReceptor)
 ```
 
 
 View ligand-receptor interaction with the highest spatial autocorrelation (Moran's I).
-```{r [Sp57]}
+```{r [Sp58]}
 ImageFeaturePlot(edgeSeurat, "Penk-Htr1f")
 ```
 
 View ligand-receptor interaction with the lowest spatial autocorrelation (Moran's I).
-```{r [Sp58]}
+```{r [Sp59]}
 ImageFeaturePlot(edgeSeurat, "Sst-Gpr17")
 ```
 
@@ -704,7 +750,7 @@ the edges based on cutoffs.
 This functions annotates edges with their lengths and the cell types
 of the two cells in question.
 
-```{r [Sp59]}
+```{r [Sp60]}
 annEdges =
 edgeLengthsAndCellTypePairs(delaunayNeighbours,clusters,centroids)
 head(annEdges)
@@ -716,7 +762,7 @@ Here we visualise the distribution of edge lengths together with
 proposed cutoffs.  We will say more in a moment about how these
 proposed cutoffs are calculated.
 
-```{r [Sp60]}
+```{r [Sp61]}
 cutoffDF = edgeCutoffsByPercentile(annEdges,percentileCutof=95)
 g = edgeLengthPlot(annEdges,cutoffDF,whichPairs=60)
 print(g)
@@ -741,7 +787,7 @@ pair.
 
 #### edgeCutoffsByClustering
 
-```{r [Sp61]}
+```{r [Sp62]}
 cutoffDF = edgeCutoffsByClustering(annEdges)
 ```
 
@@ -757,7 +803,7 @@ produce a spurious cutoff.
 #### edgeCutoffsByPercentile
 
 
-```{r [Sp62]}
+```{r [Sp63]}
 cutoffDF = edgeCutoffsByPercentile(annEdges,percentileCutoff=95)
 ```
 
@@ -771,7 +817,7 @@ cell type pairs.
 #### edgeCutoffsByZScore
 
 
-```{r [Sp63]}
+```{r [Sp65]}
 cutoffDF = edgeCutoffsByZScore(annEdges,zCutoff=1.5)
 ```
 
@@ -782,7 +828,7 @@ percentile.
 #### edgeCutoffsByWatershed
 
 
-```{r [Sp64]}
+```{r [Sp66]}
 cutoffDF = edgeCutoffsByWatershed(annEdges,nbins=15,tolerance=10)
 ```
 
@@ -797,7 +843,7 @@ algorithm.
 
 #### cullEdges
 
-```{r [Sp65]}
+```{r [Sp67]}
 cutoffDF = edgeCutoffsByWatershed(annEdges,nbins=15,tolerance=10)
 culledEdges = cullEdges(annEdges,cutoffDF)
 nrow(annEdges)
@@ -809,7 +855,7 @@ can be a cutoff data frame as produced by any of the edgeCutoff
 functions or can be a single number in which case all the cell type
 pairs will be trimmed to the same cutoff.
 
-```{r [Sp66]}
+```{r [Sp68]}
 sessionInfo()
 ```
 

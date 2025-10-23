@@ -2,7 +2,9 @@
 % Please edit documentation in R/CatsCradleLigandReceptorAnalysis.R
 \name{makeLRInteractionHeatmap}
 \alias{makeLRInteractionHeatmap}
-\title{This function takes ligandReceptorResults and plots a heatmap of -log10(pvalues).}
+\title{This function takes ligandReceptorResults and plots a heatmap of -log10(pvalues).
+If the minimum p-value is 0 a pseudocount of 0.001 will be added before log
+transformation.}
 \usage{
 makeLRInteractionHeatmap(
   ligandReceptorResults,
@@ -49,12 +51,13 @@ matrix of -log10(pvalues) that underlies the heatmap.
 }
 \description{
 This function takes ligandReceptorResults and plots a heatmap of -log10(pvalues).
+If the minimum p-value is 0 a pseudocount of 0.001 will be added before log
+transformation.
 }
 \examples{
 getExample = make.getExample()
 clusters = getExample('clusters')
-colours = getExample('colours')
 ligandReceptorResults = getExample('ligandReceptorResults')
-ligRecMatrix = makeLRInteractionHeatmap(ligandReceptorResults, 
-clusters, colours = colours, labelClusterPairs = FALSE)
+cellTypePerCellTypeLigRecMatrix = 
+makeSummedLRInteractionHeatmap(ligandReceptorResults, clusters, "mean")
 }

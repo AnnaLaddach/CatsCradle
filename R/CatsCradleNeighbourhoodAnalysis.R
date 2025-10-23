@@ -132,14 +132,15 @@ computeGraphEmbedding = function(seuratObj, graph=defaultGraph(seuratObj),
 
 ## ####################################################
 #' For each cell type, this function looks at the neighbourhoods
-#' around cells of that type and discovers the fractions of those
-#' cells of each type.
+#' around cells of that type and discovers the fractions (or numbers if 
+#' normalise = F) of those cells of each type.
 #'
 #' @param nbhdByCellType - A matrix whose rows are neighbourhoods
 #' each denoted by the cell at their center, whose columns are
 #' cell types, and whose entries are counts.
 #' @param cellTypes - named vector of cell types where names are each cell and
 #' cell types are a factor
+#' @param normalise - boolean, defaults to TRUE
 #' @return A square matrix whose rownames and colnames are the
 #' seurat_clusters as character strings.  Each row corresponds
 #' to neighbourhoods around all cells of that type and the entries
@@ -151,12 +152,15 @@ computeGraphEmbedding = function(seuratObj, graph=defaultGraph(seuratObj),
 #' NBHDByCTMatrix = getExample('NBHDByCTMatrix')
 #' clusters = getExample('clusters')
 #' cellTypesPerCellType = computeCellTypesPerCellTypeMatrix(NBHDByCTMatrix,clusters)
-computeCellTypesPerCellTypeMatrix = function(nbhdByCellType,cellTypes)
+computeCellTypesPerCellTypeMatrix = function(nbhdByCellType,cellTypes, 
+                                             normalise = TRUE)
 {
   MM = aggregate(nbhdByCellType, list(cellTypes), sum)
   rownames(MM) = MM$Group.1
   MM = MM[,seq(from=2,to=ncol(MM))]
-  MM = MM/rowSums(MM)
+  if (normalise){
+    MM = MM/rowSums(MM)
+  }
   MM = as.matrix(MM)
   return(MM)
 }
@@ -310,7 +314,25 @@ cellTypesPerCellTypeGraphFromNbhdMatrix = function(nbhdByCellType,
 
 ## ####################################################
 #' This function calculates P values for whether cell types are more frequently 
-#' neighbours than expected by chance.  It offers two distinct randomisations.
+#' neighbours than expected by chance. By default it calculates P values 
+#' analytically using a hypergeometric test on the edges, where the arguments 
+#' to the  R phyper function are as follows:
+#'  q = number of edges between cell type A and B 
+#'  m = number of edges between cell type B and any other cell type
+#'  n = the number of edges between any cell type apart from cell type B
+#'  k =  number of edges between cell type B and any other cell type
+#' The purist may object to the use of the hypergeometric test here.
+#' We may think of "edges out of a cell of type A" as being the random draw 
+#' balls (here, edges) from the urn and "edges out of cells of type B" as being 
+#' success. However, all edges out of a given cell of type A are in this 
+#' "random draw". Clearly the edges in this draw are not independent. However, 
+#' empirically we find that p-values computed using this method correspond very 
+#' closely to those computed using permutation while the computation time is 
+#' orders of magnitude faster.
+#' 
+#' For legacy purposes, and for user flexibility, it allows for the 
+#' calculation of P values by comparison to randomised graphs. 
+#' It offers two distinct randomisations.
 #' One is by permuting the cell types on the neighbour (e.g., delaunay)
 #' graph.  The other is by comparison to randomised  neighbour graphs
 #' where edges are randomised but the degree of each node is  
@@ -319,8 +341,12 @@ cellTypesPerCellTypeGraphFromNbhdMatrix = function(nbhdByCellType,
 #' @param spatialGraph - a spatial graph in neighbour list format.
 #' @param cellTypes - named vector of cell types where names are each cell and
 #' cell types are a factor.
+#' @param method - method for computing p-values. Defaults to "analytical", in 
+#' which case an edge-based hypergeometric test is performed. If "permutation" 
+#' is selected p-values are calculated by comparison to randomised graphs (note
+#' this is slower than the analytical approach).   
 #' @param nSim - the number of randomised graphs to create for pvalue 
-#' calculation.
+#' calculation, if the method is set to permutation.
 #' @param maxTries - the maximum number of tries to remove self edges during 
 #' graph randomisation. If self edges are remeining this will be reported.
 #' @param randomiseBy - This takes either the value 'cells' (the default)
@@ -332,7 +358,7 @@ cellTypesPerCellTypeGraphFromNbhdMatrix = function(nbhdByCellType,
 #' @return A square matrix containing upper tail p values describing
 #' whether two  cell types are more frequently found together than
 #' expected by chance.
-#' 
+#' @importFrom stats phyper
 #' @importFrom abind abind
 #' @export
 #' @examples
@@ -340,61 +366,82 @@ cellTypesPerCellTypeGraphFromNbhdMatrix = function(nbhdByCellType,
 #' delaunayNeighbours = getExample('delaunayNeighbours')
 #' clusters = getExample('clusters')
 #' cellTypesPerCellTypePValues = computeNeighbourEnrichment(delaunayNeighbours, 
-#'                                         clusters, nSim = 10, verbose = FALSE)
-computeNeighbourEnrichment = function(spatialGraph, cellTypes, nSim = 1000,
+#'                                         clusters, verbose = FALSE)
+computeNeighbourEnrichment = function(spatialGraph, cellTypes, 
+                                      method = "analytical", 
+                                      nSim = 1000,
                                       maxTries = 1000,
                                       randomiseBy='cells',
                                       verbose=TRUE)
 {
-    stopifnot(randomiseBy %in% c('cells','graph'))
-    results = list()
-    spatialGraphOrig = spatialGraph
-    NBHDByCTmatrix = computeNBHDByCTMatrix(spatialGraphOrig,cellTypes) 
-    cellTypeMatrix = computeCellTypesPerCellTypeMatrix(NBHDByCTmatrix, cellTypes) 
-
-    ## Randomise by graph:
-    if(randomiseBy == 'graph')
-    {
-        for (i in seq_len(nSim))
-        { 
-            spatialGraph = spatialGraphOrig
-            simGraph = randomiseGraph(spatialGraph, maxTries = maxTries)
-            NBHDByCTmatrix = computeNBHDByCTMatrix(simGraph,cellTypes)
-            results[[i]] = computeCellTypesPerCellTypeMatrix(NBHDByCTmatrix,cellTypes)
-            if (i %% 10 == 0 & verbose)
-            {
-                writeLines(as.character(i))
-            }
-        }
+  stopifnot(method %in% c('analytical','permutation')) 
+  stopifnot(randomiseBy %in% c('cells','graph'))
+  
+  results = list()
+  spatialGraphOrig = spatialGraph
+  NBHDByCTmatrix = computeNBHDByCTMatrix(spatialGraphOrig,cellTypes) 
+  cellTypeMatrix = computeCellTypesPerCellTypeMatrix(NBHDByCTmatrix, cellTypes) 
+  
+  ##compute analytical results
+  if (method == "analytical"){
+    cellTypeMatrixNumbers = computeCellTypesPerCellTypeMatrix(NBHDByCTmatrix, cellTypes, FALSE) 
+    CTEdges = rowSums(cellTypeMatrixNumbers)
+    cellTypesNames = levels(cellTypes)
+    results = matrix(, nrow = length(cellTypesNames), length(cellTypesNames))
+    rownames(results) = cellTypesNames
+    colnames(results) = cellTypesNames
+    for (CT1 in cellTypesNames){
+      for (CT2 in cellTypesNames){
+        pval = phyper(q =  cellTypeMatrixNumbers[CT1,CT2], m = CTEdges[CT2] , n = sum(CTEdges) - CTEdges[CT2] , k = CTEdges[CT1] , lower.tail = F)
+        results[CT1,CT2] = pval
+      }    
     }
-
-    ## Randomise by cells:
-    if(randomiseBy == 'cells')
-    {
-        for(i in seq_len(nSim))
-        {
-            permCellTypes = sample(cellTypes)
-            ## This keeps the unpermuted graph, but the count of cell types
-            ## in each neighbourhood is permuted cell types
-            NBHDByCTmatrix = computeNBHDByCTMatrix(spatialGraph,permCellTypes)
-
-            ## This uses actual cell types to classify the individual cells at
-            ## the center of each neighourhood and then counts up the permuted
-            ## cell types found above in each neighbourhood
-            results[[i]] = computeCellTypesPerCellTypeMatrix(NBHDByCTmatrix,cellTypes)
-            if (i %% 10 == 0 & verbose)
-            {
-                writeLines(as.character(i))
-            }
-        }
-    }
-    
-    results = lapply(results, function(x, y) y > x, y = cellTypeMatrix)
-    results = abind(results, along = 3L)
-    results = rowSums(results, dims = 2)
-    results = abs((results - nSim)/nSim) 
-    results = pmax(results,(1/nSim))
     return(results)
+  }
+  
+  ## Randomise by graph:
+  if(randomiseBy == 'graph')
+  {
+    for (i in seq_len(nSim))
+    { 
+      spatialGraph = spatialGraphOrig
+      simGraph = randomiseGraph(spatialGraph, maxTries = maxTries)
+      NBHDByCTmatrix = computeNBHDByCTMatrix(simGraph,cellTypes)
+      results[[i]] = computeCellTypesPerCellTypeMatrix(NBHDByCTmatrix,cellTypes)
+      if (i %% 10 == 0 & verbose)
+      {
+        writeLines(as.character(i))
+      }
+    }
+  }
+  
+  ## Randomise by cells:
+  if(randomiseBy == 'cells')
+  {
+    for(i in seq_len(nSim))
+    {
+      permCellTypes = sample(cellTypes)
+      ## This keeps the unpermuted graph, but the count of cell types
+      ## in each neighbourhood is permuted cell types
+      NBHDByCTmatrix = computeNBHDByCTMatrix(spatialGraph,permCellTypes)
+      
+      ## This uses actual cell types to classify the individual cells at
+      ## the center of each neighourhood and then counts up the permuted
+      ## cell types found above in each neighbourhood
+      results[[i]] = computeCellTypesPerCellTypeMatrix(NBHDByCTmatrix,cellTypes)
+      if (i %% 10 == 0 & verbose)
+      {
+        writeLines(as.character(i))
+      }
+    }
+  }
+  
+  results = lapply(results, function(x, y) y > x, y = cellTypeMatrix)
+  results = abind(results, along = 3L)
+  results = rowSums(results, dims = 2)
+  results = abs((results - nSim)/nSim) 
+  results = pmax(results,(1/nSim))
+  return(results)
 }
 
 
