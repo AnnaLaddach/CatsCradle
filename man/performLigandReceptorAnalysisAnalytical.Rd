@@ -38,6 +38,13 @@ cell pairs.
 clusters are a factor
 }}
 
+\item{conditional}{\itemize{
+\item if method is "analytical" and conditional is true,
+p-values will be calculated given the proportion of cells that express
+ligands and receptors in the specific clusters. Otherwise global proportions
+of ligand and receptor expression are used. Defaults to FALSE.
+}}
+
 \item{lrn}{\itemize{
 \item a ligand-receptor network, i.e., a
 data frame with columns from and to.  By default, it

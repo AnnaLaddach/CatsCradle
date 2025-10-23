@@ -69,7 +69,7 @@ randomised graphs (note this is slower than the analytical approach).
 \item if method is "analytical" and conditional is true,
 p-values will be calculated given the proportion of cells that express
 ligands and receptors in the specific clusters. Otherwise global proportions
-of ligand and receptor expressions are used. Defaults to FALSE.
+of ligand and receptor expression are used. Defaults to FALSE.
 }}
 
 \item{minEdgesPos}{\itemize{
