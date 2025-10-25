@@ -44,3 +44,8 @@ CHANGES IN VERSION 1.3.2
   This has a faster runtime.
 * Function plotLRDotplot added to visualise ligand-receptor interactions returned
   by performLigandReceptorAnalysis.
+  
+CHANGES IN VERSION 1.3.3
+--------------------------
+
+* Example data ligandReceptorResults.rda saved in compressed format.
