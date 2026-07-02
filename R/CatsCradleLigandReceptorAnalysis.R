@@ -57,7 +57,6 @@ getLigandReceptorNetwork = function(species)
 getLigandReceptorPairsInPanel = function(obj,species,
                                          lrn = getLigandReceptorNetwork(species))
 {
-  stopifnot(species %in% c('mouse','human'))
   
   obj = acceptor(obj)
   
@@ -417,7 +416,7 @@ performLigandReceptorAnalysisPermutation = function(obj, spatialGraph, species,
   spatialGraph = unique(spatialGraph)
   
   #get ligand receptor pairs
-  lrPairs = getLigandReceptorPairsInPanel(obj, species)
+  lrPairs = getLigandReceptorPairsInPanel(obj, species, lrn)
   
   #get binarised expression matrix for ligand receptor pairs
   M = getBinarisedMatrix(obj)
@@ -569,7 +568,7 @@ performLigandReceptorAnalysisAnalytical = function(obj, spatialGraph, species, c
   spatialGraph = unique(spatialGraph)
   
   #get ligand receptor pairs
-  lrPairs = getLigandReceptorPairsInPanel(obj, species)
+  lrPairs = getLigandReceptorPairsInPanel(obj, species, lrn)
   
   #get binarised expression matrix for ligand receptor pairs
   M = getBinarisedMatrix(obj)
@@ -707,6 +706,7 @@ makeLRInteractionHeatmap = function(ligandReceptorResults,
   rownames(rowAnno) = rownames(selectedPValues)
   rowAnno = rowAnno[,c("receiver","sender")]
   p1 = pheatmap(negLog10PValuesMod, annotation_row = rowAnno, show_rownames = labelClusterPairs)
+  negLog10PValues = negLog10PValues[p1$tree_row$order,p1$tree_col$order]
   if (length(colours) > 0){
     p2 = pheatmap(negLog10PValues, annotation_row = rowAnno,  annotation_colors = list("sender" = colours, "receiver" = colours),
           show_rownames = labelClusterPairs, cluster_rows = F,cluster_cols = F, na_col = "grey")

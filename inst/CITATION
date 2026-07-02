@@ -1,18 +1,23 @@
 citHeader("To cite CatsCradle in publications use:")
 
 bibentry(
-bibtype    = 'Misc',
-title    = 'CatsCradle',
-author   = c(person(given='Anna',family='Laddach'),
-             person(given='Michael',family='Shapiro')),
-year     = '2024',
-url      = 'https://github.com/AnnaLaddach/CatsCradle',
-textVersion = paste('Anna Laddach and Michael Shapiro,',
-                    'CatsCradle: an R package for spatial',
-                    'single cell transcriptomics and the',
-                    'clustering and annotation of genes,',
-                    'developed in the Pachnis lab at the',
-                    'Francis Crick Institute',
-                    'https://github.com/AnnaLaddach/CatsCradle')
+    bibtype    = "article",
+    title      = "Capturing gene-cell duality in a cat's cradle",
+    author     =  c(person(given='Anna',family='Laddach'),
+    person(given='Fränze',family='Progatzky'),
+        person(given='Vassilis',family='Pachnis'),
+        person(given='Michael',family='Shapiro')),
+    journal     = "Bioinformatics",
+    volume      = "42",
+    number      = "1",
+    pages       = "btaf681",
+    year        = "2026",
+    month       = "1",
+    issn        = "1367-4811",
+    doi         = "10.1093/bioinformatics/btaf681",
+    url         = "https://doi.org/10.1093/bioinformatics/btaf681",
+    textVersion  = paste("Anna Laddach, Fränze Progatzky, Vassilis Pachnis, Michael Shapiro,",
+                         "Capturing gene-cell duality in a cat's cradle, Bioinformatics, Volume 42, Issue 1,",
+                         "January 2026, lqae139, https://doi.org/10.1093/bioinformatics/btaf681")
 )
 
