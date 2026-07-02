@@ -49,3 +49,10 @@ CHANGES IN VERSION 1.3.3
 --------------------------
 
 * Example data ligandReceptorResults.rda saved in compressed format.
+
+CHANGES IN VERSION 1.7.1
+--------------------------
+
+* Bugfix to allow use of user-provided LRN.
+* Remove check that species is human or mouse if LRN is provided by user.
+* Heirachical ordering of LRInteraction heatmap.
